@@ -1,0 +1,48 @@
+QUESTIONS
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+ID	 STATUS		DESCRIPTION																				    DEVELOPER	COMMENTS
+1	 ANSWERED	contract ensures/otherwise																	Balázs		Csak exception lehet
+2	 ANSWERED	newexpression + lambdaexpression generálás Java howto										Balázs		Anoním do() interfésszel.
+3    ANSWERED	Authorization keret C#-hoz                                                                  Balázs
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+BUGS
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+ID	 STATUS		DESCRIPTION																				    DEVELOPER	COMMENTS
+1	 FIXED		namespace tartalmazás miatt Gen és Gen.ator namespacekhez is generálódnak fájlok			Isti 
+2	 FIXED		namespace uri may not be empty? -> jax-ws generator error, prefix may not be empty			Isti		http://default
+3	 FIXED		namespace uri -> java package ??? akkor mi legyen az elválasztó?							Isti		Balázs kérésére Namesapce neve
+4	 FIXED		java type javítás -> arrayek jaxb által generált szerint									Isti
+5	 FIXED		java void, oneway																			Isti
+6	 FIXED		java nagybetûs osztálynevek és használat ahol csak van										Isti
+7	 FIXED		generáláskor az arrayknek mivel nincs névterük, így az aktuális névtér lesz a hozzájuk		Isti
+				tartozó névtér.
+8	 FIXED		generálás helyett másolás ahol lehet														Isti
+9	 FIXED		C# generátorban külön fájlba rakom az adattípusokat, nem úgy mint a példában				Isti
+10	 FIXED		claimset belsejébõl arrayek																    Buda		nem is volt bug
+11   FIXED		rossz expression beolvasás																	Buda		új nyelvtant kellett írni
+				ebbõl: left + right - left * right
+				ez lesz: (((((left) + (right)) - (left)) * (right)) > (0))
+12   FIXED		memberinitexpression property-je nem lesz kitöltve                                          Buda
+13	 FIXED		ConcurrentModificationException az XsdWsdlGenerator.Main()-ben								Balázs
+14	 FIXED		Operation not found in the interface, ha valamelyik paraméter Enum							Buda		TypeHelpers-bõl kimaradt az EnumType
+15   BUG        TDK_Example nyomán fellépõ különbözõ bugok. (Jó sok.)                                       Isti
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+TASKS
+-------------------------------------------------------------------------------------------------------------------------------------------------------
+ID	 STATUS		DESCRIPTION																				    DEVELOPER	COMMENTS
+1	 TODO		newexpression generálás, ha van member!	C# és JAVA											Isti        megkezdve -> Java kész
+2	 TODO		lambaexpression gen. C# és JAVA																Isti
+3	 TODO		constantexpression/date	gen																	Isti        Késõbb...
+4	 TODO		defaultexpression, oldexpression gen														Isti        Késõbb...
+5	 DONE		contract, interface, authorization, endpoint név nem egyezhet (struct, enummal sem)			Buda
+6	 TODO		constantexpression értékek parsolásának tesztelés Guid-tól TimeSpan-ig						Buda
+7	 DONE		memberexpression generálás -> nem mindegy, hogy get vagy set...								Isti        Claimben is getter, setter
+8    DONE		operationauthorization-be és operationcontract-be a paraméterek neve rossz helyrõl jön		Isti        Jó helyrõl jött, rosszból generáltam.
+9    DONE		zárójeljavítás az expressionök körül 														Isti        Expression precedencia szerinti zárójelezés
+10	 DONE		contract ensures/otherwise																	Isti        csak new Exception() lehet otherwise-ban
+11   TODO		textliteral parse-olás                                                                      Buda
+12   TODO		csak new Exception() lehet otherwise-ban                                                    Buda
+13   DONE		Expression-ök C#-hoz                                                                        Isti
+14   TODO		Authorization keret C#-hoz                                                                  Isti
+15   DONE		Warning a kisbetûs Declaration és Field nevekhez											Buda
+-------------------------------------------------------------------------------------------------------------------------------------------------------

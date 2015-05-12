@@ -1,0 +1,77 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="SoaMetaModel.SoaLanguageParser" Collapsed="true">
+    <Position X="2.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAiAAAAxChAAQAACAACgAAAIAAAAAIAIAAAAEBAAAA=</HashCode>
+      <FileName>SoaLanguageParser.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Field Name="context" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.SourceLocationInfo" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="7.75" Y="3.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAJAAAA=</HashCode>
+      <FileName>SoaLanguageInfo.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="SoaMetaModel.NodeInfo" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="7.75" Y="2.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAA=</HashCode>
+      <FileName>SoaLanguageInfo.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="SoaMetaModel.DeclarationParser" Collapsed="true">
+    <Position X="2.75" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAgAAIAAIBAAAAQAEAABAgIRAAAAAEAAAACAAAAAAE=</HashCode>
+      <FileName>DeclarationParser.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.MemberParser" Collapsed="true">
+    <Position X="4.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>MAAgAAIAAIBAAAAQAMAABAgAUAACCAUAIAACACAAEAA=</HashCode>
+      <FileName>MemberParser.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.ExpressionParser" Collapsed="true">
+    <Position X="1" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>NAAgAEIAAIJMwCAQEMAwBKgAUCGDChdAIAACACwEEAA=</HashCode>
+      <FileName>ExpressionParser.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.MetaInfo.HiddenInfo" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="7.75" Y="4.5" Width="1.75" />
+    <TypeIdentifier />
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="SoaMetaModel.SoaLanguageContext" Collapsed="true">
+    <Position X="2.5" Y="1.5" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAIAAAAAAAAAAABQAAAAAAAAAAAABAAAA=</HashCode>
+      <FileName>SoaLanguage.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Field Name="objects" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.SoaObject" Collapsed="true">
+    <Position X="5.5" Y="1.5" Width="1.25" />
+    <TypeIdentifier />
+    <ShowAsCollectionAssociation>
+      <Field Name="metaInfos" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Interface Name="SoaMetaModel.MetaInfo.IMetaInfo" Collapsed="true">
+    <Position X="7.75" Y="1.5" Width="1.75" />
+    <TypeIdentifier />
+  </Interface>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

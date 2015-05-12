@@ -1,0 +1,49 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" Type="Item" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005">
+  <TemplateData>
+    <Name>M Code Generator</Name>
+    <Description>A code genenerator</Description>
+    <Icon>Sb.OsloExtensions.VStudio.MGenItemTempl.ico</Icon>
+    <TemplateID>e306c588-85df-4b0c-92da-35532a0ff799</TemplateID>
+    <ProjectType>CSharp</ProjectType>
+    <RequiredFrameworkVersion>2.0</RequiredFrameworkVersion>
+    <NumberOfParentCategoriesToRollUp>1</NumberOfParentCategoriesToRollUp>
+    <DefaultName>Generator.mcg</DefaultName>
+  </TemplateData>
+  <TemplateContent>
+		<References>
+      <Reference>
+        <Assembly>System</Assembly>
+      </Reference>
+      <Reference>
+        <Assembly>System.Core</Assembly>
+      </Reference>
+      <Reference>
+        <Assembly>System.Xml.Linq</Assembly>
+      </Reference>
+      <Reference>
+        <Assembly>System.Data.DataSetExtensions</Assembly>
+      </Reference>
+      <Reference>
+        <Assembly>Microsoft.CSharp</Assembly>
+      </Reference>
+      <Reference>
+        <Assembly>System.Data</Assembly>
+      </Reference>
+      <Reference>
+        <Assembly>System.Xml</Assembly>
+      </Reference>
+      <Reference>
+        <Assembly>System.Dataflow, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL</Assembly>
+      </Reference>
+      <Reference>
+        <Assembly>Microsoft.M, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL</Assembly>
+      </Reference>
+      <Reference>
+        <Assembly>Sb.OsloExtensions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=61d7564ac0cf7b10, processorArchitecture=MSIL</Assembly>
+			</Reference>
+		</References>
+
+    <ProjectItem ReplaceParameters="true">Generator.mcg</ProjectItem>
+  </TemplateContent>
+</VSTemplate>

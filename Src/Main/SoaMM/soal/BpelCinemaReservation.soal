@@ -1,0 +1,62 @@
+﻿[Uri("http://www.iit.bme.hu/soi/hw/CinemaReservation")]
+namespace CinemaReservation
+{
+	struct Offer
+	{
+		string OfferId;
+		int Price;
+	}
+
+	struct Seat
+	{
+		string Row;
+		string Column;
+	}
+
+	struct Reservation
+	{
+		string ReservationId;
+		Date Date;
+		string Room;
+		Seat[] Seats;
+	}
+
+	interface ICinemaReservation
+	{
+		Offer GetOffer(int seatCount);
+		Reservation Reserve(string offerId);
+	}
+
+	binding HttpSoap11
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+	}
+
+	endpoint CinemaReservationService : ICinemaReservation
+	{
+		binding HttpSoap11;
+		location "http://www.tempuri.org";
+	}
+}
+
+[Uri("http://www.iit.bme.hu/soi/hw/CinemaAgent")]
+namespace CinemaAgent
+{
+	interface ICinemaAgent
+	{
+		CinemaReservation.Reservation Reserve(int seatCount);
+	}
+
+	binding HttpSoap11
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+	}
+
+	endpoint CinemaAgentService : ICinemaAgent
+	{
+		binding HttpSoap11;
+		location "http://www.tempuri.org";
+	}
+}

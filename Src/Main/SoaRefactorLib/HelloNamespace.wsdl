@@ -1,0 +1,29 @@
+<wsdl:definitions targetNamespace="http://www.iit.bme.hu/HelloNamespace"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema"
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+	xmlns:tns="http://www.iit.bme.hu/HelloNamespace"
+	xmlns:ns0="http://www.iit.bme.hu/HelloNamespace">
+  
+  <wsdl:types>
+    <xs:schema targetNamespace="http://www.iit.bme.hu/HelloNamespace/Imports">
+      <xs:import schemaLocation="HelloNamespace.xsd" namespace="http://www.iit.bme.hu/HelloNamespace"/>
+    </xs:schema>
+  </wsdl:types>
+  
+  <wsdl:message name="IHello_helloOperation_InputMessage">
+    <wsdl:part name="parameters" element="tns:helloOperation"/>
+  </wsdl:message>
+  
+  <wsdl:message name="IHello_helloOperation_OutputMessage">
+    <wsdl:part name="parameters" element="tns:helloOperationResponse"/>
+  </wsdl:message>
+  
+  <wsdl:portType name="IHello">
+    <wsdl:operation name="helloOperation">
+      <wsdl:input wsaw:Action="http://www.iit.bme.hu/HelloNamespace/IHello/helloOperation" message="ns0:IHello_helloOperation_InputMessage"/>
+      <wsdl:output wsaw:Action="http://www.iit.bme.hu/HelloNamespace/IHello/helloOperationResponse" message="ns0:IHello_helloOperation_OutputMessage"/>
+    </wsdl:operation>
+  </wsdl:portType>
+  
+</wsdl:definitions>

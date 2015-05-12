@@ -1,0 +1,172 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
+  <Class Name="SoaMetaModel.TransportBindingElement" Collapsed="true">
+    <Position X="13.5" Y="6.25" Width="2" />
+    <InheritanceLine Type="SoaMetaModel.BindingElement" ManuallyRouted="true" FixedToPoint="true">
+      <Path>
+        <Point X="16.875" Y="5.691" />
+        <Point X="16.875" Y="5.941" />
+        <Point X="14.5" Y="5.941" />
+        <Point X="14.5" Y="6.25" />
+      </Path>
+    </InheritanceLine>
+    <AssociationLine Name="Binding" Type="SoaMetaModel.Binding" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="15.025" Y="6.941" />
+        <Point X="15.025" Y="8.248" />
+        <Point X="22.886" Y="8.248" />
+        <Point X="22.886" Y="6.941" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACA=</HashCode>
+      <FileName>TransportBindingElement.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Binding" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.EncodingBindingElement" Collapsed="true">
+    <Position X="15.75" Y="6.25" Width="2" />
+    <InheritanceLine Type="SoaMetaModel.BindingElement" ManuallyRouted="true">
+      <Path>
+        <Point X="16.875" Y="5.691" />
+        <Point X="16.875" Y="6" />
+        <Point X="16.75" Y="6" />
+        <Point X="16.75" Y="6.25" />
+      </Path>
+    </InheritanceLine>
+    <AssociationLine Name="Binding" Type="SoaMetaModel.Binding" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="17.05" Y="6.941" />
+        <Point X="17.05" Y="7.828" />
+        <Point X="21.812" Y="7.828" />
+        <Point X="21.812" Y="6.941" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACA=</HashCode>
+      <FileName>EncodingBindingElement.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Binding" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.BindingElement" Collapsed="true">
+    <Position X="16" Y="5" Width="1.75" />
+    <AssociationLine Name="Properties" Type="SoaMetaModel.BindingElementProperty" FixedFromPoint="true">
+      <Path>
+        <Point X="16" Y="5.5" />
+        <Point X="14.25" Y="5.5" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="0.11" Y="0.06" Height="0.182" Width="1.089" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQEAAAAAAAAAAAAAAACAAA=</HashCode>
+      <FileName>BindingElement.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Properties" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.BindingElementProperty" Collapsed="true">
+    <Position X="12.5" Y="5" Width="1.75" />
+    <AssociationLine Name="BindingElement" Type="SoaMetaModel.BindingElement" FixedFromPoint="true">
+      <Path>
+        <Point X="14.25" Y="5.25" />
+        <Point X="16" Y="5.25" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAgAAAAAAAAAgAAAAEAA=</HashCode>
+      <FileName>BindingElementProperty.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="BindingElement" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.ProtocolBindingElement" Collapsed="true">
+    <Position X="18" Y="6.25" Width="2" />
+    <InheritanceLine Type="SoaMetaModel.BindingElement" ManuallyRouted="true">
+      <Path>
+        <Point X="16.875" Y="5.691" />
+        <Point X="16.875" Y="5.918" />
+        <Point X="19" Y="5.918" />
+        <Point X="19" Y="6.25" />
+      </Path>
+    </InheritanceLine>
+    <AssociationLine Name="Binding" Type="SoaMetaModel.Binding" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="19.35" Y="6.941" />
+        <Point X="19.35" Y="7.371" />
+        <Point X="20.75" Y="7.371" />
+        <Point X="20.75" Y="6.941" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACA=</HashCode>
+      <FileName>ProtocolBindingElement.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Binding" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.SoaObject" Collapsed="true">
+    <Position X="15.75" Y="3.5" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAACAAAAAAAAAAAAAAAAIAAAACAAAAEAAAAA=</HashCode>
+      <FileName>SoaObject.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.Binding" Collapsed="true">
+    <Position X="20.5" Y="6.25" Width="2.75" />
+    <AssociationLine Name="Transport" Type="SoaMetaModel.TransportBindingElement" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="23.088" Y="6.941" />
+        <Point X="23.088" Y="8.448" />
+        <Point X="14.15" Y="8.448" />
+        <Point X="14.15" Y="6.941" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="Encoding" Type="SoaMetaModel.EncodingBindingElement" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="22.062" Y="6.941" />
+        <Point X="22.062" Y="8.037" />
+        <Point X="16.4" Y="8.037" />
+        <Point X="16.4" Y="6.941" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="Protocols" Type="SoaMetaModel.ProtocolBindingElement" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="21" Y="6.941" />
+        <Point X="21" Y="7.546" />
+        <Point X="18.7" Y="7.546" />
+        <Point X="18.7" Y="6.941" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="0.11" Y="0.06" Height="0.182" Width="0.926" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABAAAAAAAAAAAARAgAAAAAAAAAAAEAABAAA=</HashCode>
+      <FileName>Binding.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Transport" />
+      <Property Name="Encoding" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Protocols" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.Declaration" Collapsed="true">
+    <Position X="19.75" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAAAAAAAAAAAAAAAQAAAAAIAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Declaration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="SoaMetaModel.Claim">
+    <Position X="0.5" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAgAA=</HashCode>
+      <FileName>Claim.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.ClaimField">
+    <Position X="2.75" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ClaimField.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.Property">
+    <Position X="2.75" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAAAAAAAAAQAAAAAAAAAAQAAAAAAAAA=</HashCode>
+      <FileName>Property.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.SoaObject">
+    <Position X="1.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAACAAAAAAAAAAAAAAAAIAAAACAAAAEAAAAA=</HashCode>
+      <FileName>SoaObject.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.Declaration">
+    <Position X="0.5" Y="4" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAAAAAAAAAAAAAAAQAAAAAIAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Declaration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

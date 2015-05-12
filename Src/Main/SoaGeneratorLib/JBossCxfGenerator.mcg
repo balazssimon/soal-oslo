@@ -1,0 +1,184 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.IO;
+include "GeneratorLib.mcg";
+import JavaGenerator;
+import XsdWsdlGenerator;
+import EclipseCxfGenerator;
+
+configuration
+    string NamespaceName = "SoaMetaModel";
+	string ClassName = "JBossCxfGenerator";
+    Type InstancesType = typeof(IEnumerable<SoaObject>);
+    properties Properties
+        string ProjectName = "JBossProject";
+        string ResourcesDir = "../Resources";
+        string OutputDir = "../../Output";
+        bool NoImplementationDelegates = true;
+        bool ThrowNotImplementedException = true;
+        bool GenerateProxyFeatureConstructors = false;
+        bool GenerateImplementationBase = false;
+		string CxfVersion = "2.7.11";
+		bool GenerateJksService = true;
+		bool GenerateJksClient = true;
+    end properties
+end configuration
+
+/*
+* Main function for creating folders and calling file templates.
+*/
+function void Main()
+	JavaGenerator.Properties.NoImplementationDelegates = Properties.NoImplementationDelegates;
+	JavaGenerator.Properties.ThrowNotImplementedException = Properties.ThrowNotImplementedException;
+	JavaGenerator.Properties.GenerateProxyFeatureConstructors = Properties.GenerateProxyFeatureConstructors;
+	JavaGenerator.Properties.GenerateImplementationBase = Properties.GenerateImplementationBase;
+
+	EclipseCxfGenerator.Properties.ProjectName = Properties.ProjectName;
+	EclipseCxfGenerator.Properties.ResourcesDir = Properties.ResourcesDir;
+	EclipseCxfGenerator.Properties.OutputDir = Properties.OutputDir;
+	EclipseCxfGenerator.Properties.CxfVersion = Properties.CxfVersion;
+	EclipseCxfGenerator.Properties.GenerateJksService = Properties.GenerateJksService;
+	EclipseCxfGenerator.Properties.GenerateJksClient = Properties.GenerateJksClient;
+
+	Context.SetOutputFolder(Properties.OutputDir);
+	Context.CreateFolder("JBoss");
+	// === SERVER ===
+	JavaGenerator.Properties.WsdlDirectory = "WEB-INF/wsdl/";
+	Context.CreateFolder("JBoss/" + GetProjectName());
+	Context.SetOutput("JBoss/" + GetProjectName() + "/.project");
+	Context.Output(EclipseCxfGenerator.Generate_server_project());
+	Context.SetOutput("JBoss/" + GetProjectName() + "/.classpath");
+	Context.Output(EclipseCxfGenerator.Generate_server_classpath());
+	Context.CreateFolder("JBoss/" + GetProjectName() + "/.settings");
+	Context.SetOutput("JBoss/" + GetProjectName() + "/.settings/.jsdtscope");
+	Context.Output(EclipseCxfGenerator.Generate_jsdtscope());
+	Context.SetOutput("JBoss/" + GetProjectName() + "/.settings/org.eclipse.jdt.core.prefs");
+	Context.Output(EclipseCxfGenerator.Generate_core_prefs());
+	Context.SetOutput("JBoss/" + GetProjectName() + "/.settings/org.eclipse.wst.common.component");
+	Context.Output(EclipseCxfGenerator.Generate_common_component());
+	Context.SetOutput("JBoss/" + GetProjectName() + "/.settings/org.eclipse.wst.common.project.facet.core.xml");
+	Context.Output(EclipseCxfGenerator.Generate_facet_core());
+	Context.SetOutput("JBoss/" + GetProjectName() + "/.settings/org.eclipse.wst.jsdt.ui.superType.container");
+	Context.Output(EclipseCxfGenerator.Generate_superType_container());
+	Context.SetOutput("JBoss/" + GetProjectName() + "/.settings/org.eclipse.wst.jsdt.ui.superType.name");
+	Context.Output(EclipseCxfGenerator.Generate_superType_name());
+
+	Context.CreateFolder("JBoss/" + GetProjectName() + "/build");
+	Context.CreateFolder("JBoss/" + GetProjectName() + "/WebContent");
+	Context.SetOutput("JBoss/" + GetProjectName() + "/WebContent/services.jsp");
+	Context.Output(EclipseCxfGenerator.Generate_web_services_jsp());
+	Context.CreateFolder("JBoss/" + GetProjectName() + "/WebContent/META-INF");
+	Context.SetOutput("JBoss/" + GetProjectName() + "/WebContent/META-INF/MANIFEST.MF");
+	Context.Output(EclipseCxfGenerator.Generate_MetaInf_Manifest());
+
+	Context.CreateFolder("JBoss/" + GetProjectName() + "/WebContent/WEB-INF");
+	Context.CreateFolder("JBoss/" + GetProjectName() + "/WebContent/WEB-INF/lib");
+	Context.SetOutput("JBoss/" + GetProjectName() + "/WebContent/WEB-INF/web.xml");
+	Context.Output(Generate_web_xml());
+	Context.SetOutput("JBoss/" + GetProjectName() + "/WebContent/WEB-INF/jbossws-cxf.xml");
+	Context.Output(EclipseCxfGenerator.Generate_cxf_xml(true, Properties.GenerateJksService));
+	
+	Context.CreateFolder("JBoss/" + GetProjectName() + "/src");
+	if (Properties.GenerateJksService)
+		Context.SetOutput("JBoss/" + GetProjectName() + "/src/SecurityCallbackHandler.java");
+		Context.Output(EclipseCxfGenerator.Generate_SecurityCallbackHandler(""));
+	end if
+	if (Properties.GenerateJksService)
+		Context.SetOutput("JBoss/" + GetProjectName() + "/src/server_signature.properties");
+		Context.Output(EclipseCxfGenerator.Generate_security_properties("server_keystore.jks"));
+		Context.SetOutput("JBoss/" + GetProjectName() + "/src/server_encryption.properties");
+		Context.Output(EclipseCxfGenerator.Generate_security_properties("server_truststore.jks"));
+		File.Copy(Properties.ResourcesDir+"/Java/server_keystore.jks", "JBoss/" + GetProjectName() + "/src/server_keystore.jks", true);
+		File.Copy(Properties.ResourcesDir+"/Java/server_truststore.jks", "JBoss/" + GetProjectName() + "/src/server_truststore.jks", true);
+	end if
+	JavaGenerator.Properties.GenerateServerStubs = true;
+	JavaGenerator.Properties.GenerateClientProxies = false;
+	JavaGenerator.GenerateJavaCode("JBoss/" + GetProjectName() + "/src");
+
+	Context.CreateFolder("JBoss/" + GetProjectName() + "/WebContent/WEB-INF");
+	Context.SetOutputFolder(Properties.OutputDir+"/JBoss/" + GetProjectName() + "/WebContent/WEB-INF");
+	XsdWsdlGenerator.Properties.OutputDir = Properties.OutputDir+"/JBoss/" + GetProjectName() + "/WebContent/WEB-INF";
+	loop(Instances->ns:typeof(Namespace))
+		XsdWsdlGenerator.GenerateXsdWsdl(ns);
+	end loop
+	Context.SetOutputFolder(Properties.OutputDir);
+
+	// === CLIENT ===
+	JavaGenerator.Properties.WsdlDirectory = "META-INF";
+	Context.CreateFolder("JBoss/" + GetClientProjectName());
+	Context.SetOutput("JBoss/" + GetClientProjectName() + "/.project");
+	Context.Output(EclipseCxfGenerator.Generate_client_project());
+	Context.SetOutput("JBoss/" + GetClientProjectName() + "/.classpath");
+	Context.Output(EclipseCxfGenerator.Generate_client_classpath());
+	Context.CreateFolder("JBoss/" + GetClientProjectName() + "/.settings");
+	Context.SetOutput("JBoss/" + GetClientProjectName() + "/.settings/org.eclipse.jdt.core.prefs");
+	Context.Output(EclipseCxfGenerator.Generate_core_prefs());
+	Context.SetOutput("JBoss/" + GetClientProjectName() + "/.settings/org.eclipse.jst.ws.cxf.core.prefs");
+	Context.Output(EclipseCxfGenerator.Generate_ws_cxf_core_prefs());
+
+	Context.CreateFolder("JBoss/" + GetClientProjectName() + "/bin");
+	Context.CreateFolder("JBoss/" + GetClientProjectName() + "/src/META-INF");
+	Context.SetOutput("JBoss/" + GetClientProjectName() + "/src/META-INF/cxf-client.xml");
+	Context.Output(EclipseCxfGenerator.Generate_cxf_xml(false, Properties.GenerateJksClient));
+
+	Context.CreateFolder("JBoss/" + GetClientProjectName() + "/src/META-INF");
+	Context.SetOutput("JBoss/" + GetClientProjectName() + "/src/META-INF/MANIFEST.MF");
+	Context.Output(EclipseCxfGenerator.Generate_MetaInf_Manifest());
+
+	if (Properties.GenerateJksClient)
+		Context.SetOutput("JBoss/" + GetClientProjectName() + "/src/SecurityCallbackHandler.java");
+		Context.Output(EclipseCxfGenerator.Generate_SecurityCallbackHandler(""));
+	end if
+	if (Properties.GenerateJksClient)
+		Context.CreateFolder("JBoss/" + GetClientProjectName() + "/src/META-INF");
+		Context.SetOutput("JBoss/" + GetClientProjectName() + "/src/META-INF/client_signature.properties");
+		Context.Output(EclipseCxfGenerator.Generate_security_properties("client_keystore.jks"));
+		Context.SetOutput("JBoss/" + GetClientProjectName() + "/src/META-INF/client_encryption.properties");
+		Context.Output(EclipseCxfGenerator.Generate_security_properties("client_truststore.jks"));
+		File.Copy(Properties.ResourcesDir+"/Java/client_keystore.jks", "JBoss/" + GetClientProjectName() + "/src/META-INF/client_keystore.jks", true);
+		File.Copy(Properties.ResourcesDir+"/Java/client_truststore.jks", "JBoss/" + GetClientProjectName() + "/src/META-INF/client_truststore.jks", true);
+	end if
+	JavaGenerator.Properties.GenerateServerStubs = false;
+	JavaGenerator.Properties.GenerateClientProxies = true;
+	JavaGenerator.GenerateJavaCode("JBoss/" + GetClientProjectName() + "/src");
+	loop(Instances->ns:typeof(Namespace))
+		Context.CreateFolder("JBoss/" + GetClientProjectName() + "/src/"+GetPackage(ns).ToLower()+"client");
+		Context.SetOutput("JBoss/" + GetClientProjectName() + "/src/"+GetPackage(ns).ToLower()+"client/Program.java");
+		Context.Output(EclipseCxfGenerator.Generate_Program_java(ns));
+	end loop
+
+	Context.CreateFolder("JBoss/" + GetClientProjectName() + "/src/META-INF");
+	Context.SetOutputFolder(Properties.OutputDir+"/JBoss/" + GetClientProjectName() + "/src/META-INF");
+	XsdWsdlGenerator.Properties.OutputDir = Properties.OutputDir+"/JBoss/" + GetClientProjectName() + "/META-INF";
+	loop(Instances->ns:typeof(Namespace))
+		XsdWsdlGenerator.GenerateXsdWsdl(ns);
+	end loop
+	Context.SetOutputFolder(Properties.OutputDir);
+end function
+
+/*
+* Get project name
+*/
+function string GetProjectName()
+    return Properties.ProjectName;
+end function
+
+/*
+* Get client project name
+*/
+function string GetClientProjectName()
+    return Properties.ProjectName+"Client";
+end function
+
+
+template Generate_web_xml()
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app
+ version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" 
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+</web-app>
+end template

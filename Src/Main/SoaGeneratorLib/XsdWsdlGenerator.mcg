@@ -1,0 +1,1131 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using SoaMetaModel;
+include "GeneratorLib.mcg";
+
+configuration
+    string NamespaceName = "SoaMetaModel";
+	string ClassName = "XsdWsdlGenerator";
+    Type InstancesType = typeof(IEnumerable<SoaObject>);
+    properties Properties
+		string OutputDir = "../../Output/common";
+		bool GenerateSingleWsdl = false;
+		bool GenerateSeparateXsdWsdlFolder = true;
+		bool GeneratePolicies = true;
+		bool GenerateMetroJksService = false;
+		bool GenerateMetroJksClient = false;
+		bool GenerateServiceUrl = false;
+		string ServiceUrlPattern = "http://localhost/{0}";
+		bool Ibm = false;
+		bool XPathSignEncrypt = false;
+		string WsPolicyNamespace = "http://www.w3.org/ns/ws-policy";
+		string WsSecurityPolicyNamespace = "http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200702";
+    end properties
+end configuration
+
+/*
+* Main function
+* Creates the folders and files
+* Uses: GenerateXsd(), GenerateWsdlAbstract(), GenerateWsdlBinding() and GenerateWsdlEndpoint()
+*/
+function void Main()
+	Context.CreateFolder(Properties.OutputDir);
+	Context.SetOutputFolder(Properties.OutputDir);
+	loop(Instances->ns:typeof(Namespace))
+		GenerateXsdWsdl(ns);
+    end loop
+end function
+
+function void GenerateXsdWsdl(Namespace ns)
+	if (Properties.GenerateSeparateXsdWsdlFolder)
+		Context.CreateFolder("schema");
+		Context.CreateFolder("wsdl");
+	end if
+	// Count namespaces in namespace
+	int i = 0;
+	loop(ns.Declarations->d:typeof(Namespace))
+		i = i + 1;
+	end loop
+	// Only create files if not only containing namespaces
+	if(ns.Declarations.Count > i)
+		if (Properties.GenerateSeparateXsdWsdlFolder)
+			Context.SetOutput("schema/" + ns.FullName+".xsd");
+		else
+			Context.SetOutput(ns.FullName+".xsd");
+		end if
+		Context.Output(GenerateXsd(ns));
+
+		if (Properties.GenerateSingleWsdl)
+			if (Properties.GenerateSeparateXsdWsdlFolder)
+				Context.SetOutput("wsdl/" + ns.FullName+".wsdl");
+			else
+				Context.SetOutput(ns.FullName+".wsdl");
+			end if
+			Context.Output(GenerateSingleWsdl(ns));
+		else
+			if (Properties.GenerateSeparateXsdWsdlFolder)
+				Context.SetOutput("wsdl/" + ns.FullName+".wsdl");
+			else
+				Context.SetOutput(ns.FullName+".wsdl");
+			end if
+			Context.Output(GenerateWsdlAbstract(ns));
+
+			if (Properties.GenerateSeparateXsdWsdlFolder)
+				Context.SetOutput("wsdl/" + ns.FullName+"Binding.wsdl");
+			else
+				Context.SetOutput(ns.FullName+"Binding.wsdl");
+			end if
+			Context.Output(GenerateWsdlBinding(ns));
+
+			if (Properties.GenerateSeparateXsdWsdlFolder)
+				Context.SetOutput("wsdl/" + ns.FullName+"Endpoint.wsdl");
+			else
+				Context.SetOutput(ns.FullName+"Endpoint.wsdl");
+			end if
+			Context.Output(GenerateWsdlEndpoint(ns));
+		end if
+	end if
+end function
+
+/*
+* Template for generating the xsd file
+* Uses: GenerateElement()
+*/
+template GenerateXsd(Namespace ns)
+<?xml version="1.0" encoding="utf-8"?>
+<xs:schema targetNamespace="[GetUri(ns)]"
+		xmlns:xs="http://www.w3.org/2001/XMLSchema"
+		xmlns:tns="[GetUri(ns)]"
+		xmlns:[ns.Prefix]="[GetUri(ns)]"
+		elementFormDefault="qualified">
+
+[loop(Instances->type:typeof(ArrayType))]
+^
+[if(type.ItemType is NullableType)]
+	<xs:element name="ArrayOfNullable[type.ItemType.Name]" nillable="true" type="[ns.Prefix]:ArrayOfNullable[type.ItemType.Name]"/>
+	<xs:complexType name="ArrayOfNullable[type.ItemType.Name]">
+		<xs:sequence>
+			[GenerateElement(type.ItemType, type.ItemType.Name, ns, true, true)]
+		</xs:sequence>
+	</xs:complexType>
+[else if(type.ItemType != BuiltInType.Byte)]
+	<xs:element name="ArrayOf[type.ItemType.Name]" nillable="true" type="[ns.Prefix]:ArrayOf[type.ItemType.Name]"/>
+	<xs:complexType name="ArrayOf[type.ItemType.Name]">
+		<xs:sequence>
+			[GenerateElement(type.ItemType, type.ItemType.Name, ns, true, false)]
+		</xs:sequence>
+	</xs:complexType>
+[end if]
+[end loop]
+
+[loop(ns.Declarations->type:typeof(StructType))]
+^
+	<xs:element name="[type.Name]" nillable="true" type="[ns.Prefix]:[type.Name]"/>
+	<xs:complexType name="[type.Name]">
+		[if (type.SuperType != null)]
+		<xs:complexContent>
+			<xs:extension base="[type.SuperType.Namespace.Prefix]:[type.SuperType.Name]">
+				[if (type.Fields.Count == 0)]
+				<xs:sequence />
+				[else]
+				<xs:sequence>
+					[loop(type.Fields->param:typeof(StructField))]
+					[GenerateElement(param.Type, param.Name, ns, false, false)]
+					[end loop]
+				</xs:sequence>
+				[end if]
+			</xs:extension>
+		</xs:complexContent>
+		[else]
+		[if (type.Fields.Count == 0)]
+		<xs:sequence />
+		[else]
+		<xs:sequence>
+			[loop(type.Fields->param:typeof(StructField))]
+			[GenerateElement(param.Type, param.Name, ns, false, false)]
+			[end loop]
+		</xs:sequence>
+		[end if]
+		[end if]
+	</xs:complexType>
+[end loop]
+
+[loop(ns.Declarations->type:typeof(ExceptionType))]
+	^
+	<xs:element name="[type.Name]" nillable="true" type="[ns.Prefix]:[type.Name]"/>
+	<xs:complexType name="[type.Name]">
+		[if (type.SuperType != null)]
+		<xs:extension base="[type.SuperType.Name]">
+			[if (type.Fields.Count == 0)]
+			<xs:sequence />
+			[else]
+			<xs:sequence>
+				[loop(type.Fields->param:typeof(ExceptionField))]
+				[GenerateElement(param.Type, param.Name, ns, false, false)]
+				[end loop]
+			</xs:sequence>
+			[end if]
+		</xs:extension>
+		[else]
+		[if (type.Fields.Count == 0)]
+		<xs:sequence />
+		[else]
+		<xs:sequence>
+			[loop(type.Fields->param:typeof(ExceptionField))]
+			[GenerateElement(param.Type, param.Name, ns, false, false)]
+			[end loop]
+		</xs:sequence>
+		[end if]
+		[end if]
+	</xs:complexType>
+[end loop]
+
+[loop(ns.Declarations->type:typeof(EnumType))]
+	^
+	<xs:element name="[type.Name]" nillable="true" type="[ns.Prefix]:[type.Name]"/>
+	<xs:simpleType name="[type.Name]">
+		<xs:restriction base="xs:string">
+			[loop(type.Values->value:typeof(EnumValue))]
+			<xs:enumeration value="[value.Name]"/>
+			[end loop]
+		</xs:restriction>
+	</xs:simpleType>
+[end loop]
+
+[loop(ns.Declarations->intf:typeof(Interface))]
+	[loop(intf.Operations->op:typeof(Operation))]
+	^
+	<xs:element name="[op.Name]" nillable="true" type="[ns.Prefix]:[op.Name]"/>
+	<xs:complexType name="[op.Name]">
+	[if (op.Parameters.Count == 0)]
+		<xs:sequence />
+	[else]
+		<xs:sequence>
+		[loop(op.Parameters->param:typeof(OperationParameter))]
+			[GenerateElement(param.Type, param.Name, ns, false, false)]
+		[end loop]
+		</xs:sequence>
+	[end if]
+	</xs:complexType>
+	[if(op.ReturnType != PseudoType.Async)]
+	^
+	<xs:element name="[op.Name]Response" nillable="true" type="[ns.Prefix]:[op.Name]Response"/>
+	<xs:complexType name="[op.Name]Response">
+	[if (op.ReturnType == PseudoType.Void)]
+		<xs:sequence />
+	[else]
+		<xs:sequence>
+			[GenerateElement(op.ReturnType, op.Name + "Result", ns, false, false)]
+		</xs:sequence>
+	[end if]
+	</xs:complexType>
+	[end loop]
+	[end if]
+[end loop]
+</xs:schema>
+end template
+
+/*
+* Template GenerateElementPostfix generates nillable and array in xsd
+*/
+template GenerateElementPostfix(bool arrayElement, bool isNullable)
+[if(isNullable && !arrayElement)]
+nillable="true"
+[else if(arrayElement && !isNullable)]
+minOccurs="0" maxOccurs="unbounded"
+[else if(arrayElement && isNullable)]
+nillable="true" minOccurs="0" maxOccurs="unbounded"
+[end if]
+end template
+
+/*
+* Template for generating element
+* Uses: GenerateElementPostfix
+*/
+template GenerateElement(Type type, string name, Namespace ns, bool arrayElement, bool isNullable)
+[if(type is BuiltInType)]
+	[if(type == BuiltInType.Guid)]
+<xs:element name="[name]" type="xs:string" [GenerateElementPostfix(arrayElement, isNullable)]/>
+	[else if(type == BuiltInType.String)]
+<xs:element name="[name]" type="xs:string" [GenerateElementPostfix(arrayElement, true)]/>
+	[else if(type == BuiltInType.Bool)]
+<xs:element name="[name]" type="xs:boolean" [GenerateElementPostfix(arrayElement, isNullable)]/>
+	[else if(type == BuiltInType.Date)]
+<xs:element name="[name]" type="xs:date" [GenerateElementPostfix(arrayElement, isNullable)]/>
+	[else if(type == BuiltInType.Time)]
+<xs:element name="[name]" type="xs:time" [GenerateElementPostfix(arrayElement, isNullable)]/>
+	[else if(type == BuiltInType.DateTime)]
+<xs:element name="[name]" type="xs:dateTime" [GenerateElementPostfix(arrayElement, isNullable)]/>
+	[else if(type == BuiltInType.TimeSpan)]
+<xs:element name="[name]" type="xs:duration" [GenerateElementPostfix(arrayElement, isNullable)]/>
+	[else]
+<xs:element name="[name]" type="xs:[type.Name]" [GenerateElementPostfix(arrayElement, isNullable)]/>
+	[end if]
+[else if(type is StructType)]
+<xs:element name="[name]" nillable="true" type="[type.Namespace.Prefix]:[type.Name]" [GenerateElementPostfix(arrayElement, isNullable)]/>
+[else if(type is EnumType)]
+<xs:element name="[name]" type="[type.Namespace.Prefix]:[type.Name]" [GenerateElementPostfix(arrayElement, isNullable)]/>
+[else if(type is NullableType)]
+	[if(((NullableType)type).InnerType is BuiltInType)]
+		[if(((NullableType)type).InnerType == BuiltInType.Guid)]
+<xs:element name="[name]" type="xs:string" [GenerateElementPostfix(arrayElement, true)]/>
+		[else if(((NullableType)type).InnerType == BuiltInType.String)]
+<xs:element name="[name]" type="xs:string" [GenerateElementPostfix(arrayElement, true)]/>
+		[else if(((NullableType)type).InnerType == BuiltInType.Bool)]
+<xs:element name="[name]" type="xs:boolean" [GenerateElementPostfix(arrayElement, true)]/>
+		[else if(((NullableType)type).InnerType == BuiltInType.Date)]
+<xs:element name="[name]" type="xs:date" [GenerateElementPostfix(arrayElement, true)]/>
+		[else if(((NullableType)type).InnerType == BuiltInType.Time)]
+<xs:element name="[name]" type="xs:time" [GenerateElementPostfix(arrayElement, true)]/>
+		[else if(((NullableType)type).InnerType == BuiltInType.DateTime)]
+<xs:element name="[name]" type="xs:dateTime" [GenerateElementPostfix(arrayElement, true)]/>
+		[else if(((NullableType)type).InnerType == BuiltInType.TimeSpan)]
+<xs:element name="[name]" type="xs:duration" [GenerateElementPostfix(arrayElement, true)]/>
+		[else]
+<xs:element name="[name]" type="xs:[((NullableType)type).InnerType.Name]" [GenerateElementPostfix(arrayElement, true)]/>
+		[end if]
+	[else if(((NullableType)type).InnerType is StructType || ((NullableType)type).InnerType is EnumType)]
+<xs:element name="[name]" type="[type.Namespace.Prefix]:[((NullableType)type).InnerType.Name]" [GenerateElementPostfix(arrayElement, true)]/>
+	[end if]
+[else if(type is ArrayType)]
+	[if(((ArrayType)type).ItemType is NullableType)]
+<xs:element name="[name]" nillable="true" type="[ns.Prefix]:ArrayOfNullable[((ArrayType)type).ItemType.Name]" [GenerateElementPostfix(arrayElement, isNullable)]/>
+	[else if(((ArrayType)type).ItemType == BuiltInType.Byte)]
+<xs:element name="[name]" nillable="true" type="xs:base64Binary" [GenerateElementPostfix(arrayElement, isNullable)]/>
+	[else]
+<xs:element name="[name]" nillable="true" type="[ns.Prefix]:ArrayOf[((ArrayType)type).ItemType.Name]" [GenerateElementPostfix(arrayElement, isNullable)]/>
+	[end if]
+[end if]
+end template
+
+template GenerateSingleWsdl(Namespace ns)
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions targetNamespace="[GetUri(ns)]"  
+	xmlns:tns="[GetUri(ns)]"
+	xmlns:[ns.Prefix]="[GetUri(ns)]"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+	xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
+	[GeneratePolicyNamespaces()]	
+>
+	[GenerateWsdlTypesPart(ns)]
+	[GeneratePolicy(ns, false)]
+	[GenerateWsdlAbstractPart(ns)]
+	[GenerateWsdlBindingPart(ns)]
+	[GenerateWsdlEndpointPart(ns)]
+</wsdl:definitions>
+end template			
+
+template GenerateSingleWsdl(Endpoint endp)
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions targetNamespace="[GetUri(endp.Namespace)]"  
+	xmlns:tns="[GetUri(endp.Namespace)]"
+	xmlns:[endp.Namespace.Prefix]="[GetUri(endp.Namespace)]"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+	xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
+	[GeneratePolicyNamespaces()]
+>
+	[GenerateWsdlTypesPart(endp.Namespace)]
+	[GeneratePolicy(endp.Binding, false)]
+	[GenerateWsdlAbstractPart(endp.Interface)]
+	[GenerateWsdlBinding(endp)]
+	[GenerateWsdlEndpoint(endp)]
+</wsdl:definitions>
+end template	
+/*
+* Template for generating the wsdl abstract
+* Uses: GenerateMessages() and GeneratePortType()
+*/
+template GenerateWsdlAbstract(Namespace ns)
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions targetNamespace="[GetUri(ns)]"  
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+	xmlns:tns="[GetUri(ns)]"
+	xmlns:[ns.Prefix]="[GetUri(ns)]">
+
+	[GenerateWsdlTypesPart(ns)]
+	[GenerateWsdlAbstractPart(ns)]
+
+</wsdl:definitions>
+end template
+
+template GenerateWsdlTypesPart(Namespace ns)
+<wsdl:types>
+	<xs:schema>
+	[if (Properties.GenerateSeparateXsdWsdlFolder)]
+		<xs:import schemaLocation="["../schema/"+ns.FullName+".xsd"]" namespace="[GetUri(ns)]"/>
+	[else]
+		<xs:import schemaLocation="[ns.FullName+".xsd"]" namespace="[GetUri(ns)]"/>
+	[end if]
+	</xs:schema>
+</wsdl:types>
+end template
+
+template GenerateWsdlAbstractPart(Namespace ns)
+[loop(ns.Declarations->intf:typeof(Interface))]
+[GenerateMessages(intf)]
+[end loop]
+
+[loop(ns.Declarations->intf:typeof(Interface))]
+[GeneratePortType(intf)]
+[end loop]
+end template
+
+template GenerateWsdlAbstractPart(Interface intf)
+[GenerateMessages(intf)]
+^
+[GeneratePortType(intf)]
+end template
+
+/*
+* Template for generating wsdl messages
+*/
+template GenerateMessages(Interface intf)
+[loop(intf.Operations->op:typeof(Operation))]
+^
+<wsdl:message name="[intf.Name]_[op.Name]_InputMessage">
+	<wsdl:part name="parameters" element="[intf.Namespace.Prefix]:[op.Name]"/>
+</wsdl:message>
+[if(op.ReturnType != PseudoType.Async)]
+^
+<wsdl:message name="[intf.Name]_[op.Name]_OutputMessage">
+	<wsdl:part name="parameters" element="[intf.Namespace.Prefix]:[op.Name]Response"/>
+</wsdl:message>
+[end if]
+[loop(op.Exceptions->ex:typeof(ExceptionType))]
+^
+<wsdl:message name="[intf.Name]_[op.Name]_[ex.Name]">
+	<wsdl:part name="fault" element="[ex.Namespace.Prefix]:[ex.Name]"/>
+</wsdl:message>
+[end loop]
+[end loop]
+end template
+
+/*
+* Template for generating PortTypes
+* Uses: GenerateOperations()
+*/
+template GeneratePortType(Interface intf)
+^
+<wsdl:portType name="[intf.Name]">
+	[GenerateOperations(intf)]
+</wsdl:portType>
+end template
+
+/*
+* Template for generating operations of porttype
+* Uses: GenerateOperations()
+*/
+template GenerateOperations(Interface intf)
+[loop(intf.SuperInterfaces->sup:typeof(Interface))]
+[GenerateOperations(sup)]
+[end loop]
+[loop(intf.Operations->op:typeof(Operation))]
+<wsdl:operation name="[op.Name]">
+	<wsdl:input wsaw:action="[GetUriWithSlash(op.Interface.Namespace) + op.Interface.Name + "/" + op.Name]" message="[op.Interface.Namespace.Prefix]:[op.Interface.Name]_[op.Name]_InputMessage"/>
+[if(op.ReturnType != PseudoType.Async)]
+	<wsdl:output wsaw:action="[GetUriWithSlash(op.Interface.Namespace) + op.Interface.Name + "/" + op.Name + "Response"]" message="[op.Interface.Namespace.Prefix]:[op.Interface.Name]_[op.Name]_OutputMessage"/>
+[end if]
+	[loop(op.Exceptions->ex:typeof(ExceptionType))]
+	<wsdl:fault wsaw:action="[GetUriWithSlash(op.Interface.Namespace) + op.Interface.Name + "/" + op.Name + "Fault/" + ex.Name]" message="[ex.Namespace.Prefix]:[op.Interface.Name]_[op.Name]_[ex.Name]" name="[ex.Name]"/>
+	[end loop]
+</wsdl:operation>
+[end loop]
+end template
+
+/*
+* Template for generating WSDL binding
+* Uses: GeneratePolicy()
+*/
+template GenerateWsdlBinding(Namespace ns)
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions targetNamespace="[GetUri(ns)]"  
+	xmlns:tns="[GetUri(ns)]"
+	xmlns:[ns.Prefix]="[GetUri(ns)]"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+	xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
+	[GeneratePolicyNamespaces()]
+>
+	^
+	<wsdl:import location="[ns.FullName].wsdl" namespace="[GetUri(ns)]" />
+	[GeneratePolicy(ns, false)]
+	[GenerateWsdlBindingPart(ns)]
+</wsdl:definitions>
+end template
+
+/*
+* Template for generating WSDL binding part
+*/
+template GenerateWsdlBindingPart(Namespace ns)
+[loop(ns.Declarations->endpoint:typeof(Endpoint))]
+[GenerateWsdlBinding(endpoint)]
+[end loop]
+end template
+
+template GenerateWsdlBinding(Endpoint endpoint)
+[loop(endpoint->ns:Namespace)]
+^
+<wsdl:binding name="[endpoint.Interface.Name]_[endpoint.Binding.Name]_Binding" type="[ns.Prefix]:[endpoint.Interface.Name]">
+[if(endpoint.Binding.Protocols.Count > 0 || endpoint.Binding.Transport.GetType() == typeof(HttpsTransportBindingElement))]
+	[if (Properties.GeneratePolicies)]
+	<wsp:PolicyReference URI="#[endpoint.Binding.Name]_Policy"/>
+	[end if]
+	[loop(endpoint.Binding.Protocols->addressing:typeof(AddressingProtocolBindingElement))]
+	[if(addressing.Version == AddressingVersion.AddressingAugust2004)]
+	<wsaw:UsingAddressing/>
+	[end if]
+	[end loop]
+[end if]
+[if (endpoint.Binding.Encoding.GetType() == typeof(SoapEncodingBindingElement) && ((SoapEncodingBindingElement)endpoint.Binding.Encoding).Version == SoapVersion.Soap11)]
+	[if (endpoint.Binding.Transport.GetType() == typeof(HttpTransportBindingElement) || endpoint.Binding.Transport.GetType() == typeof(HttpsTransportBindingElement))]
+	<soap:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+	[else]
+	<soap:binding style="document"/>
+	[end if]
+[end if]
+[if (endpoint.Binding.Encoding.GetType() == typeof(SoapEncodingBindingElement) && ((SoapEncodingBindingElement)endpoint.Binding.Encoding).Version == SoapVersion.Soap12)]
+	[if (endpoint.Binding.Transport.GetType() == typeof(HttpTransportBindingElement) || endpoint.Binding.Transport.GetType() == typeof(HttpsTransportBindingElement))]
+	<soap12:binding style="document" transport="http://schemas.xmlsoap.org/soap/http"/>
+	[else]
+	<soap12:binding style="document"/>
+	[end if]
+[end if]
+[loop(endpoint.Interface.Operations->op:typeof(Operation))]
+	<wsdl:operation name="[op.Name]">
+	[if (endpoint.Binding.Encoding.GetType() == typeof(SoapEncodingBindingElement) && ((SoapEncodingBindingElement)endpoint.Binding.Encoding).Version == SoapVersion.Soap11)]
+		<soap:operation style="document" soapAction="[GetUriWithSlash(endpoint.Interface.Namespace) + endpoint.Interface.Name + "/" + op.Name]"/>
+	[end if]
+	[if (endpoint.Binding.Encoding.GetType() == typeof(SoapEncodingBindingElement) && ((SoapEncodingBindingElement)endpoint.Binding.Encoding).Version == SoapVersion.Soap12)]
+		<soap12:operation style="document" soapAction="[GetUriWithSlash(endpoint.Interface.Namespace) + endpoint.Interface.Name + "/" + op.Name]"/>
+	[end if]
+		<wsdl:input>
+		[if (Properties.GeneratePolicies)]
+			[loop(endpoint.Binding.Protocols->security:typeof(SecurityProtocolBindingElement))]
+			<wsp:PolicyReference URI="#[endpoint.Binding.Name]_Input_Policy"/>
+			[end loop]
+		[end if]
+		[if (endpoint.Binding.Encoding.GetType() == typeof(SoapEncodingBindingElement) && ((SoapEncodingBindingElement)endpoint.Binding.Encoding).Version == SoapVersion.Soap11)]
+			<soap:body use="literal"/>
+		[end if]
+		[if (endpoint.Binding.Encoding.GetType() == typeof(SoapEncodingBindingElement) && ((SoapEncodingBindingElement)endpoint.Binding.Encoding).Version == SoapVersion.Soap12)]
+			<soap12:body use="literal"/>
+		[end if]
+		</wsdl:input>
+		<wsdl:output>
+		[if (Properties.GeneratePolicies)]
+			[loop(endpoint.Binding.Protocols->security:typeof(SecurityProtocolBindingElement))]
+			<wsp:PolicyReference URI="#[endpoint.Binding.Name]_Output_Policy"/>
+			[end loop]
+		[end if]
+		[if (endpoint.Binding.Encoding.GetType() == typeof(SoapEncodingBindingElement) && ((SoapEncodingBindingElement)endpoint.Binding.Encoding).Version == SoapVersion.Soap11)]
+			<soap:body use="literal"/>
+		[end if]
+		[if (endpoint.Binding.Encoding.GetType() == typeof(SoapEncodingBindingElement) && ((SoapEncodingBindingElement)endpoint.Binding.Encoding).Version == SoapVersion.Soap12)]
+			<soap12:body use="literal"/>
+		[end if]
+		</wsdl:output>
+	[loop(op.Exceptions->ex:typeof(ExceptionType))]
+		<wsdl:fault name="[ex.Name]">
+		[if (endpoint.Binding.Encoding.GetType() == typeof(SoapEncodingBindingElement) && ((SoapEncodingBindingElement)endpoint.Binding.Encoding).Version == SoapVersion.Soap11)]
+			<soap:fault name="[ex.Name]" use="literal"/>
+		[end if]
+		[if (endpoint.Binding.Encoding.GetType() == typeof(SoapEncodingBindingElement) && ((SoapEncodingBindingElement)endpoint.Binding.Encoding).Version == SoapVersion.Soap12)]
+			<soap12:fault name="[ex.Name]" use="literal"/>
+		[end if]
+		</wsdl:fault>
+	[end loop]
+	</wsdl:operation>
+[end loop]
+</wsdl:binding>
+[end loop]
+end template
+
+template GenerateMetroJks()
+	[if (Properties.GenerateMetroJksService)]
+	<sc:KeyStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" xmlns:wspp="http://java.sun.com/xml/ns/wsit/policy"
+			        wspp:visibility="private" location="server_keystore.jks" type="JKS" storepass="changeit" alias="wspservicepriv" keypass="changeit"/>
+	<sc:TrustStore xmlns:sc="http://schemas.sun.com/2006/03/wss/server" xmlns:wspp="http://java.sun.com/xml/ns/wsit/policy"
+			        wspp:visibility="private" storepass="changeit" type="JKS" location="server_truststore.jks"/>
+	[end if]
+	[if (Properties.GenerateMetroJksClient)]
+	<sc:KeyStore xmlns:sc="http://schemas.sun.com/2006/03/wss/client" xmlns:wspp="http://java.sun.com/xml/ns/wsit/policy"
+		            wspp:visibility="private" location="client_keystore.jks" type="JKS" storepass="changeit" alias="wspclientpriv" keypass="changeit"/>
+	<sc:TrustStore xmlns:sc="http://schemas.sun.com/2006/03/wss/client" xmlns:wspp="http://java.sun.com/xml/ns/wsit/policy"
+		            wspp:visibility="private" storepass="changeit" type="JKS" location="client_truststore.jks" peeralias="wspservicepub"/>
+	[end if]
+end template
+
+/*
+* Template for generating WSDL policies
+* Uses: HasPolicy(), GeneratePolicy()
+*/
+template GeneratePolicy(Namespace ns, bool combineSecurityPolicies)
+[loop(ns.Declarations->binding:typeof(Binding))]
+[GeneratePolicy(binding, combineSecurityPolicies)]
+[end loop]
+end template
+
+template GeneratePolicy(Binding binding, bool combineSecurityPolicies)
+[if(Properties.GeneratePolicies)]
+[if(binding.HasPolicy())]
+^
+[GeneratePolicy(binding.Namespace, binding, false, combineSecurityPolicies)]
+[end if]
+[end if]
+end template
+
+template GeneratePolicyNamespaces()
+xmlns:wsp="[Properties.WsPolicyNamespace]"
+xmlns:wsu="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+xmlns:wsoma="http://schemas.xmlsoap.org/ws/2004/09/policy/optimizedmimeserialization"
+xmlns:wsa="http://www.w3.org/2005/08/addressing" 
+xmlns:wsam="http://www.w3.org/2007/05/addressing/metadata"
+xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+xmlns:wsrmp="http://docs.oasis-open.org/ws-rx/wsrmp/200702"
+xmlns:wsat="http://schemas.xmlsoap.org/ws/2004/10/wsat"
+xmlns:sp="[Properties.WsSecurityPolicyNamespace]"
+xmlns:wst="http://docs.oasis-open.org/ws-sx/ws-trust/200512"
+xmlns:wsx="http://schemas.xmlsoap.org/ws/2004/09/mex"
+end template
+
+/*
+* Template for generating WSDL policy
+* Uses: GenerateMutualCertificatePolicy(), GenerateStsPolicy(), GenerateSamlPolicy(), GenerateMessagePolicy(), GenerateGeneralPolicy(), GenerateTrustPolicy()
+*/
+template GeneratePolicy(Namespace ns, Binding binding, bool GenNsPrefixes, bool combineSecurityPolicies)
+[if (GenNsPrefixes)]
+<wsp:Policy wsu:Id="[binding.Name]_Policy"
+	[GeneratePolicyNamespaces()]
+>
+[else]
+<wsp:Policy wsu:Id="[binding.Name]_Policy">
+[end if]
+	[GenerateHttpsPolicy(binding)]
+	[GenerateMtomPolicy(binding)]
+	[GenerateAddressingPolicy(binding)]
+	[GenerateReliableMessagingPolicy(binding)]
+	[GenerateAtomicTransactionPolicy(binding)]
+	[GenerateSecurityPolicy(binding, combineSecurityPolicies)]
+</wsp:Policy>
+[if (!combineSecurityPolicies)]
+[loop(binding.Protocols->security:typeof(SecurityProtocolBindingElement))]
+^
+<wsp:Policy wsu:Id="[binding.Name]_Input_Policy">
+	[GenerateAppMessagePolicy(security)]
+</wsp:Policy>
+^
+<wsp:Policy wsu:Id="[binding.Name]_Output_Policy">
+	[GenerateAppMessagePolicy(security)]
+</wsp:Policy>
+[end loop]
+[end if]
+end template
+
+template GenerateAddressingPolicy(Binding binding)
+[loop(binding.Protocols->addressing:typeof(AddressingProtocolBindingElement))]
+	[if(addressing.Version == AddressingVersion.Addressing10)]
+<wsam:Addressing/>
+	[end if]
+	[if(addressing.Version == AddressingVersion.AddressingAugust2004)]
+	[end if]
+[end loop]
+end template
+
+template GenerateMtomPolicy(Binding binding)
+[if(binding.Encoding.GetType() == typeof(SoapEncodingBindingElement))]
+	[if(((SoapEncodingBindingElement)binding.Encoding).MtomEnabled == true)]
+<wsoma:OptimizedMimeSerialization/>
+	[end if]
+[end if]
+end template
+
+template GenerateHttpsPolicy(Binding binding)
+[if(binding.Transport.GetType() == typeof(HttpsTransportBindingElement))]
+<sp:TransportBinding>
+	<wsp:Policy>
+		<sp:TransportToken>
+			<wsp:Policy>
+			[if(((HttpsTransportBindingElement)binding.Transport).ClientAuthentication == HttpsClientAuthentication.Certificate)]
+				<sp:HttpsToken RequireClientCertificate="true"/>
+			[else]
+				<sp:HttpsToken RequireClientCertificate="false"/>
+			[end if]
+			</wsp:Policy>
+		</sp:TransportToken>
+		<sp:AlgorithmSuite>
+			<wsp:Policy>
+				<sp:Basic256/>
+			</wsp:Policy>
+		</sp:AlgorithmSuite>
+		<sp:Layout>
+			<wsp:Policy>
+				<sp:Strict/>
+			</wsp:Policy>
+		</sp:Layout> 
+	</wsp:Policy>
+</sp:TransportBinding>
+[end if]
+end template
+
+template GenerateReliableMessagingPolicy(Binding binding)
+[loop(binding.Protocols->rm:typeof(ReliableMessagingProtocolBindingElement))]
+	[if(rm.Version == ReliableMessagingVersion.ReliableMessaging11)]
+<wsrmp:RMAssertion>
+	<wsp:Policy>
+		<wsrmp:DeliveryAssurance>
+			<wsp:Policy>
+			[if(rm.Delivery == ReliableMessagingDelivery.AtLeastOnce)]
+				<wsrmp:AtLeastOnce/>
+			[end if]
+			[if(rm.Delivery == ReliableMessagingDelivery.AtMostOnce)]
+				<wsrmp:AtMostOnce/>
+			[end if]
+			[if(rm.Delivery == ReliableMessagingDelivery.ExactlyOnce)]
+				<wsrmp:ExactlyOnce/>
+			[end if]
+			[if(rm.InOrder == true)]
+				<wsrmp:InOrder/>
+			[end if]
+			</wsp:Policy>
+		</wsrmp:DeliveryAssurance>
+	</wsp:Policy>
+</wsrmp:RMAssertion>
+	[end if]
+[end loop]
+end template
+
+template GenerateAtomicTransactionPolicy(Binding binding)
+[loop(binding.Protocols->at:typeof(AtomicTransactionProtocolBindingElement))]
+	[if(at.Version == AtomicTransactionVersion.AtomicTransaction10)]
+<wsat:ATAssertion/>
+	[end if]
+[end loop]
+end template
+
+template GenerateSecurityPolicy(Binding binding, bool generateMessagePolicy)
+[loop(binding.Protocols->mc:typeof(MutualCertificateSecurityProtocolBindingElement))]
+[GenerateMutualCertificatePolicy(mc.AlgorithmSuite, mc.HeaderLayout, mc.ProtectionOrder, mc.RequireSignatureConfirmation)]
+[GenerateMetroJks()]
+[if (generateMessagePolicy)]
+[GenerateAppMessagePolicy(mc)]
+[end if]
+[end loop]
+[loop(binding.Protocols->sts:typeof(StsSecurityProtocolBindingElement))]
+[GenerateStsPolicy(sts.AlgorithmSuite, sts.HeaderLayout, sts.ProtectionOrder, sts.TokenVersion, sts.TokenType, sts.TokenIssuer, sts.RequireSignatureConfirmation, sts.DerivedKeys)]
+[if (generateMessagePolicy)]
+[GenerateAppMessagePolicy(sts)]
+[end if]
+[end loop]
+[loop(binding.Protocols->saml:typeof(SamlSecurityProtocolBindingElement))]
+[GenerateSamlPolicy(saml.AlgorithmSuite, saml.HeaderLayout, saml.ProtectionOrder, saml.TokenVersion, saml.TokenType, saml.TokenIssuer, saml.RequireSignatureConfirmation, saml.Claims)]
+[if (generateMessagePolicy)]
+[GenerateAppMessagePolicy(saml)]
+[end if]
+[end loop]
+[loop(binding.Protocols->sc:typeof(SecureConversationSecurityProtocolBindingElement))]
+<sp:SymmetricBinding>
+	<wsp:Policy>
+		<sp:ProtectionToken>
+			<wsp:Policy>
+				<sp:SecureConversationToken sp:IncludeToken="[Properties.WsSecurityPolicyNamespace]/IncludeToken/AlwaysToRecipient">
+					<wsp:Policy>
+						<sp:BootstrapPolicy>
+							<wsp:Policy>
+							[if(sc.Bootstrap.GetType() == typeof(MutualCertificateBootstrapProtocolBindingElement))]
+								[GenerateMutualCertificatePolicy(sc.AlgorithmSuite, sc.HeaderLayout, sc.ProtectionOrder, sc.RequireSignatureConfirmation)]
+							[end if]
+							[if(sc.Bootstrap.GetType() == typeof(StsBootstrapProtocolBindingElement))]
+								[GenerateStsPolicy(sc.AlgorithmSuite, sc.HeaderLayout, sc.ProtectionOrder, ((StsBootstrapProtocolBindingElement)sc.Bootstrap).TokenVersion, ((StsBootstrapProtocolBindingElement)sc.Bootstrap).TokenType, ((StsBootstrapProtocolBindingElement)sc.Bootstrap).TokenIssuer, ((StsBootstrapProtocolBindingElement)sc.Bootstrap).RequireSignatureConfirmation, ((StsBootstrapProtocolBindingElement)sc.Bootstrap).DerivedKeys)]
+							[end if]
+							[if(sc.Bootstrap.GetType() == typeof(SamlBootstrapProtocolBindingElement))]
+								[GenerateSamlPolicy(sc.AlgorithmSuite, sc.HeaderLayout, sc.ProtectionOrder, ((SamlBootstrapProtocolBindingElement)sc.Bootstrap).TokenVersion, ((SamlBootstrapProtocolBindingElement)sc.Bootstrap).TokenType, ((SamlBootstrapProtocolBindingElement)sc.Bootstrap).TokenIssuer, ((SamlBootstrapProtocolBindingElement)sc.Bootstrap).RequireSignatureConfirmation, ((SamlBootstrapProtocolBindingElement)sc.Bootstrap).Claims)]
+							[end if]
+								[GenerateBootstrapMessagePolicy(sc.Bootstrap)]
+							</wsp:Policy>
+						</sp:BootstrapPolicy>
+						[if(sc.DerivedKeys == true)]
+						<sp:RequireDerivedKeys/>
+						[end if]
+					</wsp:Policy>
+				</sp:SecureConversationToken>
+			</wsp:Policy>
+		</sp:ProtectionToken>
+		[GenerateGeneralPolicy(sc.AlgorithmSuite, sc.HeaderLayout, sc.ProtectionOrder, false)]
+	</wsp:Policy>
+</sp:SymmetricBinding>
+[GenerateTrustPolicy(false)]
+[if (generateMessagePolicy)]
+[GenerateAppMessagePolicy(sc)]
+[end if]
+[GenerateMetroJks()]
+[end loop]
+end template
+
+/*
+* Template for generating mutual certificate policy
+* Uses: GenerateGeneralPolicy()
+*/
+template GenerateMutualCertificatePolicy(SecurityAlgorithmSuite algorithm, SecurityHeaderLayout layout, SecurityProtectionOrder order, bool signatureConfirmation)
+<sp:AsymmetricBinding>
+	<wsp:Policy>
+		<sp:InitiatorToken>
+			<wsp:Policy>
+				<sp:X509Token sp:IncludeToken="[Properties.WsSecurityPolicyNamespace]/IncludeToken/AlwaysToRecipient">
+					<wsp:Policy>
+						<sp:WssX509V3Token10/>
+					</wsp:Policy>
+				</sp:X509Token>
+			</wsp:Policy>
+		</sp:InitiatorToken>
+		<sp:RecipientToken>
+			<wsp:Policy>
+				<sp:X509Token sp:IncludeToken="[Properties.WsSecurityPolicyNamespace]/IncludeToken/Never">
+					<wsp:Policy>
+						<sp:WssX509V3Token10/>
+					</wsp:Policy>
+				</sp:X509Token>
+			</wsp:Policy>
+		</sp:RecipientToken>
+		[GenerateGeneralPolicy(algorithm, layout, order, true)]
+	</wsp:Policy>
+</sp:AsymmetricBinding>
+[GenerateTrustPolicy(signatureConfirmation)]
+end template
+
+template GenerateStsPolicy(SecurityAlgorithmSuite algorithm, SecurityHeaderLayout layout, SecurityProtectionOrder order, IssuedTokenVersion version, IssuedTokenType type, IssuedTokenIssuer issuer, bool signatureConfirmation, bool derived)
+<sp:SymmetricBinding>
+	<wsp:Policy>
+		<sp:ProtectionToken>
+			<wsp:Policy>
+				[GenerateIssuedTokenPolicy(version, type, issuer, derived, null)]
+			</wsp:Policy>
+		</sp:ProtectionToken>
+		[GenerateGeneralPolicy(algorithm, layout, order, false)]
+	</wsp:Policy>
+</sp:SymmetricBinding>
+[GenerateTrustPolicy(signatureConfirmation)]
+end template
+
+template GenerateSamlPolicy(SecurityAlgorithmSuite algorithm, SecurityHeaderLayout layout, SecurityProtectionOrder order, IssuedTokenVersion version, IssuedTokenType type, IssuedTokenIssuer issuer, bool signatureConfirmation, IList<ClaimsetType> claims)
+<sp:AsymmetricBinding>
+	<wsp:Policy>
+		<sp:InitiatorToken>
+			<wsp:Policy>
+				[GenerateIssuedTokenPolicy(version, type, issuer, false, claims)]
+			</wsp:Policy>
+	    </sp:InitiatorToken>
+	    <sp:RecipientToken>
+			<wsp:Policy>
+				<sp:X509Token sp:IncludeToken="[Properties.WsSecurityPolicyNamespace]/IncludeToken/AlwaysToInitiator">
+					<wsp:Policy>
+						<sp:WssX509V3Token10/>
+					</wsp:Policy>
+				</sp:X509Token>
+			</wsp:Policy>
+		</sp:RecipientToken>
+		[GenerateGeneralPolicy(algorithm, layout, order, true)]
+	</wsp:Policy>
+</sp:AsymmetricBinding>
+[GenerateTrustPolicy(signatureConfirmation)]
+end template
+
+template GenerateIssuedTokenPolicy(IssuedTokenVersion version, IssuedTokenType type, IssuedTokenIssuer issuer, bool derived, IEnumerable<ClaimsetType> claims)
+<sp:IssuedToken sp:IncludeToken="[Properties.WsSecurityPolicyNamespace]/IncludeToken/AlwaysToRecipient">
+	<sp:RequestSecurityTokenTemplate>
+	[if(version == IssuedTokenVersion.Token10)]
+		<wst:TokenType>urn:oasis:names:tc:SAML:1.0:assertion</wst:TokenType>
+	[end if]
+	[if(version == IssuedTokenVersion.Token11)]
+		<wst:TokenType>http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1</wst:TokenType>
+	[end if]
+	[if(version == IssuedTokenVersion.Token20)]
+		<wst:TokenType>urn:oasis:names:tc:SAML:2.0:assertion</wst:TokenType>
+	[end if]
+	[if(type == IssuedTokenType.Symmetric128)]
+		<wst:KeyType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/SymmetricKey</wst:KeyType>
+		<wst:KeySize>128</wst:KeySize>
+	[end if]
+	[if(type == IssuedTokenType.Symmetric192)]
+		<wst:KeyType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/SymmetricKey</wst:KeyType>
+		<wst:KeySize>192</wst:KeySize>
+	[end if]
+	[if(type == IssuedTokenType.Symmetric256)]
+		<wst:KeyType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/SymmetricKey</wst:KeyType>
+		<wst:KeySize>256</wst:KeySize>
+	[end if]
+	[if(type == IssuedTokenType.Asymmetric1024)]
+		<wst:KeyType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/PublicKey</wst:KeyType>
+		<wst:KeySize>1024</wst:KeySize>
+	[end if]
+	[if(type == IssuedTokenType.Asymmetric2048)]
+		<wst:KeyType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/PublicKey</wst:KeyType>
+		<wst:KeySize>2048</wst:KeySize>
+	[end if]
+	[if(type == IssuedTokenType.Asymmetric3072)]
+		<wst:KeyType>http://docs.oasis-open.org/ws-sx/ws-trust/200512/PublicKey</wst:KeyType>
+		<wst:KeySize>3072</wst:KeySize>
+	[end if]
+	[if(claims != null)]
+		<wst:Claims Dialect="http://schemas.xmlsoap.org/ws/2005/05/identity" xmlns:ic="http://schemas.xmlsoap.org/ws/2005/05/identity">
+			[loop(claims->claim:typeof(ClaimsetType))]
+			<ic:ClaimType Uri="http://schemas.xmlsoap.org/ws/2005/05/identity/claims/[claim.Name]"/>
+			[end loop]
+		</wst:Claims>
+	[end if]
+	</sp:RequestSecurityTokenTemplate>
+	<wsp:Policy>
+		<sp:RequireInternalReference/>
+	[if(derived == true)]
+		<sp:RequireDerivedKeys/>
+	[end if]
+	</wsp:Policy>
+	[if(issuer != null)]
+	<sp:Issuer>
+		<wsa:Address>[issuer.Address]</wsa:Address>
+		[if(issuer.MetadataAddress != null && issuer.MetadataAddress.Length > 0)]
+		<wsa:Metadata>
+			<wsx:Metadata>
+				<wsx:MetadataSection>
+					<wsx:MetadataReference>
+						<wsa:Address>[issuer.MetadataAddress]</wsa:Address>
+					</wsx:MetadataReference>
+				</wsx:MetadataSection>
+			</wsx:Metadata>
+		</wsa:Metadata>
+		[end if]
+	</sp:Issuer>
+	[end if]
+</sp:IssuedToken>
+end template
+
+template GenerateTrustPolicy(bool signatureConfirmation)
+<sp:Wss11>
+	<wsp:Policy>
+		<sp:MustSupportRefIssuerSerial/>
+		<sp:MustSupportRefThumbprint/>
+		<sp:MustSupportRefEncryptedKey/>
+	[if(signatureConfirmation == true)]
+		<sp:RequireSignatureConfirmation/>
+	[end if]
+	</wsp:Policy>
+</sp:Wss11>
+[if (!Properties.Ibm)]
+<sp:Trust13>
+	<wsp:Policy>
+		<sp:MustSupportIssuedTokens/>
+		<sp:RequireClientEntropy/>
+		<sp:RequireServerEntropy/>
+	</wsp:Policy>
+</sp:Trust13>
+[end if]
+end template
+
+
+template GenerateGeneralPolicy(SecurityAlgorithmSuite algorithm, SecurityHeaderLayout layout, SecurityProtectionOrder order, bool timestamp)
+<sp:AlgorithmSuite>
+	<wsp:Policy>
+		<sp:[algorithm.ToString()]/>
+	</wsp:Policy>
+</sp:AlgorithmSuite>
+<sp:Layout>
+	<wsp:Policy>
+		<sp:[layout.ToString()]/>
+	</wsp:Policy>
+</sp:Layout>
+[if (timestamp)]
+<sp:IncludeTimestamp/>
+[end if]
+[if (!Properties.XPathSignEncrypt)]
+<sp:OnlySignEntireHeadersAndBody/>
+[end if]
+[if(order == SecurityProtectionOrder.EncryptBeforeSign)]
+<sp:EncryptBeforeSign/>
+[end if]
+[if(order == SecurityProtectionOrder.SignBeforeEncryptAndEncryptSignature)]
+<sp:EncryptSignature/>
+[end if]
+end template
+
+template GenerateAppMessagePolicy(SecurityProtocolBindingElement sp)
+[if (Properties.XPathSignEncrypt)]
+[GenerateAppSignEncryptParts(sp)]
+[else]
+<sp:EncryptedParts>
+	<sp:Body/>
+</sp:EncryptedParts>
+<sp:SignedParts>
+	<sp:Body/>
+	<sp:Header Namespace="http://www.w3.org/2005/08/addressing"/>
+	<sp:Header Namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702"/>
+</sp:SignedParts>
+[end if]
+end template
+
+template GenerateBootstrapMessagePolicy(BootstrapProtocolBindingElement sp)
+[if (Properties.XPathSignEncrypt)]
+[GenerateBootstrapSignEncryptParts(sp)]
+[else]
+<sp:EncryptedParts>
+	<sp:Body/>
+</sp:EncryptedParts>
+<sp:SignedParts>
+	<sp:Body/>
+	<sp:Header Namespace="http://www.w3.org/2005/08/addressing"/>
+	<sp:Header Namespace="http://docs.oasis-open.org/ws-rx/wsrm/200702"/>
+</sp:SignedParts>
+[end if]
+end template
+
+template GenerateWsdlEndpoint(Namespace ns)
+<?xml version="1.0" encoding="utf-8"?>
+<wsdl:definitions targetNamespace="[GetUri(ns)]"  
+	xmlns:xs="http://www.w3.org/2001/XMLSchema" 
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:wsaw="http://www.w3.org/2006/05/addressing/wsdl"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+	xmlns:soap12="http://schemas.xmlsoap.org/wsdl/soap12/"
+	xmlns:tns="[GetUri(ns)]"
+	xmlns:[ns.Prefix]="[GetUri(ns)]">
+^
+	<wsdl:import location="[ns.FullName]Binding.wsdl" namespace="[GetUri(ns)]" />
+	[GenerateWsdlEndpointPart(ns)]
+</wsdl:definitions>
+end template
+
+template GenerateWsdlEndpointPart(Namespace ns)
+[loop(ns.Declarations->endpoint:typeof(Endpoint))]
+[GenerateWsdlEndpoint(endpoint)]
+[end loop]
+end template
+
+template GenerateWsdlEndpoint(Endpoint endpoint)
+^
+<wsdl:service name="[endpoint.Name]">
+	<wsdl:port name="[endpoint.Interface.Name]_[endpoint.Binding.Name]_Port" binding="[endpoint.Binding.Namespace.Prefix]:[endpoint.Interface.Name]_[endpoint.Binding.Name]_Binding">
+	[if (Properties.GenerateServiceUrl)]
+	[if (endpoint.Binding.Encoding.GetType() == typeof(SoapEncodingBindingElement) && ((SoapEncodingBindingElement)endpoint.Binding.Encoding).Version == SoapVersion.Soap11)]
+		<soap:address location="[string.Format(Properties.ServiceUrlPattern, endpoint.Name)]"/>
+	[end if]
+	[if (endpoint.Binding.Encoding.GetType() == typeof(SoapEncodingBindingElement) && ((SoapEncodingBindingElement)endpoint.Binding.Encoding).Version == SoapVersion.Soap12)]
+		<soap12:address location="[string.Format(Properties.ServiceUrlPattern, endpoint.Name)]"/>
+	[end if]
+	[else]
+	[if (endpoint.Binding.Encoding.GetType() == typeof(SoapEncodingBindingElement) && ((SoapEncodingBindingElement)endpoint.Binding.Encoding).Version == SoapVersion.Soap11)]
+		<soap:address location="[endpoint.Address.Uri]"/>
+	[end if]
+	[if (endpoint.Binding.Encoding.GetType() == typeof(SoapEncodingBindingElement) && ((SoapEncodingBindingElement)endpoint.Binding.Encoding).Version == SoapVersion.Soap12)]
+		<soap12:address location="[endpoint.Address.Uri]"/>
+	[end if]
+	[end if]
+	</wsdl:port>
+</wsdl:service>
+end template
+
+template GenerateAppSignEncryptParts(SecurityProtocolBindingElement sp)
+<wsp:Policy wsu:Id="request:app_signparts">
+<sp:SignedParts>
+    <sp:Body/>
+    <sp:Header Namespace="http://schemas.xmlsoap.org/ws/2004/08/addressing"/>
+    <sp:Header Namespace="http://www.w3.org/2005/08/addressing"/>
+</sp:SignedParts>
+<sp:SignedElements>
+    <sp:XPath>["/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Envelope']/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd' and local-name()='Timestamp']"]<sp:XPath>
+    <sp:XPath>["/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Envelope']/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='UsernameToken']"]<sp:XPath>
+    <sp:XPath>["/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Envelope']/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd' and local-name()='Timestamp']"]<sp:XPath>
+    <sp:XPath>["/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Envelope']/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='UsernameToken']"]<sp:XPath>
+</sp:SignedElements>
+</wsp:Policy>
+<wsp:Policy wsu:Id="request:app_encparts">
+<sp:EncryptedParts>
+    <sp:Body/>
+</sp:EncryptedParts>
+<sp:EncryptedElements>
+[if (sp.ProtectionOrder == SecurityProtectionOrder.SignBeforeEncryptAndEncryptSignature)]
+    <sp:XPath>["/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Envelope']/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://www.w3.org/2000/09/xmldsig#' and local-name()='Signature']"]<sp:XPath>
+    <sp:XPath>["/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Envelope']/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://www.w3.org/2000/09/xmldsig#' and local-name()='Signature']"]<sp:XPath>
+    <sp:XPath>["/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Envelope']/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='UsernameToken']"]<sp:XPath>
+    <sp:XPath>["/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Envelope']/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='UsernameToken']"]<sp:XPath>
+[end if]
+</sp:EncryptedElements>
+</wsp:Policy>
+<wsp:Policy wsu:Id="response:app_signparts">
+<sp:SignedParts>
+    <sp:Body/>
+    <sp:Header Namespace="http://schemas.xmlsoap.org/ws/2004/08/addressing"/>
+    <sp:Header Namespace="http://www.w3.org/2005/08/addressing"/>
+</sp:SignedParts>
+<sp:SignedElements>
+    <sp:XPath>["/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Envelope']/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd' and local-name()='Timestamp']"]<sp:XPath>
+    <sp:XPath>["/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Envelope']/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd' and local-name()='Timestamp']"]<sp:XPath>
+</sp:SignedElements>
+</wsp:Policy>
+<wsp:Policy wsu:Id="response:app_encparts">
+<sp:EncryptedParts>
+    <sp:Body/>
+</sp:EncryptedParts>
+<sp:EncryptedElements>
+[if (sp.ProtectionOrder == SecurityProtectionOrder.SignBeforeEncryptAndEncryptSignature)]
+    <sp:XPath>["/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Envelope']/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://www.w3.org/2000/09/xmldsig#' and local-name()='Signature']"]<sp:XPath>
+    <sp:XPath>["/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Envelope']/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://www.w3.org/2000/09/xmldsig#' and local-name()='Signature']"]<sp:XPath>
+[end if]
+</sp:EncryptedElements>
+</wsp:Policy>
+end template
+
+template GenerateBootstrapSignEncryptParts(BootstrapProtocolBindingElement sp)
+<wsp:Policy wsu:Id="request:bootstrap_signparts">
+<sp:SignedParts>
+    <sp:Body/>
+    <sp:Header Namespace="http://schemas.xmlsoap.org/ws/2004/08/addressing"/>
+    <sp:Header Namespace="http://www.w3.org/2005/08/addressing"/>
+</sp:SignedParts>
+<sp:SignedElements>
+    <sp:XPath>["/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Envelope']/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd' and local-name()='Timestamp']"]</sp:XPath>
+    <sp:XPath>["/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Envelope']/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd' and local-name()='Timestamp']"]</sp:XPath>
+</sp:SignedElements>
+</wsp:Policy>
+<wsp:Policy wsu:Id="request:bootstrap_encparts">
+<sp:EncryptedParts>
+    <sp:Body/>
+</sp:EncryptedParts>
+<sp:EncryptedElements>
+[if (sp.ProtectionOrder == SecurityProtectionOrder.SignBeforeEncryptAndEncryptSignature)]
+    <sp:XPath>["/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Envelope']/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://www.w3.org/2000/09/xmldsig#' and local-name()='Signature']"]</sp:XPath>
+    <sp:XPath>["/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Envelope']/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://www.w3.org/2000/09/xmldsig#' and local-name()='Signature']"]</sp:XPath>
+[end if]
+</sp:EncryptedElements>
+</wsp:Policy>
+<wsp:Policy wsu:Id="response:bootstrap_signparts">
+<sp:SignedParts>
+    <sp:Body/>
+    <sp:Header Namespace="http://schemas.xmlsoap.org/ws/2004/08/addressing"/>
+    <sp:Header Namespace="http://www.w3.org/2005/08/addressing"/>
+</sp:SignedParts>
+<sp:SignedElements>
+    <sp:XPath>["/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Envelope']/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd' and local-name()='Timestamp']"]</sp:XPath>
+    <sp:XPath>["/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Envelope']/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd' and local-name()='Timestamp']"]</sp:XPath>
+</sp:SignedElements>
+</wsp:Policy>
+<wsp:Policy wsu:Id="response:bootstrap_encparts">
+<sp:EncryptedParts>
+    <sp:Body/>
+</sp:EncryptedParts>
+<sp:EncryptedElements>
+    <sp:XPath>["/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Envelope']/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd' and local-name()='SignatureConfirmation']"]</sp:XPath>
+    <sp:XPath>["/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Envelope']/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/oasis-wss-wssecurity-secext-1.1.xsd' and local-name()='SignatureConfirmation']"]</sp:XPath>
+[if (sp.ProtectionOrder == SecurityProtectionOrder.SignBeforeEncryptAndEncryptSignature)]
+    <sp:XPath>["/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Envelope']/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://www.w3.org/2000/09/xmldsig#' and local-name()='Signature']"]</sp:XPath>
+    <sp:XPath>["/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Envelope']/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://www.w3.org/2000/09/xmldsig#' and local-name()='Signature']"]</sp:XPath>
+[end if]
+</sp:EncryptedElements>
+</wsp:Policy>
+end template

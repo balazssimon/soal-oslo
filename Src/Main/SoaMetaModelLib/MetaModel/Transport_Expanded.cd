@@ -1,0 +1,39 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="SoaMetaModel.Binding">
+    <Position X="10" Y="1" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABAAAAAAAAAAAARAgAAAAAAAAAAAEAABAAA=</HashCode>
+      <FileName>Binding.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.HttpsTransportBindingElement">
+    <Position X="6.75" Y="4.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>HttpsTransportBindingElement.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.HttpTransportBindingElement">
+    <Position X="3.75" Y="4.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>HttpTransportBindingElement.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.TransportBindingElement">
+    <Position X="5.5" Y="2.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACA=</HashCode>
+      <FileName>TransportBindingElement.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="SoaMetaModel.HttpsClientAuthentication">
+    <Position X="10" Y="4.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAEEAAAA=</HashCode>
+      <FileName>HttpsClientAuthentication.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

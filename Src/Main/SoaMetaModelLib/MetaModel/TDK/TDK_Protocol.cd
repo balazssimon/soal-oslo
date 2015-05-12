@@ -1,0 +1,219 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="SoaMetaModel.AtomicTransactionProtocolBindingElement" Collapsed="true">
+    <Position X="3.75" Y="2.75" Width="2" />
+    <InheritanceLine Type="SoaMetaModel.ProtocolBindingElement" FixedFromPoint="true">
+      <Path>
+        <Point X="7.125" Y="2.441" />
+        <Point X="7.125" Y="2.596" />
+        <Point X="4.75" Y="2.596" />
+        <Point X="4.75" Y="2.75" />
+      </Path>
+    </InheritanceLine>
+    <AssociationLine Name="Version" Type="SoaMetaModel.AtomicTransactionVersion">
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="-0.911" Y="0.07" Height="0.182" Width="0.743" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>AtomicTransaction.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Version" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.AddressingProtocolBindingElement" Collapsed="true">
+    <Position X="1.75" Y="2.75" Width="1.75" />
+    <InheritanceLine Type="SoaMetaModel.ProtocolBindingElement" FixedFromPoint="true">
+      <Path>
+        <Point X="7.125" Y="2.441" />
+        <Point X="7.125" Y="2.596" />
+        <Point X="2.625" Y="2.596" />
+        <Point X="2.625" Y="2.75" />
+      </Path>
+    </InheritanceLine>
+    <AssociationLine Name="Version" Type="SoaMetaModel.AddressingVersion">
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="-0.89" Y="0.06" Height="0.182" Width="0.774" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Addressing.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Version" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.BootstrapProtocolBindingElement" Collapsed="true">
+    <Position X="10.5" Y="2.75" Width="1.75" />
+    <InheritanceLine Type="SoaMetaModel.ProtocolBindingElement" FixedFromPoint="true">
+      <Path>
+        <Point X="7.125" Y="2.441" />
+        <Point X="7.125" Y="2.596" />
+        <Point X="11.375" Y="2.596" />
+        <Point X="11.375" Y="2.75" />
+      </Path>
+    </InheritanceLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAQAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SecureConversation.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.ReliableMessagingProtocolBindingElement" Collapsed="true">
+    <Position X="6" Y="2.75" Width="2.25" />
+    <InheritanceLine Type="SoaMetaModel.ProtocolBindingElement" FixedFromPoint="true">
+      <Path>
+        <Point X="7.125" Y="2.441" />
+        <Point X="7.125" Y="2.75" />
+      </Path>
+    </InheritanceLine>
+    <AssociationLine Name="Version" Type="SoaMetaModel.ReliableMessagingVersion" FixedFromPoint="true">
+      <Path>
+        <Point X="6.25" Y="3.441" />
+        <Point X="6.25" Y="4.75" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.838" Y="0.102" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="Delivery" Type="SoaMetaModel.ReliableMessagingDelivery">
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="-0.932" Y="0.06" Height="0.182" Width="0.816" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>IAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAg=</HashCode>
+      <FileName>ReliableMessaging.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Version" />
+      <Property Name="Delivery" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.ProtocolBindingElement" Collapsed="true">
+    <Position X="6" Y="1.75" Width="2.25" />
+    <AssociationLine Name="Binding" Type="SoaMetaModel.Binding" FixedFromPoint="true">
+      <Path>
+        <Point X="6" Y="1.938" />
+        <Point X="4.5" Y="1.938" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACA=</HashCode>
+      <FileName>Binding.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Binding" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.SecurityProtocolBindingElement" Collapsed="true">
+    <Position X="8.5" Y="2.75" Width="1.75" />
+    <InheritanceLine Type="SoaMetaModel.ProtocolBindingElement" FixedFromPoint="true">
+      <Path>
+        <Point X="7.125" Y="2.441" />
+        <Point X="7.125" Y="2.596" />
+        <Point X="9.375" Y="2.596" />
+        <Point X="9.375" Y="2.75" />
+      </Path>
+    </InheritanceLine>
+    <AssociationLine Name="AlgorithmSuite" Type="SoaMetaModel.SecurityAlgorithmSuite">
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="-1.359" Y="0.081" Height="0.182" Width="1.253" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="HeaderLayout" Type="SoaMetaModel.SecurityHeaderLayout">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.202" Y="0.112" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="ProtectionOrder" Type="SoaMetaModel.SecurityProtectionOrder">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.296" Y="0.102" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAIA=</HashCode>
+      <FileName>Security.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="AlgorithmSuite" />
+      <Property Name="HeaderLayout" />
+      <Property Name="ProtectionOrder" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.Binding" Collapsed="true">
+    <Position X="3" Y="1.75" Width="1.5" />
+    <AssociationLine Name="Protocols" Type="SoaMetaModel.ProtocolBindingElement" FixedToPoint="true">
+      <Path>
+        <Point X="4.5" Y="2.25" />
+        <Point X="6" Y="2.25" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABAAAAAAAAAAAARAgAAAAAAAAAAAEAABAAA=</HashCode>
+      <FileName>Binding.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Protocols" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.BindingElement" Collapsed="true">
+    <Position X="6.25" Y="0.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQEAAAAAAAAAAAAAAACAAA=</HashCode>
+      <FileName>Binding.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="SoaMetaModel.AtomicTransactionVersion" Collapsed="true">
+    <Position X="3.75" Y="3.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>AtomicTransaction.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="SoaMetaModel.AddressingVersion" Collapsed="true">
+    <Position X="1.75" Y="3.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Addressing.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="SoaMetaModel.ReliableMessagingDelivery" Collapsed="true">
+    <Position X="6.5" Y="3.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAQAAAAA=</HashCode>
+      <FileName>ReliableMessaging.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="SoaMetaModel.ReliableMessagingVersion" Collapsed="true">
+    <Position X="6" Y="4.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ReliableMessaging.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="SoaMetaModel.SecurityAlgorithmSuite" Collapsed="true">
+    <Position X="9.25" Y="3.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>ACgIACAAAAAAAAAAAAAAAAEAARAAAAEgJQKQAAAQAAA=</HashCode>
+      <FileName>Security.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="SoaMetaModel.SecurityProtectionOrder" Collapsed="true">
+    <Position X="9" Y="4.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAAAAAAAAAAEABAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Security.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="SoaMetaModel.SecurityHeaderLayout" Collapsed="true">
+    <Position X="8.5" Y="5.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAAAAIAAAAgBAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Security.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -1,0 +1,111 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1" MembersFormat="FullSignature">
+  <Class Name="SoaMetaModel.Binding" Collapsed="true">
+    <Position X="8.25" Y="3.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABAAAAAAAAAAAARAgAAAAAAAAAAAEAABAAA=</HashCode>
+      <FileName>Binding.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.Declaration" Collapsed="true">
+    <Position X="6.25" Y="2.25" Width="1.25" />
+    <AssociationLine Name="Namespace" Type="SoaMetaModel.Namespace" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="6.25" Y="2.688" />
+        <Point X="2.875" Y="2.688" />
+        <Point X="2.875" Y="3.75" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.057" Y="0.779" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAAAAAAIAAAAAAAAQAAAAAIAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Declaration.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Namespace" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.Endpoint" Collapsed="true">
+    <Position X="10.25" Y="3.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAAIABAAAEAAABAAAACAAAIAAAAECA=</HashCode>
+      <FileName>Endpoint.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.Interface" Collapsed="true">
+    <Position X="6.25" Y="3.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>IAAAgAACQAAAAAAAAAgAAAAIAAAAAAAAAAACAAAAAAA=</HashCode>
+      <FileName>Interface.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.Namespace" Collapsed="true">
+    <Position X="2.25" Y="3.75" Width="1.25" />
+    <InheritanceLine Type="SoaMetaModel.Declaration" FixedToPoint="true">
+      <Path>
+        <Point X="6.875" Y="2.941" />
+        <Point X="6.875" Y="3.375" />
+        <Point X="3.188" Y="3.375" />
+        <Point X="3.188" Y="3.75" />
+      </Path>
+    </InheritanceLine>
+    <AssociationLine Name="Declarations" Type="SoaMetaModel.Declaration" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="2.625" Y="3.75" />
+        <Point X="2.625" Y="2.438" />
+        <Point X="6.25" Y="2.438" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true" ManuallySized="true">
+        <Position X="0.3" Y="0.07" Height="0.182" Width="1.125" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAQAAAAAAAAAAAAAECAAAAAgAICAAAAAAAAAA=</HashCode>
+      <FileName>Namespace.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Declarations" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.Type" Collapsed="true">
+    <Position X="4.25" Y="3.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>AQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Type.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.SoaObject" Collapsed="true">
+    <Position X="6.25" Y="0.75" Width="1.25" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAAAABAAAAAAAAAAUAAUgAAAAACgAAAACAAA=</HashCode>
+      <FileName>SoaObject.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.SoaModel" Collapsed="true">
+    <Position X="2.75" Y="0.75" Width="1.5" />
+    <AssociationLine Name="GlobalNamespace" Type="SoaMetaModel.Namespace" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="2.938" Y="1.441" />
+        <Point X="2.938" Y="1.816" />
+        <Point X="2.406" Y="1.816" />
+        <Point X="2.406" Y="3.75" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.411" Y="1.622" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAQAAAAgAAAAI=</HashCode>
+      <FileName>SoaModel.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="GlobalNamespace" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Instances" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

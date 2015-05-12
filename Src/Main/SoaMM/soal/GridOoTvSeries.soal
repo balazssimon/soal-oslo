@@ -1,0 +1,42 @@
+﻿[Uri("http://www.iit.bme.hu/gridoo/wsxmldb/db")]
+namespace GridOo.WsXmlDb.Db
+{
+	struct TvSeries
+	{
+		string Title;
+		int Season;
+		int EpisodeCount;
+	}
+
+	struct TvSeriesDb
+	{
+		TvSeries[] TvSeries;
+	}
+}
+
+[Uri("http://www.iit.bme.hu/gridoo/wsxmldb/ws")]
+namespace GridOo.WsXmlDb.Ws
+{
+	using GridOo.WsXmlDb.Db;
+
+	interface ITvSeriesService
+	{
+		void Load();
+		void Save();
+		void AddTvSeries(TvSeries series);
+		TvSeries[] FindTvSeries(string title);
+	}
+
+	binding BasicHttpBinding
+	{
+		transport HTTP;
+		encoding SOAP;
+	}
+
+	endpoint TvSeriesService : ITvSeriesService
+	{
+		binding BasicHttpBinding;
+		location "http://localhost:8080/gridoo/tvseries/service";
+	}
+}
+

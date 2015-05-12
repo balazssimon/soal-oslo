@@ -1,0 +1,152 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="SoaMetaModel.Contract" Collapsed="true">
+    <Position X="3.75" Y="5.75" Width="1.25" />
+    <AssociationLine Name="OperationContracts" Type="SoaMetaModel.OperationContract" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="5" Y="6.28" />
+        <Point X="8.521" Y="6.28" />
+        <Point X="8.521" Y="5.441" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-1.496" Y="0.143" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAACABAAAEAAAAAAAAAAAAAAAAAAIA=</HashCode>
+      <FileName>Contract.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Interface" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="OperationContracts" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.Declaration" Collapsed="true">
+    <Position X="4.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAAAAAAAAAAAAAAAQAAAAAIAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Declaration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.SoaObject" Collapsed="true">
+    <Position X="8.75" Y="1.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAACAAAAAAAAAAAAAAAAIAAAACAAAAEAAAAA=</HashCode>
+      <FileName>SoaObject.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.OperationContract" Collapsed="true">
+    <Position X="7.5" Y="4.75" Width="1.75" />
+    <AssociationLine Name="Operation" Type="SoaMetaModel.Operation">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.951" Y="0.088" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="OperationContractStatements" Type="SoaMetaModel.OperationContractStatement">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.013" Y="-0.251" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AEAAAAQAAAAAEAAAAAAAAAAAAAAAAAAAAAEIAAAAEAA=</HashCode>
+      <FileName>OperationContract.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Contract" />
+      <Property Name="Operation" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="OperationContractStatements" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.OperationContractStatement" Collapsed="true">
+    <Position X="11.25" Y="4.75" Width="2.25" />
+    <AssociationLine Name="OperationContract" Type="SoaMetaModel.OperationContract">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="0.08" Y="0.102" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAIA=</HashCode>
+      <FileName>OperationContractStatement.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="OperationContract" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.RuleType" Collapsed="true">
+    <Position X="11.25" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAA=</HashCode>
+      <FileName>RuleType.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Rule" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.Operation" Collapsed="true">
+    <Position X="7.25" Y="3.25" Width="1.5" />
+    <AssociationLine Name="Interface" Type="SoaMetaModel.Interface" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="7.562" Y="3.941" />
+        <Point X="7.562" Y="4.316" />
+        <Point X="6.406" Y="4.316" />
+        <Point X="6.406" Y="4.75" />
+      </Path>
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.868" Y="0.104" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAApAAAUAgQAAAIAAAIAABAAEAAA=</HashCode>
+      <FileName>Operation.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Interface" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.Interface" Collapsed="true">
+    <Position X="5.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAgAACQAAAAAAAAAgAAAAIAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Interface.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.Ensures" Collapsed="true">
+    <Position X="10.5" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Ensures.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.Endpoint" Collapsed="true">
+    <Position X="2.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAAIABAAAEAAABAAAACAAAIAAAAECA=</HashCode>
+      <FileName>Endpoint.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Contract" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.Requires" Collapsed="true">
+    <Position X="12.5" Y="6" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Requires.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Otherwise" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.Expression" Collapsed="true">
+    <Position X="13.5" Y="3.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAAAAAAgAAAAAAAAAAAAAACCAAAAQAAAAAAAAA=</HashCode>
+      <FileName>Expression.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -1,0 +1,40 @@
+﻿
+namespace TestWs = "http://www.iit.bme.hu/TestWs"
+{
+	struct Person
+	{
+		string Name;
+		int Age;
+	}
+
+	interface IPersonWs
+	{
+		void AddPerson(Person person);
+		int GetPersonCount();
+	}
+
+	binding Soap11Http
+	{
+		transport HTTP;
+		encoding SOAP { Version = "1.1" };
+	}
+
+	binding Soap12Http
+	{
+		transport HTTP;
+		encoding SOAP { Version = "1.2" };
+	}
+
+	endpoint Person11 : IPersonWs
+	{
+		binding Soap11Http;
+		location "http://localhost/PersonWs/Soap11";
+	}
+
+	endpoint Person12 : IPersonWs
+	{
+		binding Soap12Http;
+		location "http://localhost/PersonWs/Soap12";
+	}
+}
+

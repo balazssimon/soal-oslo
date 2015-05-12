@@ -1,0 +1,22 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<VSTemplate Version="3.0.0" Type="Project" xmlns="http://schemas.microsoft.com/developer/vstemplate/2005">
+  <TemplateData>
+    <Name>M Code Generator C# Console Application</Name>
+    <Description>A C# application based on M code generator.</Description>
+    <Icon>Sb.OsloExtensions.VStudio.MGenProjTempl.ico</Icon>
+    <ProjectType>CSharp</ProjectType>
+    <RequiredFrameworkVersion>4.0</RequiredFrameworkVersion>
+    <SortOrder>1000</SortOrder>
+    <TemplateID>87d06024-e1e5-47dc-a382-78dcd19ae938</TemplateID>
+    <CreateNewFolder>true</CreateNewFolder>
+    <DefaultName>GeneratorProject</DefaultName>
+    <ProvideDefaultName>true</ProvideDefaultName>
+  </TemplateData>
+  <TemplateContent>
+    <Project File="ProjectTemplate.csproj" ReplaceParameters="true">
+      <ProjectItem ReplaceParameters="true" TargetFileName="Properties\AssemblyInfo.cs">AssemblyInfo.cs</ProjectItem>
+      <ProjectItem ReplaceParameters="true">Program.cs</ProjectItem>
+      <ProjectItem ReplaceParameters="true" OpenInEditor="true">Generator.mcg</ProjectItem>
+    </Project>
+  </TemplateContent>
+</VSTemplate>

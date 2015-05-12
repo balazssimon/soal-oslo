@@ -1,0 +1,14 @@
+	<!--xmlns:wsdl="http://www.w3.org/2001/XMLSchema"-->
+<wsdl:definitions targetNamespace="http://www.iit.bme.hu/HelloNamespace"
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:ns0="http://www.iit.bme.hu/HelloNamespace"
+	xmlns:wsdlpart="http://www.iit.bme.hu/HelloNamespace"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/"
+	xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:import schemaLocation="HelloNamespaceBinding.wsdl" namespace="http://www.iit.bme.hu/HelloNamespace"/>
+  <wsdl:service name="helloEndpint">
+    <wsdl:port name="BasicHttpBinding_IHello" binding="ns0:IHello_BasicHttpBinding_IHello">
+      <soap:address location="http://localhost/"/>
+    </wsdl:port>
+  </wsdl:service>
+</wsdl:definitions>

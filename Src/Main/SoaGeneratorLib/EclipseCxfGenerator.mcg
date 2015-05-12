@@ -1,0 +1,453 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+include "GeneratorLib.mcg";
+
+configuration
+	string NamespaceName = "SoaMetaModel";
+	string ClassName = "EclipseCxfGenerator";
+    Type InstancesType = typeof(IEnumerable<SoaObject>);
+    properties Properties
+        string ProjectName = "CxfProject";
+        string ResourcesDir = "../Resources";
+        string OutputDir = "../../Output";
+		string CxfVersion = "2.7.11";
+		bool GenerateJksService = true;
+		bool GenerateJksClient = true;
+    end properties
+end configuration
+
+function void Main()
+end function
+
+/*
+* Get project name
+*/
+function string GetProjectName()
+    return Properties.ProjectName;
+end function
+
+/*
+* Get client project name
+*/
+function string GetClientProjectName()
+    return Properties.ProjectName+"Client";
+end function
+
+template Generate_server_project()
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>[GetProjectName()]</name>
+	<comment></comment>
+	<projects></projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.wst.jsdt.core.javascriptValidator</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.wst.common.project.facet.core.builder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.jboss.tools.jst.web.kb.kbbuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.wst.validation.validationbuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.jem.workbench.JavaEMFNature</nature>
+		<nature>org.eclipse.wst.common.modulecore.ModuleCoreNature</nature>
+		<nature>org.eclipse.wst.common.project.facet.core.nature</nature>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>org.eclipse.wst.jsdt.core.jsNature</nature>
+		<nature>org.jboss.tools.jst.web.kb.kbnature</nature>
+		<nature>org.jboss.tools.jsf.jsfnature</nature>
+	</natures>
+</projectDescription>
+end template
+
+template Generate_server_classpath()
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.7.0">
+		<attributes>
+			<attribute name="owner.project.facets" value="java"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/org.jboss.ide.eclipse.as.core.server.runtime.runtimeTarget/JBoss 7.1 Runtime">
+		<attributes>
+			<attribute name="owner.project.facets" value="jst.web"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry kind="output" path="build/classes"/>
+</classpath>
+end template
+
+template Generate_client_project()
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>[GetClientProjectName()]</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+	</natures>
+</projectDescription>
+end template
+
+template Generate_client_classpath()
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/jdk1.7.0"/>
+	<classpathentry kind="con" path="org.eclipse.jst.ws.cxf.core.CXF_CLASSPATH_CONTAINER/Apache CXF/[Properties.CxfVersion]"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.USER_LIBRARY/Spring"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
+end template
+
+template Generate_jsdtscope()
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="WebContent"/>
+	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.WebProject">
+		<attributes>
+			<attribute name="hide" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.baseBrowserLibrary"/>
+	<classpathentry kind="output" path=""/>
+</classpath>
+end template
+
+template Generate_core_prefs()
+eclipse.preferences.version=1
+org.eclipse.jdt.core.compiler.codegen.inlineJsrBytecode=enabled
+org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.7
+org.eclipse.jdt.core.compiler.codegen.unusedLocal=preserve
+org.eclipse.jdt.core.compiler.compliance=1.7
+org.eclipse.jdt.core.compiler.debug.lineNumber=generate
+org.eclipse.jdt.core.compiler.debug.localVariable=generate
+org.eclipse.jdt.core.compiler.debug.sourceFile=generate
+org.eclipse.jdt.core.compiler.problem.assertIdentifier=error
+org.eclipse.jdt.core.compiler.problem.enumIdentifier=error
+org.eclipse.jdt.core.compiler.source=1.7
+end template
+
+template Generate_ws_cxf_core_prefs()
+eclipse.preferences.version=1
+org.eclipse.jst.ws.cxf.core.runtime.version=[Properties.CxfVersion]
+end template
+
+
+template Generate_common_component()
+<?xml version="1.0" encoding="UTF-8"?>
+<project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="[GetProjectName()]">
+        <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
+        <property name="context-root" value="[GetProjectName()]"/>
+        <property name="java-output-path" value="/[GetProjectName()]/build/classes"/>
+    </wb-module>
+</project-modules>
+end template
+
+template Generate_facet_core()
+<?xml version="1.0" encoding="UTF-8"?>
+<faceted-project>
+  <runtime name="JBoss 7.1 Runtime"/>
+  <fixed facet="java"/>
+  <fixed facet="jst.web"/>
+  <fixed facet="wst.jsdt.web"/>
+  <installed facet="java" version="1.6"/>
+  <installed facet="jst.web" version="3.0"/>
+  <installed facet="wst.jsdt.web" version="1.0"/>
+</faceted-project>
+end template
+
+template Generate_superType_container()
+org.eclipse.wst.jsdt.launching.baseBrowserLibrary
+end template
+
+template Generate_superType_name()
+Window
+end template
+
+template Generate_MetaInf_Manifest()
+Manifest-Version: 1.0
+Class-Path: 
+Dependencies: org.springframework.spring,org.apache.cxf,org.apache.ws.security
+
+end template
+
+template Generate_SecurityCallbackHandler(string packageName)
+[if(packageName != "")]
+package [packageName];
+^
+[end if]
+import java.io.IOException;
+^
+import javax.security.auth.callback.Callback;
+import javax.security.auth.callback.CallbackHandler;
+import javax.security.auth.callback.UnsupportedCallbackException;
+^
+import org.apache.ws.security.WSPasswordCallback;
+^
+public class SecurityCallbackHandler implements CallbackHandler {
+    public void handle(Callback["[]"] callbacks) throws IOException, UnsupportedCallbackException {
+        for (int i = 0; i < callbacks.length; i++) {
+            WSPasswordCallback pc = (WSPasswordCallback)callbacks["["]i["]"];
+            if (pc.getIdentifier().endsWith("priv")) {
+            	pc.setPassword("changeit");
+            }
+        }
+    } 
+}
+end template
+
+
+template Generate_cxf_xml(bool service, bool jks)
+<beans xmlns='http://www.springframework.org/schema/beans'
+	xmlns:xsi='http://www.w3.org/2001/XMLSchema-instance' xmlns:beans='http://www.springframework.org/schema/beans'
+	xmlns:jaxws='http://cxf.apache.org/jaxws' xmlns:cxf="http://cxf.apache.org/core"
+	xmlns:http='http://cxf.apache.org/transports/http/configuration'
+	xmlns:sec='http://cxf.apache.org/configuration/security'
+	xmlns:p="http://cxf.apache.org/policy"
+	xmlns:wsa="http://cxf.apache.org/ws/addressing"
+	xmlns:wsrm-policy="http://schemas.xmlsoap.org/ws/2005/02/rm/policy"
+	xmlns:wsrm-mgr="http://cxf.apache.org/ws/rm/manager"
+	xsi:schemaLocation='http://cxf.apache.org/configuration/security
+      http://cxf.apache.org/schemas/configuration/security.xsd
+      http://cxf.apache.org/transports/http/configuration
+      http://cxf.apache.org/schemas/configuration/http-conf.xsd
+      http://www.springframework.org/schema/beans
+      http://www.springframework.org/schema/beans/spring-beans.xsd
+      http://schemas.xmlsoap.org/ws/2005/02/rm/policy
+      http://schemas.xmlsoap.org/ws/2005/02/rm/wsrm-policy.xsd
+      http://cxf.apache.org/jaxws
+      http://cxf.apache.org/schemas/jaxws.xsd
+      http://cxf.apache.org/core 
+      http://cxf.apache.org/schemas/core.xsd
+      http://cxf.apache.org/ws/rm/manager
+      http://cxf.apache.org/schemas/configuration/wsrm-manager.xsd
+  '>
+[loop(Instances->endp:typeof(Endpoint))]
+	[if(endp.HasReliableMessaging() || endp.HasSecurity())]
+	[if (service)]
+    <jaxws:endpoint id="[endp.Name]" implementor="[GetPackage(endp.Namespace).ToLower()].[endp.Name]">
+	[else]
+    <jaxws:client id="[endp.Name]" serviceClass="[GetPackage(endp.Namespace).ToLower()].[endp.Name]Service" address="[endp.Address.Uri]">
+	[end if]
+		[if(endp.HasReliableMessaging())]
+        <jaxws:features>
+            <wsa:addressing/>
+            <wsrm-mgr:reliableMessaging>
+                <wsrm-policy:RMAssertion/>
+                <wsrm-mgr:deliveryAssurance>
+				[loop(rm:endp.GetReliableMessaging())]
+                    [if(rm.Delivery == ReliableMessagingDelivery.AtLeastOnce)]
+                	<wsrm-mgr:AtLeastOnce/>
+                    [end if]
+                    [if(rm.Delivery == ReliableMessagingDelivery.AtMostOnce)]
+                	<wsrm-mgr:AtMostOnce/>
+                    [end if]
+                    [if(rm.Delivery == ReliableMessagingDelivery.ExactlyOnce)]
+                	<wsrm-mgr:ExactlyOnce/>
+                    [end if]
+                    [if(rm.InOrder == true)]
+                	<wsrm-mgr:InOrder/>
+                    [end if]
+				[end loop]
+                </wsrm-mgr:deliveryAssurance>
+                <wsrm-mgr:destinationPolicy acceptOffers="true"/>           
+            </wsrm-mgr:reliableMessaging>
+        </jaxws:features>
+		[end if]
+		[if(endp.HasSecurity())]
+	    <jaxws:properties>
+		   [if (service && jks)]
+	       <entry key="ws-security.signature.properties" value="server_signature.properties"/>
+	       <entry key="ws-security.signature.username" value="wspservicepriv"/>
+	       <entry key="ws-security.encryption.username" value="useReqSigCert"/>
+	       <entry key="ws-security.callback-handler" value="SecurityCallbackHandler"/>
+		   [end if]
+		   [if (!service && jks)]
+	       <entry key="ws-security.signature.properties" value="client_signature.properties"/>
+	       <entry key="ws-security.signature.username" value="wspclientpriv"/>
+	       <entry key="ws-security.encryption.properties" value="client_encryption.properties"/>
+	       <entry key="ws-security.encryption.username" value="wspservicepub"/>
+	       <entry key="ws-security.callback-handler" value="SecurityCallbackHandler"/>
+		   [end if]
+	    </jaxws:properties>
+		[end if]
+	[if (service)]
+    </jaxws:endpoint>
+	[else]
+    </jaxws:client>
+	[end if]
+	[else]
+	[if (service)]
+    <jaxws:endpoint id="[endp.Name]" implementor="[GetPackage(endp.Namespace).ToLower()].[endp.Name]"/>
+	[else]
+    <jaxws:client id="[endp.Name]" serviceClass="[GetPackage(endp.Namespace).ToLower()].[endp.Name]Service" address="[endp.Address.Uri]"/>
+	[end if]
+	[end if]
+[end loop]
+</beans>
+end template
+
+template Generate_security_properties(string jksFileName)
+org.apache.ws.security.crypto.provider=org.apache.ws.security.components.crypto.Merlin
+org.apache.ws.security.crypto.merlin.file=[jksFileName]
+org.apache.ws.security.crypto.merlin.keystore.type=jks
+org.apache.ws.security.crypto.merlin.keystore.password=changeit
+end template
+
+template Generate_web_services_jsp()
+<%-- 
+    Document   : services
+    Created on : Aug 19, 2011, 3:44:15 PM
+    Author     : sb
+--%>
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>JSP Page</title>
+    </head>
+    <body>
+        <h1>List of Services</h1>
+[loop(Instances->endpoint:typeof(Endpoint))]
+        <a href="[endpoint.Name]?wsdl">[endpoint.Name]</a><br/>
+[end loop]
+    </body>
+</html>
+end template
+
+template Generate_Program_java(Namespace ns)
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package [GetPackage(ns).ToLower()]client;
+^
+import java.io.Closeable;
+import java.net.URL;
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Random;
+^
+import javax.xml.namespace.QName;
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.Service;
+^
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.support.ClassPathXmlApplicationContext;
+^
+import [GetPackage(ns).ToLower()].*;
+^
+public class Program {
+^
+    enum TargetFramework {
+        Metro,
+        Wcf,
+        TomcatCxf,
+        Oracle,
+        Ibm
+    }
+^
+    private static final ApplicationContext context = new ClassPathXmlApplicationContext(new String["[]"] { "META-INF/cxf-client.xml" });
+^
+    private static final boolean PRINT_EXCEPTIONS = true;
+    private static final HashMap<TargetFramework, String> URLS = new HashMap<>();
+^
+    private static final TargetFramework TARGET = TargetFramework.TomcatCxf;
+^
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String["[]"] args) {
+        try {
+            URLS.put(TargetFramework.Metro, "http://localhost:8080/[GetProjectName()]/services/{0}");
+            URLS.put(TargetFramework.Wcf, "http://localhost/[GetProjectName()]/Services/{0}.svc");
+            URLS.put(TargetFramework.TomcatCxf, "http://localhost:9080/[GetProjectName()]/services/{0}");
+            URLS.put(TargetFramework.Oracle, "http://192.168.136.128:7101/[GetProjectName()]/services/{0}");
+            URLS.put(TargetFramework.Ibm, "http://192.168.136.128:9080/[GetProjectName()]/{0}");
+            String url = URLS.get(TARGET);
+			[loop(ns->Declarations->endp:typeof(Endpoint))]
+            test[endp.Interface.Name]("[endp.Name]", "[endp.Interface.Name]_[endp.Binding.Name]_Port", url, true);
+			[end loop]
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+^
+	[loop(ns->Declarations->intf:typeof(Interface))]
+    private static void test[intf.Name](String endpoint, String port, String url, boolean close) {
+        System.out.println(endpoint);
+        try {
+            String address = MessageFormat.format(url, endpoint);
+            [intf.Name] service = ([intf.Name])context.getBean(endpoint);
+            BindingProvider bp = (BindingProvider)service;
+            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, address);
+            try {
+                // call the service
+                try {
+                    if (close) {
+                        ((Closeable)service).close();
+                    }
+                } catch (Exception ex) {
+                    System.out.println("Close failed.");
+                    if (PRINT_EXCEPTIONS) {
+                        ex.printStackTrace();
+                    }
+                }
+            } catch (Exception ex) {
+                System.out.println("Call failed.");
+                if (PRINT_EXCEPTIONS) {
+                    ex.printStackTrace();
+                }
+            }
+        } catch (Exception ex) {
+            System.out.println("Init failed.");
+            if (PRINT_EXCEPTIONS) {
+                ex.printStackTrace();
+            }
+        }
+        System.out.println("----");
+    }
+	[end loop]
+^
+}
+end template

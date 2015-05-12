@@ -1,0 +1,151 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{29F8B50B-F187-45E0-A299-B9AE94294B1D}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SoaMetaModel</RootNamespace>
+    <AssemblyName>SoaMetaModelLib</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="AtomicTransaction.cs" />
+    <Compile Include="Authorization.cs" />
+    <Compile Include="Binding.cs" />
+    <Compile Include="BuiltInType.cs" />
+    <Compile Include="Claim.cs" />
+    <Compile Include="Contract.cs" />
+    <Compile Include="Delegate.cs" />
+    <Compile Include="MetaInfo\AttributeHelpers.cs" />
+    <Compile Include="MetaInfo\MetaInfo.cs" />
+    <Compile Include="MetaInfo\NameContext.cs" />
+    <Compile Include="MetaInfo\NameException.cs" />
+    <Compile Include="MetaInfo\NameHelpers.cs" />
+    <Compile Include="MetaInfo\TypeHelpers.cs" />
+    <Compile Include="MetaInfo\ValidationException.cs" />
+    <Compile Include="PseudoType.cs" />
+    <Compile Include="Reference.cs" />
+    <Compile Include="SoaModel.cs" />
+    <Compile Include="Exception.cs" />
+    <Compile Include="IssuedToken.cs" />
+    <Compile Include="MutualCertificate.cs" />
+    <Compile Include="ReliableMessaging.cs" />
+    <Compile Include="Declaration.cs" />
+    <Compile Include="Endpoint.cs" />
+    <Compile Include="Enum.cs" />
+    <Compile Include="Expression.cs" />
+    <Compile Include="Https.cs" />
+    <Compile Include="Http.cs" />
+    <Compile Include="Interface.cs" />
+    <Compile Include="ModelExtensions.cs" />
+    <Compile Include="Namespace.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Property.cs" />
+    <Compile Include="RuleStatement.cs" />
+    <Compile Include="Saml.cs" />
+    <Compile Include="SecureConversation.cs" />
+    <Compile Include="Security.cs" />
+    <Compile Include="SoaObject.cs" />
+    <Compile Include="Soap.cs" />
+    <Compile Include="Struct.cs" />
+    <Compile Include="Sts.cs" />
+    <Compile Include="Type.cs" />
+    <Compile Include="Addressing.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <Service Include="{508349B6-6B84-4DF5-91F0-309BEEBAD82D}" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Sb.Meta\Sb.Meta.csproj">
+      <Project>{264D2AF3-9F8E-4C34-B733-AE51923ED976}</Project>
+      <Name>Sb.Meta</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="MetaModel\TDK\TDK_ SequenceDiagram1.sequencediagram.layout">
+      <DependentUpon>TDK_ SequenceDiagram1.sequencediagram</DependentUpon>
+    </EmbeddedResource>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="MetaModel\TDK\TDK_Bootstrap.cd" />
+    <None Include="MetaModel\TDK\TDK_Security.cd" />
+    <None Include="MetaModel\TDK\TDK_Protocol.cd" />
+    <None Include="MetaModel\TDK\TDK_Name.cd" />
+    <None Include="MetaModel\Authorization_Collapsed.cd" />
+    <None Include="MetaModel\Binding.cd" />
+    <None Include="MetaModel\BindingElement.cd" />
+    <None Include="MetaModel\Binding_Collapsed.cd" />
+    <None Include="MetaModel\Binding_Expanded.cd" />
+    <None Include="MetaModel\Bootstrap_Collapsed.cd" />
+    <None Include="MetaModel\Bootstrap_Expanded.cd" />
+    <None Include="MetaModel\ComplexType.cd" />
+    <None Include="MetaModel\Contract_Collapsed.cd" />
+    <None Include="MetaModel\Contract_Expanded.cd" />
+    <None Include="MetaModel\Claim_Expanded.cd" />
+    <None Include="MetaModel\Authorization_Expanded.cd" />
+    <None Include="MetaModel\Encoding_Collapsed.cd" />
+    <None Include="MetaModel\Encoding_Expanded.cd" />
+    <None Include="MetaModel\Endpoint.cd" />
+    <None Include="MetaModel\Interface.cd" />
+    <None Include="MetaModel\Protocol_Collapsed.cd" />
+    <None Include="MetaModel\Protocol_Expanded.cd" />
+    <None Include="MetaModel\Claim_Collapsed.cd" />
+    <None Include="MetaModel\Security_Collapsed.cd" />
+    <None Include="MetaModel\Security_Expanded.cd" />
+    <None Include="MetaModel\SimpleType.cd" />
+    <None Include="MetaModel\SoaObject.cd" />
+    <None Include="MetaModel\TDK\TDK_ SequenceDiagram1.sequencediagram" />
+    <None Include="MetaModel\TDK\TDK_Authorization.cd" />
+    <None Include="MetaModel\TDK\TDK_Claimset.cd" />
+    <None Include="MetaModel\TDK\TDK_Binding1.cd" />
+    <None Include="MetaModel\TDK\TDK_Endpoint1.cd" />
+    <None Include="MetaModel\TDK\TDK_Interface.cd" />
+    <None Include="MetaModel\TDK\TDK_Type2.cd" />
+    <None Include="MetaModel\TDK\TDK_Expression.cd" />
+    <None Include="MetaModel\TDK\TDK_Namespace.cd" />
+    <None Include="MetaModel\TDK\TDK_Type1.cd" />
+    <None Include="MetaModel\Transport_Collapsed.cd" />
+    <None Include="MetaModel\Transport_Expanded.cd" />
+    <None Include="MetaModel\Types.cd" />
+    <None Include="MetaModel\Namespace.cd" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

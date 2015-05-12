@@ -1,0 +1,46 @@
+﻿[Uri("http://www.iit.bme.hu/soi/hw/SeatReservation")]
+namespace SeatReservation
+{
+	exception CinemaException
+	{
+		int ErrorCode;
+		string ErrorMessage;
+	}
+
+	struct Seat
+	{
+		string Row;
+		string Column;
+	}
+
+	enum SeatStatus
+	{
+		Free,
+		Locked,
+		Reserved,
+		Sold
+	}
+
+	interface ICinema
+	{
+		void Init(int rows, int columns) throws CinemaException;
+		Seat[] GetAllSeats() throws CinemaException;
+		SeatStatus GetSeatStatus(Seat seat) throws CinemaException;
+		string Lock(Seat seat, int count) throws CinemaException;
+		void Unlock(string lockId) throws CinemaException;
+		void Reserve(string lockId) throws CinemaException;
+		void Buy(string lockId) throws CinemaException;
+	}
+
+	binding HttpSoap11
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+	}
+
+	endpoint CinemaService : ICinema
+	{
+		binding HttpSoap11;
+		location "http://www.tempuri.org";
+	}
+}

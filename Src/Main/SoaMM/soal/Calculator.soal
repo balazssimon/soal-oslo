@@ -1,0 +1,37 @@
+﻿[Uri("http://www.iit.bme.hu/SoaIntegr/Calculator")]
+namespace CalculatorNs
+{
+	exception MathFault
+	{
+		int ErrorCode;
+		string ErrorMessage;
+	}
+
+	struct Complex
+	{
+		double Re;
+		double Im;
+	}
+
+	interface ICalculator
+	{
+		double Add(double left, double right);
+		double Subtract(double left, double right);
+		double Multiply(double left, double right);
+		double Divide(double left, double right) throws MathFault;
+
+		Complex ComplexAdd(Complex left, Complex right);
+	}
+
+	binding BasicHttpBinding
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+	}
+
+	endpoint Calculator : ICalculator
+	{
+		binding BasicHttpBinding;
+		location "http://www.iit.bme.hu/Services/Calculator";
+	}
+}

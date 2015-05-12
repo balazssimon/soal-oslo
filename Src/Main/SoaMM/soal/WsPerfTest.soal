@@ -1,0 +1,2168 @@
+[Uri("http://www.iit.bme.hu/WsPerfTest")]
+namespace WsPerfTest
+{
+	struct BoolList
+	{
+		bool Field;
+		BoolList Next;
+	}
+
+	struct ByteList
+	{
+		byte Field;
+		ByteList Next;
+	}
+
+	struct IntList
+	{
+		int Field;
+		IntList Next;
+	}
+
+	struct LongList
+	{
+		long Field;
+		LongList Next;
+	}
+
+	struct FloatList
+	{
+		float Field;
+		FloatList Next;
+	}
+
+	struct DoubleList
+	{
+		double Field;
+		DoubleList Next;
+	}
+
+	struct StringList
+	{
+		string Field;
+		StringList Next;
+	}
+
+
+	interface ITestVoid
+	{
+		void CallVoid();
+	}
+
+	interface ITestBool
+	{
+		void CallBool(bool[] arg);
+		bool[] CallReturnBool(int arrayLength, int stringLength, bool[] arg);
+		bool[] ReturnBool(int arrayLength, int stringLength);
+	}
+
+	interface ITestBoolList
+	{
+		void CallBoolList(BoolList[] arg);
+		BoolList[] CallReturnBoolList(int arrayLength, int stringLength, int structDepth, BoolList[] arg);
+		BoolList[] ReturnBoolList(int arrayLength, int stringLength, int structDepth);
+	}
+
+	interface ITestByte
+	{
+		void CallByte(byte[] arg);
+		byte[] CallReturnByte(int arrayLength, int stringLength, byte[] arg);
+		byte[] ReturnByte(int arrayLength, int stringLength);
+	}
+
+	interface ITestByteList
+	{
+		void CallByteList(ByteList[] arg);
+		ByteList[] CallReturnByteList(int arrayLength, int stringLength, int structDepth, ByteList[] arg);
+		ByteList[] ReturnByteList(int arrayLength, int stringLength, int structDepth);
+	}
+
+	interface ITestInt
+	{
+		void CallInt(int[] arg);
+		int[] CallReturnInt(int arrayLength, int stringLength, int[] arg);
+		int[] ReturnInt(int arrayLength, int stringLength);
+	}
+
+	interface ITestIntList
+	{
+		void CallIntList(IntList[] arg);
+		IntList[] CallReturnIntList(int arrayLength, int stringLength, int structDepth, IntList[] arg);
+		IntList[] ReturnIntList(int arrayLength, int stringLength, int structDepth);
+	}
+
+	interface ITestLong
+	{
+		void CallLong(long[] arg);
+		long[] CallReturnLong(int arrayLength, int stringLength, long[] arg);
+		long[] ReturnLong(int arrayLength, int stringLength);
+	}
+
+	interface ITestLongList
+	{
+		void CallLongList(LongList[] arg);
+		LongList[] CallReturnLongList(int arrayLength, int stringLength, int structDepth, LongList[] arg);
+		LongList[] ReturnLongList(int arrayLength, int stringLength, int structDepth);
+	}
+
+	interface ITestFloat
+	{
+		void CallFloat(float[] arg);
+		float[] CallReturnFloat(int arrayLength, int stringLength, float[] arg);
+		float[] ReturnFloat(int arrayLength, int stringLength);
+	}
+
+	interface ITestFloatList
+	{
+		void CallFloatList(FloatList[] arg);
+		FloatList[] CallReturnFloatList(int arrayLength, int stringLength, int structDepth, FloatList[] arg);
+		FloatList[] ReturnFloatList(int arrayLength, int stringLength, int structDepth);
+	}
+
+	interface ITestDouble
+	{
+		void CallDouble(double[] arg);
+		double[] CallReturnDouble(int arrayLength, int stringLength, double[] arg);
+		double[] ReturnDouble(int arrayLength, int stringLength);
+	}
+
+	interface ITestDoubleList
+	{
+		void CallDoubleList(DoubleList[] arg);
+		DoubleList[] CallReturnDoubleList(int arrayLength, int stringLength, int structDepth, DoubleList[] arg);
+		DoubleList[] ReturnDoubleList(int arrayLength, int stringLength, int structDepth);
+	}
+
+	interface ITestString
+	{
+		void CallString(string[] arg);
+		string[] CallReturnString(int arrayLength, int stringLength, string[] arg);
+		string[] ReturnString(int arrayLength, int stringLength);
+	}
+
+	interface ITestStringList
+	{
+		void CallStringList(StringList[] arg);
+		StringList[] CallReturnStringList(int arrayLength, int stringLength, int structDepth, StringList[] arg);
+		StringList[] ReturnStringList(int arrayLength, int stringLength, int structDepth);
+	}
+
+
+	binding Soap11
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+	}
+
+	binding Soap12
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap12 };
+	}
+
+	binding Soap11Mtom
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11, MTOM = true };
+	}
+
+	binding Soap12Mtom
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap12, MTOM = true };
+	}
+
+	binding Soap11Wsa
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+	}
+
+	binding Soap12Wsa
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap12 };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+	}
+
+	binding Soap11MtomWsa
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11, MTOM = true };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+	}
+
+	binding Soap12MtomWsa
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap12, MTOM = true };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+	}
+
+	binding Soap11WsaWsRm
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+		protocol ReliableMessaging 
+		{
+			Version = ReliableMessagingVersion.ReliableMessaging11,
+			Delivery = ReliableMessagingDelivery.ExactlyOnce,
+			InOrder = true
+		};
+	}
+
+	binding Soap12WsaWsRm
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap12 };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+		protocol ReliableMessaging 
+		{
+			Version = ReliableMessagingVersion.ReliableMessaging11,
+			Delivery = ReliableMessagingDelivery.ExactlyOnce,
+			InOrder = true
+		};
+	}
+
+	binding Soap11MtomWsaWsRm
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11, MTOM = true };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+		protocol ReliableMessaging 
+		{
+			Version = ReliableMessagingVersion.ReliableMessaging11,
+			Delivery = ReliableMessagingDelivery.ExactlyOnce,
+			InOrder = true
+		};
+	}
+
+	binding Soap12MtomWsaWsRm
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap12, MTOM = true };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+		protocol ReliableMessaging 
+		{
+			Version = ReliableMessagingVersion.ReliableMessaging11,
+			Delivery = ReliableMessagingDelivery.ExactlyOnce,
+			InOrder = true
+		};
+	}
+
+	binding Soap11WsaWsS
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+		protocol MutualCertificateSecurity
+		{
+			AlgorithmSuite = SecurityAlgorithmSuite.TripleDesRsa15,
+			HeaderLayout = SecurityHeaderLayout.Strict,
+			ProtectionOrder = SecurityProtectionOrder.SignBeforeEncryptAndEncryptSignature
+		};
+	}
+
+	binding Soap12WsaWsS
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap12 };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+		protocol MutualCertificateSecurity
+		{
+			AlgorithmSuite = SecurityAlgorithmSuite.TripleDesRsa15,
+			HeaderLayout = SecurityHeaderLayout.Strict,
+			ProtectionOrder = SecurityProtectionOrder.SignBeforeEncryptAndEncryptSignature
+		};
+	}
+
+	binding Soap11MtomWsaWsS
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11, MTOM = true };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+		protocol MutualCertificateSecurity
+		{
+			AlgorithmSuite = SecurityAlgorithmSuite.TripleDesRsa15,
+			HeaderLayout = SecurityHeaderLayout.Strict,
+			ProtectionOrder = SecurityProtectionOrder.SignBeforeEncryptAndEncryptSignature
+		};
+	}
+
+	binding Soap12MtomWsaWsS
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap12, MTOM = true };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+		protocol MutualCertificateSecurity
+		{
+			AlgorithmSuite = SecurityAlgorithmSuite.TripleDesRsa15,
+			HeaderLayout = SecurityHeaderLayout.Strict,
+			ProtectionOrder = SecurityProtectionOrder.SignBeforeEncryptAndEncryptSignature
+		};
+	}
+
+	binding Soap11WsaWsSc
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+		protocol SecureConversationSecurity
+		{
+			AlgorithmSuite = SecurityAlgorithmSuite.TripleDesRsa15,
+			HeaderLayout = SecurityHeaderLayout.Strict,
+			ProtectionOrder = SecurityProtectionOrder.SignBeforeEncryptAndEncryptSignature,
+			DerivedKeys = true
+		};
+		protocol MutualCertificateBootstrap;
+	}
+
+	binding Soap12WsaWsSc
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap12 };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+		protocol SecureConversationSecurity
+		{
+			AlgorithmSuite = SecurityAlgorithmSuite.TripleDesRsa15,
+			HeaderLayout = SecurityHeaderLayout.Strict,
+			ProtectionOrder = SecurityProtectionOrder.SignBeforeEncryptAndEncryptSignature,
+			DerivedKeys = true
+		};
+		protocol MutualCertificateBootstrap;
+	}
+
+	binding Soap11MtomWsaWsSc
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11, MTOM = true };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+		protocol SecureConversationSecurity
+		{
+			AlgorithmSuite = SecurityAlgorithmSuite.TripleDesRsa15,
+			HeaderLayout = SecurityHeaderLayout.Strict,
+			ProtectionOrder = SecurityProtectionOrder.SignBeforeEncryptAndEncryptSignature,
+			DerivedKeys = true
+		};
+		protocol MutualCertificateBootstrap;
+	}
+
+	binding Soap12MtomWsaWsSc
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap12, MTOM = true };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+		protocol SecureConversationSecurity
+		{
+			AlgorithmSuite = SecurityAlgorithmSuite.TripleDesRsa15,
+			HeaderLayout = SecurityHeaderLayout.Strict,
+			ProtectionOrder = SecurityProtectionOrder.SignBeforeEncryptAndEncryptSignature,
+			DerivedKeys = true
+		};
+		protocol MutualCertificateBootstrap;
+	}
+
+
+	endpoint TestVoidSoap11 : ITestVoid
+	{
+		binding Soap11;
+		location "http://localhost/WsPerfTest/Services/TestVoidSoap11.svc";
+	}
+
+	endpoint TestBoolSoap11 : ITestBool
+	{
+		binding Soap11;
+		location "http://localhost/WsPerfTest/Services/TestBoolSoap11.svc";
+	}
+
+	endpoint TestBoolListSoap11 : ITestBoolList
+	{
+		binding Soap11;
+		location "http://localhost/WsPerfTest/Services/TestBoolListSoap11.svc";
+	}
+
+	endpoint TestByteSoap11 : ITestByte
+	{
+		binding Soap11;
+		location "http://localhost/WsPerfTest/Services/TestByteSoap11.svc";
+	}
+
+	endpoint TestByteListSoap11 : ITestByteList
+	{
+		binding Soap11;
+		location "http://localhost/WsPerfTest/Services/TestByteListSoap11.svc";
+	}
+
+	endpoint TestIntSoap11 : ITestInt
+	{
+		binding Soap11;
+		location "http://localhost/WsPerfTest/Services/TestIntSoap11.svc";
+	}
+
+	endpoint TestIntListSoap11 : ITestIntList
+	{
+		binding Soap11;
+		location "http://localhost/WsPerfTest/Services/TestIntListSoap11.svc";
+	}
+
+	endpoint TestLongSoap11 : ITestLong
+	{
+		binding Soap11;
+		location "http://localhost/WsPerfTest/Services/TestLongSoap11.svc";
+	}
+
+	endpoint TestLongListSoap11 : ITestLongList
+	{
+		binding Soap11;
+		location "http://localhost/WsPerfTest/Services/TestLongListSoap11.svc";
+	}
+
+	endpoint TestFloatSoap11 : ITestFloat
+	{
+		binding Soap11;
+		location "http://localhost/WsPerfTest/Services/TestFloatSoap11.svc";
+	}
+
+	endpoint TestFloatListSoap11 : ITestFloatList
+	{
+		binding Soap11;
+		location "http://localhost/WsPerfTest/Services/TestFloatListSoap11.svc";
+	}
+
+	endpoint TestDoubleSoap11 : ITestDouble
+	{
+		binding Soap11;
+		location "http://localhost/WsPerfTest/Services/TestDoubleSoap11.svc";
+	}
+
+	endpoint TestDoubleListSoap11 : ITestDoubleList
+	{
+		binding Soap11;
+		location "http://localhost/WsPerfTest/Services/TestDoubleListSoap11.svc";
+	}
+
+	endpoint TestStringSoap11 : ITestString
+	{
+		binding Soap11;
+		location "http://localhost/WsPerfTest/Services/TestStringSoap11.svc";
+	}
+
+	endpoint TestStringListSoap11 : ITestStringList
+	{
+		binding Soap11;
+		location "http://localhost/WsPerfTest/Services/TestStringListSoap11.svc";
+	}
+
+	endpoint TestVoidSoap12 : ITestVoid
+	{
+		binding Soap12;
+		location "http://localhost/WsPerfTest/Services/TestVoidSoap12.svc";
+	}
+
+	endpoint TestBoolSoap12 : ITestBool
+	{
+		binding Soap12;
+		location "http://localhost/WsPerfTest/Services/TestBoolSoap12.svc";
+	}
+
+	endpoint TestBoolListSoap12 : ITestBoolList
+	{
+		binding Soap12;
+		location "http://localhost/WsPerfTest/Services/TestBoolListSoap12.svc";
+	}
+
+	endpoint TestByteSoap12 : ITestByte
+	{
+		binding Soap12;
+		location "http://localhost/WsPerfTest/Services/TestByteSoap12.svc";
+	}
+
+	endpoint TestByteListSoap12 : ITestByteList
+	{
+		binding Soap12;
+		location "http://localhost/WsPerfTest/Services/TestByteListSoap12.svc";
+	}
+
+	endpoint TestIntSoap12 : ITestInt
+	{
+		binding Soap12;
+		location "http://localhost/WsPerfTest/Services/TestIntSoap12.svc";
+	}
+
+	endpoint TestIntListSoap12 : ITestIntList
+	{
+		binding Soap12;
+		location "http://localhost/WsPerfTest/Services/TestIntListSoap12.svc";
+	}
+
+	endpoint TestLongSoap12 : ITestLong
+	{
+		binding Soap12;
+		location "http://localhost/WsPerfTest/Services/TestLongSoap12.svc";
+	}
+
+	endpoint TestLongListSoap12 : ITestLongList
+	{
+		binding Soap12;
+		location "http://localhost/WsPerfTest/Services/TestLongListSoap12.svc";
+	}
+
+	endpoint TestFloatSoap12 : ITestFloat
+	{
+		binding Soap12;
+		location "http://localhost/WsPerfTest/Services/TestFloatSoap12.svc";
+	}
+
+	endpoint TestFloatListSoap12 : ITestFloatList
+	{
+		binding Soap12;
+		location "http://localhost/WsPerfTest/Services/TestFloatListSoap12.svc";
+	}
+
+	endpoint TestDoubleSoap12 : ITestDouble
+	{
+		binding Soap12;
+		location "http://localhost/WsPerfTest/Services/TestDoubleSoap12.svc";
+	}
+
+	endpoint TestDoubleListSoap12 : ITestDoubleList
+	{
+		binding Soap12;
+		location "http://localhost/WsPerfTest/Services/TestDoubleListSoap12.svc";
+	}
+
+	endpoint TestStringSoap12 : ITestString
+	{
+		binding Soap12;
+		location "http://localhost/WsPerfTest/Services/TestStringSoap12.svc";
+	}
+
+	endpoint TestStringListSoap12 : ITestStringList
+	{
+		binding Soap12;
+		location "http://localhost/WsPerfTest/Services/TestStringListSoap12.svc";
+	}
+
+	endpoint TestVoidSoap11Mtom : ITestVoid
+	{
+		binding Soap11Mtom;
+		location "http://localhost/WsPerfTest/Services/TestVoidSoap11Mtom.svc";
+	}
+
+	endpoint TestBoolSoap11Mtom : ITestBool
+	{
+		binding Soap11Mtom;
+		location "http://localhost/WsPerfTest/Services/TestBoolSoap11Mtom.svc";
+	}
+
+	endpoint TestBoolListSoap11Mtom : ITestBoolList
+	{
+		binding Soap11Mtom;
+		location "http://localhost/WsPerfTest/Services/TestBoolListSoap11Mtom.svc";
+	}
+
+	endpoint TestByteSoap11Mtom : ITestByte
+	{
+		binding Soap11Mtom;
+		location "http://localhost/WsPerfTest/Services/TestByteSoap11Mtom.svc";
+	}
+
+	endpoint TestByteListSoap11Mtom : ITestByteList
+	{
+		binding Soap11Mtom;
+		location "http://localhost/WsPerfTest/Services/TestByteListSoap11Mtom.svc";
+	}
+
+	endpoint TestIntSoap11Mtom : ITestInt
+	{
+		binding Soap11Mtom;
+		location "http://localhost/WsPerfTest/Services/TestIntSoap11Mtom.svc";
+	}
+
+	endpoint TestIntListSoap11Mtom : ITestIntList
+	{
+		binding Soap11Mtom;
+		location "http://localhost/WsPerfTest/Services/TestIntListSoap11Mtom.svc";
+	}
+
+	endpoint TestLongSoap11Mtom : ITestLong
+	{
+		binding Soap11Mtom;
+		location "http://localhost/WsPerfTest/Services/TestLongSoap11Mtom.svc";
+	}
+
+	endpoint TestLongListSoap11Mtom : ITestLongList
+	{
+		binding Soap11Mtom;
+		location "http://localhost/WsPerfTest/Services/TestLongListSoap11Mtom.svc";
+	}
+
+	endpoint TestFloatSoap11Mtom : ITestFloat
+	{
+		binding Soap11Mtom;
+		location "http://localhost/WsPerfTest/Services/TestFloatSoap11Mtom.svc";
+	}
+
+	endpoint TestFloatListSoap11Mtom : ITestFloatList
+	{
+		binding Soap11Mtom;
+		location "http://localhost/WsPerfTest/Services/TestFloatListSoap11Mtom.svc";
+	}
+
+	endpoint TestDoubleSoap11Mtom : ITestDouble
+	{
+		binding Soap11Mtom;
+		location "http://localhost/WsPerfTest/Services/TestDoubleSoap11Mtom.svc";
+	}
+
+	endpoint TestDoubleListSoap11Mtom : ITestDoubleList
+	{
+		binding Soap11Mtom;
+		location "http://localhost/WsPerfTest/Services/TestDoubleListSoap11Mtom.svc";
+	}
+
+	endpoint TestStringSoap11Mtom : ITestString
+	{
+		binding Soap11Mtom;
+		location "http://localhost/WsPerfTest/Services/TestStringSoap11Mtom.svc";
+	}
+
+	endpoint TestStringListSoap11Mtom : ITestStringList
+	{
+		binding Soap11Mtom;
+		location "http://localhost/WsPerfTest/Services/TestStringListSoap11Mtom.svc";
+	}
+
+	endpoint TestVoidSoap12Mtom : ITestVoid
+	{
+		binding Soap12Mtom;
+		location "http://localhost/WsPerfTest/Services/TestVoidSoap12Mtom.svc";
+	}
+
+	endpoint TestBoolSoap12Mtom : ITestBool
+	{
+		binding Soap12Mtom;
+		location "http://localhost/WsPerfTest/Services/TestBoolSoap12Mtom.svc";
+	}
+
+	endpoint TestBoolListSoap12Mtom : ITestBoolList
+	{
+		binding Soap12Mtom;
+		location "http://localhost/WsPerfTest/Services/TestBoolListSoap12Mtom.svc";
+	}
+
+	endpoint TestByteSoap12Mtom : ITestByte
+	{
+		binding Soap12Mtom;
+		location "http://localhost/WsPerfTest/Services/TestByteSoap12Mtom.svc";
+	}
+
+	endpoint TestByteListSoap12Mtom : ITestByteList
+	{
+		binding Soap12Mtom;
+		location "http://localhost/WsPerfTest/Services/TestByteListSoap12Mtom.svc";
+	}
+
+	endpoint TestIntSoap12Mtom : ITestInt
+	{
+		binding Soap12Mtom;
+		location "http://localhost/WsPerfTest/Services/TestIntSoap12Mtom.svc";
+	}
+
+	endpoint TestIntListSoap12Mtom : ITestIntList
+	{
+		binding Soap12Mtom;
+		location "http://localhost/WsPerfTest/Services/TestIntListSoap12Mtom.svc";
+	}
+
+	endpoint TestLongSoap12Mtom : ITestLong
+	{
+		binding Soap12Mtom;
+		location "http://localhost/WsPerfTest/Services/TestLongSoap12Mtom.svc";
+	}
+
+	endpoint TestLongListSoap12Mtom : ITestLongList
+	{
+		binding Soap12Mtom;
+		location "http://localhost/WsPerfTest/Services/TestLongListSoap12Mtom.svc";
+	}
+
+	endpoint TestFloatSoap12Mtom : ITestFloat
+	{
+		binding Soap12Mtom;
+		location "http://localhost/WsPerfTest/Services/TestFloatSoap12Mtom.svc";
+	}
+
+	endpoint TestFloatListSoap12Mtom : ITestFloatList
+	{
+		binding Soap12Mtom;
+		location "http://localhost/WsPerfTest/Services/TestFloatListSoap12Mtom.svc";
+	}
+
+	endpoint TestDoubleSoap12Mtom : ITestDouble
+	{
+		binding Soap12Mtom;
+		location "http://localhost/WsPerfTest/Services/TestDoubleSoap12Mtom.svc";
+	}
+
+	endpoint TestDoubleListSoap12Mtom : ITestDoubleList
+	{
+		binding Soap12Mtom;
+		location "http://localhost/WsPerfTest/Services/TestDoubleListSoap12Mtom.svc";
+	}
+
+	endpoint TestStringSoap12Mtom : ITestString
+	{
+		binding Soap12Mtom;
+		location "http://localhost/WsPerfTest/Services/TestStringSoap12Mtom.svc";
+	}
+
+	endpoint TestStringListSoap12Mtom : ITestStringList
+	{
+		binding Soap12Mtom;
+		location "http://localhost/WsPerfTest/Services/TestStringListSoap12Mtom.svc";
+	}
+
+	endpoint TestVoidSoap11Wsa : ITestVoid
+	{
+		binding Soap11Wsa;
+		location "http://localhost/WsPerfTest/Services/TestVoidSoap11Wsa.svc";
+	}
+
+	endpoint TestBoolSoap11Wsa : ITestBool
+	{
+		binding Soap11Wsa;
+		location "http://localhost/WsPerfTest/Services/TestBoolSoap11Wsa.svc";
+	}
+
+	endpoint TestBoolListSoap11Wsa : ITestBoolList
+	{
+		binding Soap11Wsa;
+		location "http://localhost/WsPerfTest/Services/TestBoolListSoap11Wsa.svc";
+	}
+
+	endpoint TestByteSoap11Wsa : ITestByte
+	{
+		binding Soap11Wsa;
+		location "http://localhost/WsPerfTest/Services/TestByteSoap11Wsa.svc";
+	}
+
+	endpoint TestByteListSoap11Wsa : ITestByteList
+	{
+		binding Soap11Wsa;
+		location "http://localhost/WsPerfTest/Services/TestByteListSoap11Wsa.svc";
+	}
+
+	endpoint TestIntSoap11Wsa : ITestInt
+	{
+		binding Soap11Wsa;
+		location "http://localhost/WsPerfTest/Services/TestIntSoap11Wsa.svc";
+	}
+
+	endpoint TestIntListSoap11Wsa : ITestIntList
+	{
+		binding Soap11Wsa;
+		location "http://localhost/WsPerfTest/Services/TestIntListSoap11Wsa.svc";
+	}
+
+	endpoint TestLongSoap11Wsa : ITestLong
+	{
+		binding Soap11Wsa;
+		location "http://localhost/WsPerfTest/Services/TestLongSoap11Wsa.svc";
+	}
+
+	endpoint TestLongListSoap11Wsa : ITestLongList
+	{
+		binding Soap11Wsa;
+		location "http://localhost/WsPerfTest/Services/TestLongListSoap11Wsa.svc";
+	}
+
+	endpoint TestFloatSoap11Wsa : ITestFloat
+	{
+		binding Soap11Wsa;
+		location "http://localhost/WsPerfTest/Services/TestFloatSoap11Wsa.svc";
+	}
+
+	endpoint TestFloatListSoap11Wsa : ITestFloatList
+	{
+		binding Soap11Wsa;
+		location "http://localhost/WsPerfTest/Services/TestFloatListSoap11Wsa.svc";
+	}
+
+	endpoint TestDoubleSoap11Wsa : ITestDouble
+	{
+		binding Soap11Wsa;
+		location "http://localhost/WsPerfTest/Services/TestDoubleSoap11Wsa.svc";
+	}
+
+	endpoint TestDoubleListSoap11Wsa : ITestDoubleList
+	{
+		binding Soap11Wsa;
+		location "http://localhost/WsPerfTest/Services/TestDoubleListSoap11Wsa.svc";
+	}
+
+	endpoint TestStringSoap11Wsa : ITestString
+	{
+		binding Soap11Wsa;
+		location "http://localhost/WsPerfTest/Services/TestStringSoap11Wsa.svc";
+	}
+
+	endpoint TestStringListSoap11Wsa : ITestStringList
+	{
+		binding Soap11Wsa;
+		location "http://localhost/WsPerfTest/Services/TestStringListSoap11Wsa.svc";
+	}
+
+	endpoint TestVoidSoap12Wsa : ITestVoid
+	{
+		binding Soap12Wsa;
+		location "http://localhost/WsPerfTest/Services/TestVoidSoap12Wsa.svc";
+	}
+
+	endpoint TestBoolSoap12Wsa : ITestBool
+	{
+		binding Soap12Wsa;
+		location "http://localhost/WsPerfTest/Services/TestBoolSoap12Wsa.svc";
+	}
+
+	endpoint TestBoolListSoap12Wsa : ITestBoolList
+	{
+		binding Soap12Wsa;
+		location "http://localhost/WsPerfTest/Services/TestBoolListSoap12Wsa.svc";
+	}
+
+	endpoint TestByteSoap12Wsa : ITestByte
+	{
+		binding Soap12Wsa;
+		location "http://localhost/WsPerfTest/Services/TestByteSoap12Wsa.svc";
+	}
+
+	endpoint TestByteListSoap12Wsa : ITestByteList
+	{
+		binding Soap12Wsa;
+		location "http://localhost/WsPerfTest/Services/TestByteListSoap12Wsa.svc";
+	}
+
+	endpoint TestIntSoap12Wsa : ITestInt
+	{
+		binding Soap12Wsa;
+		location "http://localhost/WsPerfTest/Services/TestIntSoap12Wsa.svc";
+	}
+
+	endpoint TestIntListSoap12Wsa : ITestIntList
+	{
+		binding Soap12Wsa;
+		location "http://localhost/WsPerfTest/Services/TestIntListSoap12Wsa.svc";
+	}
+
+	endpoint TestLongSoap12Wsa : ITestLong
+	{
+		binding Soap12Wsa;
+		location "http://localhost/WsPerfTest/Services/TestLongSoap12Wsa.svc";
+	}
+
+	endpoint TestLongListSoap12Wsa : ITestLongList
+	{
+		binding Soap12Wsa;
+		location "http://localhost/WsPerfTest/Services/TestLongListSoap12Wsa.svc";
+	}
+
+	endpoint TestFloatSoap12Wsa : ITestFloat
+	{
+		binding Soap12Wsa;
+		location "http://localhost/WsPerfTest/Services/TestFloatSoap12Wsa.svc";
+	}
+
+	endpoint TestFloatListSoap12Wsa : ITestFloatList
+	{
+		binding Soap12Wsa;
+		location "http://localhost/WsPerfTest/Services/TestFloatListSoap12Wsa.svc";
+	}
+
+	endpoint TestDoubleSoap12Wsa : ITestDouble
+	{
+		binding Soap12Wsa;
+		location "http://localhost/WsPerfTest/Services/TestDoubleSoap12Wsa.svc";
+	}
+
+	endpoint TestDoubleListSoap12Wsa : ITestDoubleList
+	{
+		binding Soap12Wsa;
+		location "http://localhost/WsPerfTest/Services/TestDoubleListSoap12Wsa.svc";
+	}
+
+	endpoint TestStringSoap12Wsa : ITestString
+	{
+		binding Soap12Wsa;
+		location "http://localhost/WsPerfTest/Services/TestStringSoap12Wsa.svc";
+	}
+
+	endpoint TestStringListSoap12Wsa : ITestStringList
+	{
+		binding Soap12Wsa;
+		location "http://localhost/WsPerfTest/Services/TestStringListSoap12Wsa.svc";
+	}
+
+	endpoint TestVoidSoap11MtomWsa : ITestVoid
+	{
+		binding Soap11MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestVoidSoap11MtomWsa.svc";
+	}
+
+	endpoint TestBoolSoap11MtomWsa : ITestBool
+	{
+		binding Soap11MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestBoolSoap11MtomWsa.svc";
+	}
+
+	endpoint TestBoolListSoap11MtomWsa : ITestBoolList
+	{
+		binding Soap11MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestBoolListSoap11MtomWsa.svc";
+	}
+
+	endpoint TestByteSoap11MtomWsa : ITestByte
+	{
+		binding Soap11MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestByteSoap11MtomWsa.svc";
+	}
+
+	endpoint TestByteListSoap11MtomWsa : ITestByteList
+	{
+		binding Soap11MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestByteListSoap11MtomWsa.svc";
+	}
+
+	endpoint TestIntSoap11MtomWsa : ITestInt
+	{
+		binding Soap11MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestIntSoap11MtomWsa.svc";
+	}
+
+	endpoint TestIntListSoap11MtomWsa : ITestIntList
+	{
+		binding Soap11MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestIntListSoap11MtomWsa.svc";
+	}
+
+	endpoint TestLongSoap11MtomWsa : ITestLong
+	{
+		binding Soap11MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestLongSoap11MtomWsa.svc";
+	}
+
+	endpoint TestLongListSoap11MtomWsa : ITestLongList
+	{
+		binding Soap11MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestLongListSoap11MtomWsa.svc";
+	}
+
+	endpoint TestFloatSoap11MtomWsa : ITestFloat
+	{
+		binding Soap11MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestFloatSoap11MtomWsa.svc";
+	}
+
+	endpoint TestFloatListSoap11MtomWsa : ITestFloatList
+	{
+		binding Soap11MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestFloatListSoap11MtomWsa.svc";
+	}
+
+	endpoint TestDoubleSoap11MtomWsa : ITestDouble
+	{
+		binding Soap11MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestDoubleSoap11MtomWsa.svc";
+	}
+
+	endpoint TestDoubleListSoap11MtomWsa : ITestDoubleList
+	{
+		binding Soap11MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestDoubleListSoap11MtomWsa.svc";
+	}
+
+	endpoint TestStringSoap11MtomWsa : ITestString
+	{
+		binding Soap11MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestStringSoap11MtomWsa.svc";
+	}
+
+	endpoint TestStringListSoap11MtomWsa : ITestStringList
+	{
+		binding Soap11MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestStringListSoap11MtomWsa.svc";
+	}
+
+	endpoint TestVoidSoap12MtomWsa : ITestVoid
+	{
+		binding Soap12MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestVoidSoap12MtomWsa.svc";
+	}
+
+	endpoint TestBoolSoap12MtomWsa : ITestBool
+	{
+		binding Soap12MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestBoolSoap12MtomWsa.svc";
+	}
+
+	endpoint TestBoolListSoap12MtomWsa : ITestBoolList
+	{
+		binding Soap12MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestBoolListSoap12MtomWsa.svc";
+	}
+
+	endpoint TestByteSoap12MtomWsa : ITestByte
+	{
+		binding Soap12MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestByteSoap12MtomWsa.svc";
+	}
+
+	endpoint TestByteListSoap12MtomWsa : ITestByteList
+	{
+		binding Soap12MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestByteListSoap12MtomWsa.svc";
+	}
+
+	endpoint TestIntSoap12MtomWsa : ITestInt
+	{
+		binding Soap12MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestIntSoap12MtomWsa.svc";
+	}
+
+	endpoint TestIntListSoap12MtomWsa : ITestIntList
+	{
+		binding Soap12MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestIntListSoap12MtomWsa.svc";
+	}
+
+	endpoint TestLongSoap12MtomWsa : ITestLong
+	{
+		binding Soap12MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestLongSoap12MtomWsa.svc";
+	}
+
+	endpoint TestLongListSoap12MtomWsa : ITestLongList
+	{
+		binding Soap12MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestLongListSoap12MtomWsa.svc";
+	}
+
+	endpoint TestFloatSoap12MtomWsa : ITestFloat
+	{
+		binding Soap12MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestFloatSoap12MtomWsa.svc";
+	}
+
+	endpoint TestFloatListSoap12MtomWsa : ITestFloatList
+	{
+		binding Soap12MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestFloatListSoap12MtomWsa.svc";
+	}
+
+	endpoint TestDoubleSoap12MtomWsa : ITestDouble
+	{
+		binding Soap12MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestDoubleSoap12MtomWsa.svc";
+	}
+
+	endpoint TestDoubleListSoap12MtomWsa : ITestDoubleList
+	{
+		binding Soap12MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestDoubleListSoap12MtomWsa.svc";
+	}
+
+	endpoint TestStringSoap12MtomWsa : ITestString
+	{
+		binding Soap12MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestStringSoap12MtomWsa.svc";
+	}
+
+	endpoint TestStringListSoap12MtomWsa : ITestStringList
+	{
+		binding Soap12MtomWsa;
+		location "http://localhost/WsPerfTest/Services/TestStringListSoap12MtomWsa.svc";
+	}
+
+	endpoint TestVoidSoap11WsaWsRm : ITestVoid
+	{
+		binding Soap11WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestVoidSoap11WsaWsRm.svc";
+	}
+
+	endpoint TestBoolSoap11WsaWsRm : ITestBool
+	{
+		binding Soap11WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestBoolSoap11WsaWsRm.svc";
+	}
+
+	endpoint TestBoolListSoap11WsaWsRm : ITestBoolList
+	{
+		binding Soap11WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestBoolListSoap11WsaWsRm.svc";
+	}
+
+	endpoint TestByteSoap11WsaWsRm : ITestByte
+	{
+		binding Soap11WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestByteSoap11WsaWsRm.svc";
+	}
+
+	endpoint TestByteListSoap11WsaWsRm : ITestByteList
+	{
+		binding Soap11WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestByteListSoap11WsaWsRm.svc";
+	}
+
+	endpoint TestIntSoap11WsaWsRm : ITestInt
+	{
+		binding Soap11WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestIntSoap11WsaWsRm.svc";
+	}
+
+	endpoint TestIntListSoap11WsaWsRm : ITestIntList
+	{
+		binding Soap11WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestIntListSoap11WsaWsRm.svc";
+	}
+
+	endpoint TestLongSoap11WsaWsRm : ITestLong
+	{
+		binding Soap11WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestLongSoap11WsaWsRm.svc";
+	}
+
+	endpoint TestLongListSoap11WsaWsRm : ITestLongList
+	{
+		binding Soap11WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestLongListSoap11WsaWsRm.svc";
+	}
+
+	endpoint TestFloatSoap11WsaWsRm : ITestFloat
+	{
+		binding Soap11WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestFloatSoap11WsaWsRm.svc";
+	}
+
+	endpoint TestFloatListSoap11WsaWsRm : ITestFloatList
+	{
+		binding Soap11WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestFloatListSoap11WsaWsRm.svc";
+	}
+
+	endpoint TestDoubleSoap11WsaWsRm : ITestDouble
+	{
+		binding Soap11WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestDoubleSoap11WsaWsRm.svc";
+	}
+
+	endpoint TestDoubleListSoap11WsaWsRm : ITestDoubleList
+	{
+		binding Soap11WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestDoubleListSoap11WsaWsRm.svc";
+	}
+
+	endpoint TestStringSoap11WsaWsRm : ITestString
+	{
+		binding Soap11WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestStringSoap11WsaWsRm.svc";
+	}
+
+	endpoint TestStringListSoap11WsaWsRm : ITestStringList
+	{
+		binding Soap11WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestStringListSoap11WsaWsRm.svc";
+	}
+
+	endpoint TestVoidSoap12WsaWsRm : ITestVoid
+	{
+		binding Soap12WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestVoidSoap12WsaWsRm.svc";
+	}
+
+	endpoint TestBoolSoap12WsaWsRm : ITestBool
+	{
+		binding Soap12WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestBoolSoap12WsaWsRm.svc";
+	}
+
+	endpoint TestBoolListSoap12WsaWsRm : ITestBoolList
+	{
+		binding Soap12WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestBoolListSoap12WsaWsRm.svc";
+	}
+
+	endpoint TestByteSoap12WsaWsRm : ITestByte
+	{
+		binding Soap12WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestByteSoap12WsaWsRm.svc";
+	}
+
+	endpoint TestByteListSoap12WsaWsRm : ITestByteList
+	{
+		binding Soap12WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestByteListSoap12WsaWsRm.svc";
+	}
+
+	endpoint TestIntSoap12WsaWsRm : ITestInt
+	{
+		binding Soap12WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestIntSoap12WsaWsRm.svc";
+	}
+
+	endpoint TestIntListSoap12WsaWsRm : ITestIntList
+	{
+		binding Soap12WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestIntListSoap12WsaWsRm.svc";
+	}
+
+	endpoint TestLongSoap12WsaWsRm : ITestLong
+	{
+		binding Soap12WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestLongSoap12WsaWsRm.svc";
+	}
+
+	endpoint TestLongListSoap12WsaWsRm : ITestLongList
+	{
+		binding Soap12WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestLongListSoap12WsaWsRm.svc";
+	}
+
+	endpoint TestFloatSoap12WsaWsRm : ITestFloat
+	{
+		binding Soap12WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestFloatSoap12WsaWsRm.svc";
+	}
+
+	endpoint TestFloatListSoap12WsaWsRm : ITestFloatList
+	{
+		binding Soap12WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestFloatListSoap12WsaWsRm.svc";
+	}
+
+	endpoint TestDoubleSoap12WsaWsRm : ITestDouble
+	{
+		binding Soap12WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestDoubleSoap12WsaWsRm.svc";
+	}
+
+	endpoint TestDoubleListSoap12WsaWsRm : ITestDoubleList
+	{
+		binding Soap12WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestDoubleListSoap12WsaWsRm.svc";
+	}
+
+	endpoint TestStringSoap12WsaWsRm : ITestString
+	{
+		binding Soap12WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestStringSoap12WsaWsRm.svc";
+	}
+
+	endpoint TestStringListSoap12WsaWsRm : ITestStringList
+	{
+		binding Soap12WsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestStringListSoap12WsaWsRm.svc";
+	}
+
+	endpoint TestVoidSoap11MtomWsaWsRm : ITestVoid
+	{
+		binding Soap11MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestVoidSoap11MtomWsaWsRm.svc";
+	}
+
+	endpoint TestBoolSoap11MtomWsaWsRm : ITestBool
+	{
+		binding Soap11MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestBoolSoap11MtomWsaWsRm.svc";
+	}
+
+	endpoint TestBoolListSoap11MtomWsaWsRm : ITestBoolList
+	{
+		binding Soap11MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestBoolListSoap11MtomWsaWsRm.svc";
+	}
+
+	endpoint TestByteSoap11MtomWsaWsRm : ITestByte
+	{
+		binding Soap11MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestByteSoap11MtomWsaWsRm.svc";
+	}
+
+	endpoint TestByteListSoap11MtomWsaWsRm : ITestByteList
+	{
+		binding Soap11MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestByteListSoap11MtomWsaWsRm.svc";
+	}
+
+	endpoint TestIntSoap11MtomWsaWsRm : ITestInt
+	{
+		binding Soap11MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestIntSoap11MtomWsaWsRm.svc";
+	}
+
+	endpoint TestIntListSoap11MtomWsaWsRm : ITestIntList
+	{
+		binding Soap11MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestIntListSoap11MtomWsaWsRm.svc";
+	}
+
+	endpoint TestLongSoap11MtomWsaWsRm : ITestLong
+	{
+		binding Soap11MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestLongSoap11MtomWsaWsRm.svc";
+	}
+
+	endpoint TestLongListSoap11MtomWsaWsRm : ITestLongList
+	{
+		binding Soap11MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestLongListSoap11MtomWsaWsRm.svc";
+	}
+
+	endpoint TestFloatSoap11MtomWsaWsRm : ITestFloat
+	{
+		binding Soap11MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestFloatSoap11MtomWsaWsRm.svc";
+	}
+
+	endpoint TestFloatListSoap11MtomWsaWsRm : ITestFloatList
+	{
+		binding Soap11MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestFloatListSoap11MtomWsaWsRm.svc";
+	}
+
+	endpoint TestDoubleSoap11MtomWsaWsRm : ITestDouble
+	{
+		binding Soap11MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestDoubleSoap11MtomWsaWsRm.svc";
+	}
+
+	endpoint TestDoubleListSoap11MtomWsaWsRm : ITestDoubleList
+	{
+		binding Soap11MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestDoubleListSoap11MtomWsaWsRm.svc";
+	}
+
+	endpoint TestStringSoap11MtomWsaWsRm : ITestString
+	{
+		binding Soap11MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestStringSoap11MtomWsaWsRm.svc";
+	}
+
+	endpoint TestStringListSoap11MtomWsaWsRm : ITestStringList
+	{
+		binding Soap11MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestStringListSoap11MtomWsaWsRm.svc";
+	}
+
+	endpoint TestVoidSoap12MtomWsaWsRm : ITestVoid
+	{
+		binding Soap12MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestVoidSoap12MtomWsaWsRm.svc";
+	}
+
+	endpoint TestBoolSoap12MtomWsaWsRm : ITestBool
+	{
+		binding Soap12MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestBoolSoap12MtomWsaWsRm.svc";
+	}
+
+	endpoint TestBoolListSoap12MtomWsaWsRm : ITestBoolList
+	{
+		binding Soap12MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestBoolListSoap12MtomWsaWsRm.svc";
+	}
+
+	endpoint TestByteSoap12MtomWsaWsRm : ITestByte
+	{
+		binding Soap12MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestByteSoap12MtomWsaWsRm.svc";
+	}
+
+	endpoint TestByteListSoap12MtomWsaWsRm : ITestByteList
+	{
+		binding Soap12MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestByteListSoap12MtomWsaWsRm.svc";
+	}
+
+	endpoint TestIntSoap12MtomWsaWsRm : ITestInt
+	{
+		binding Soap12MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestIntSoap12MtomWsaWsRm.svc";
+	}
+
+	endpoint TestIntListSoap12MtomWsaWsRm : ITestIntList
+	{
+		binding Soap12MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestIntListSoap12MtomWsaWsRm.svc";
+	}
+
+	endpoint TestLongSoap12MtomWsaWsRm : ITestLong
+	{
+		binding Soap12MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestLongSoap12MtomWsaWsRm.svc";
+	}
+
+	endpoint TestLongListSoap12MtomWsaWsRm : ITestLongList
+	{
+		binding Soap12MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestLongListSoap12MtomWsaWsRm.svc";
+	}
+
+	endpoint TestFloatSoap12MtomWsaWsRm : ITestFloat
+	{
+		binding Soap12MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestFloatSoap12MtomWsaWsRm.svc";
+	}
+
+	endpoint TestFloatListSoap12MtomWsaWsRm : ITestFloatList
+	{
+		binding Soap12MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestFloatListSoap12MtomWsaWsRm.svc";
+	}
+
+	endpoint TestDoubleSoap12MtomWsaWsRm : ITestDouble
+	{
+		binding Soap12MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestDoubleSoap12MtomWsaWsRm.svc";
+	}
+
+	endpoint TestDoubleListSoap12MtomWsaWsRm : ITestDoubleList
+	{
+		binding Soap12MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestDoubleListSoap12MtomWsaWsRm.svc";
+	}
+
+	endpoint TestStringSoap12MtomWsaWsRm : ITestString
+	{
+		binding Soap12MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestStringSoap12MtomWsaWsRm.svc";
+	}
+
+	endpoint TestStringListSoap12MtomWsaWsRm : ITestStringList
+	{
+		binding Soap12MtomWsaWsRm;
+		location "http://localhost/WsPerfTest/Services/TestStringListSoap12MtomWsaWsRm.svc";
+	}
+
+	endpoint TestVoidSoap11WsaWsS : ITestVoid
+	{
+		binding Soap11WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestVoidSoap11WsaWsS.svc";
+	}
+
+	endpoint TestBoolSoap11WsaWsS : ITestBool
+	{
+		binding Soap11WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestBoolSoap11WsaWsS.svc";
+	}
+
+	endpoint TestBoolListSoap11WsaWsS : ITestBoolList
+	{
+		binding Soap11WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestBoolListSoap11WsaWsS.svc";
+	}
+
+	endpoint TestByteSoap11WsaWsS : ITestByte
+	{
+		binding Soap11WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestByteSoap11WsaWsS.svc";
+	}
+
+	endpoint TestByteListSoap11WsaWsS : ITestByteList
+	{
+		binding Soap11WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestByteListSoap11WsaWsS.svc";
+	}
+
+	endpoint TestIntSoap11WsaWsS : ITestInt
+	{
+		binding Soap11WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestIntSoap11WsaWsS.svc";
+	}
+
+	endpoint TestIntListSoap11WsaWsS : ITestIntList
+	{
+		binding Soap11WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestIntListSoap11WsaWsS.svc";
+	}
+
+	endpoint TestLongSoap11WsaWsS : ITestLong
+	{
+		binding Soap11WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestLongSoap11WsaWsS.svc";
+	}
+
+	endpoint TestLongListSoap11WsaWsS : ITestLongList
+	{
+		binding Soap11WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestLongListSoap11WsaWsS.svc";
+	}
+
+	endpoint TestFloatSoap11WsaWsS : ITestFloat
+	{
+		binding Soap11WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestFloatSoap11WsaWsS.svc";
+	}
+
+	endpoint TestFloatListSoap11WsaWsS : ITestFloatList
+	{
+		binding Soap11WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestFloatListSoap11WsaWsS.svc";
+	}
+
+	endpoint TestDoubleSoap11WsaWsS : ITestDouble
+	{
+		binding Soap11WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestDoubleSoap11WsaWsS.svc";
+	}
+
+	endpoint TestDoubleListSoap11WsaWsS : ITestDoubleList
+	{
+		binding Soap11WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestDoubleListSoap11WsaWsS.svc";
+	}
+
+	endpoint TestStringSoap11WsaWsS : ITestString
+	{
+		binding Soap11WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestStringSoap11WsaWsS.svc";
+	}
+
+	endpoint TestStringListSoap11WsaWsS : ITestStringList
+	{
+		binding Soap11WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestStringListSoap11WsaWsS.svc";
+	}
+
+	endpoint TestVoidSoap12WsaWsS : ITestVoid
+	{
+		binding Soap12WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestVoidSoap12WsaWsS.svc";
+	}
+
+	endpoint TestBoolSoap12WsaWsS : ITestBool
+	{
+		binding Soap12WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestBoolSoap12WsaWsS.svc";
+	}
+
+	endpoint TestBoolListSoap12WsaWsS : ITestBoolList
+	{
+		binding Soap12WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestBoolListSoap12WsaWsS.svc";
+	}
+
+	endpoint TestByteSoap12WsaWsS : ITestByte
+	{
+		binding Soap12WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestByteSoap12WsaWsS.svc";
+	}
+
+	endpoint TestByteListSoap12WsaWsS : ITestByteList
+	{
+		binding Soap12WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestByteListSoap12WsaWsS.svc";
+	}
+
+	endpoint TestIntSoap12WsaWsS : ITestInt
+	{
+		binding Soap12WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestIntSoap12WsaWsS.svc";
+	}
+
+	endpoint TestIntListSoap12WsaWsS : ITestIntList
+	{
+		binding Soap12WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestIntListSoap12WsaWsS.svc";
+	}
+
+	endpoint TestLongSoap12WsaWsS : ITestLong
+	{
+		binding Soap12WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestLongSoap12WsaWsS.svc";
+	}
+
+	endpoint TestLongListSoap12WsaWsS : ITestLongList
+	{
+		binding Soap12WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestLongListSoap12WsaWsS.svc";
+	}
+
+	endpoint TestFloatSoap12WsaWsS : ITestFloat
+	{
+		binding Soap12WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestFloatSoap12WsaWsS.svc";
+	}
+
+	endpoint TestFloatListSoap12WsaWsS : ITestFloatList
+	{
+		binding Soap12WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestFloatListSoap12WsaWsS.svc";
+	}
+
+	endpoint TestDoubleSoap12WsaWsS : ITestDouble
+	{
+		binding Soap12WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestDoubleSoap12WsaWsS.svc";
+	}
+
+	endpoint TestDoubleListSoap12WsaWsS : ITestDoubleList
+	{
+		binding Soap12WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestDoubleListSoap12WsaWsS.svc";
+	}
+
+	endpoint TestStringSoap12WsaWsS : ITestString
+	{
+		binding Soap12WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestStringSoap12WsaWsS.svc";
+	}
+
+	endpoint TestStringListSoap12WsaWsS : ITestStringList
+	{
+		binding Soap12WsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestStringListSoap12WsaWsS.svc";
+	}
+
+	endpoint TestVoidSoap11MtomWsaWsS : ITestVoid
+	{
+		binding Soap11MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestVoidSoap11MtomWsaWsS.svc";
+	}
+
+	endpoint TestBoolSoap11MtomWsaWsS : ITestBool
+	{
+		binding Soap11MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestBoolSoap11MtomWsaWsS.svc";
+	}
+
+	endpoint TestBoolListSoap11MtomWsaWsS : ITestBoolList
+	{
+		binding Soap11MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestBoolListSoap11MtomWsaWsS.svc";
+	}
+
+	endpoint TestByteSoap11MtomWsaWsS : ITestByte
+	{
+		binding Soap11MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestByteSoap11MtomWsaWsS.svc";
+	}
+
+	endpoint TestByteListSoap11MtomWsaWsS : ITestByteList
+	{
+		binding Soap11MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestByteListSoap11MtomWsaWsS.svc";
+	}
+
+	endpoint TestIntSoap11MtomWsaWsS : ITestInt
+	{
+		binding Soap11MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestIntSoap11MtomWsaWsS.svc";
+	}
+
+	endpoint TestIntListSoap11MtomWsaWsS : ITestIntList
+	{
+		binding Soap11MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestIntListSoap11MtomWsaWsS.svc";
+	}
+
+	endpoint TestLongSoap11MtomWsaWsS : ITestLong
+	{
+		binding Soap11MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestLongSoap11MtomWsaWsS.svc";
+	}
+
+	endpoint TestLongListSoap11MtomWsaWsS : ITestLongList
+	{
+		binding Soap11MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestLongListSoap11MtomWsaWsS.svc";
+	}
+
+	endpoint TestFloatSoap11MtomWsaWsS : ITestFloat
+	{
+		binding Soap11MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestFloatSoap11MtomWsaWsS.svc";
+	}
+
+	endpoint TestFloatListSoap11MtomWsaWsS : ITestFloatList
+	{
+		binding Soap11MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestFloatListSoap11MtomWsaWsS.svc";
+	}
+
+	endpoint TestDoubleSoap11MtomWsaWsS : ITestDouble
+	{
+		binding Soap11MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestDoubleSoap11MtomWsaWsS.svc";
+	}
+
+	endpoint TestDoubleListSoap11MtomWsaWsS : ITestDoubleList
+	{
+		binding Soap11MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestDoubleListSoap11MtomWsaWsS.svc";
+	}
+
+	endpoint TestStringSoap11MtomWsaWsS : ITestString
+	{
+		binding Soap11MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestStringSoap11MtomWsaWsS.svc";
+	}
+
+	endpoint TestStringListSoap11MtomWsaWsS : ITestStringList
+	{
+		binding Soap11MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestStringListSoap11MtomWsaWsS.svc";
+	}
+
+	endpoint TestVoidSoap12MtomWsaWsS : ITestVoid
+	{
+		binding Soap12MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestVoidSoap12MtomWsaWsS.svc";
+	}
+
+	endpoint TestBoolSoap12MtomWsaWsS : ITestBool
+	{
+		binding Soap12MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestBoolSoap12MtomWsaWsS.svc";
+	}
+
+	endpoint TestBoolListSoap12MtomWsaWsS : ITestBoolList
+	{
+		binding Soap12MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestBoolListSoap12MtomWsaWsS.svc";
+	}
+
+	endpoint TestByteSoap12MtomWsaWsS : ITestByte
+	{
+		binding Soap12MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestByteSoap12MtomWsaWsS.svc";
+	}
+
+	endpoint TestByteListSoap12MtomWsaWsS : ITestByteList
+	{
+		binding Soap12MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestByteListSoap12MtomWsaWsS.svc";
+	}
+
+	endpoint TestIntSoap12MtomWsaWsS : ITestInt
+	{
+		binding Soap12MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestIntSoap12MtomWsaWsS.svc";
+	}
+
+	endpoint TestIntListSoap12MtomWsaWsS : ITestIntList
+	{
+		binding Soap12MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestIntListSoap12MtomWsaWsS.svc";
+	}
+
+	endpoint TestLongSoap12MtomWsaWsS : ITestLong
+	{
+		binding Soap12MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestLongSoap12MtomWsaWsS.svc";
+	}
+
+	endpoint TestLongListSoap12MtomWsaWsS : ITestLongList
+	{
+		binding Soap12MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestLongListSoap12MtomWsaWsS.svc";
+	}
+
+	endpoint TestFloatSoap12MtomWsaWsS : ITestFloat
+	{
+		binding Soap12MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestFloatSoap12MtomWsaWsS.svc";
+	}
+
+	endpoint TestFloatListSoap12MtomWsaWsS : ITestFloatList
+	{
+		binding Soap12MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestFloatListSoap12MtomWsaWsS.svc";
+	}
+
+	endpoint TestDoubleSoap12MtomWsaWsS : ITestDouble
+	{
+		binding Soap12MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestDoubleSoap12MtomWsaWsS.svc";
+	}
+
+	endpoint TestDoubleListSoap12MtomWsaWsS : ITestDoubleList
+	{
+		binding Soap12MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestDoubleListSoap12MtomWsaWsS.svc";
+	}
+
+	endpoint TestStringSoap12MtomWsaWsS : ITestString
+	{
+		binding Soap12MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestStringSoap12MtomWsaWsS.svc";
+	}
+
+	endpoint TestStringListSoap12MtomWsaWsS : ITestStringList
+	{
+		binding Soap12MtomWsaWsS;
+		location "http://localhost/WsPerfTest/Services/TestStringListSoap12MtomWsaWsS.svc";
+	}
+
+	endpoint TestVoidSoap11WsaWsSc : ITestVoid
+	{
+		binding Soap11WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestVoidSoap11WsaWsSc.svc";
+	}
+
+	endpoint TestBoolSoap11WsaWsSc : ITestBool
+	{
+		binding Soap11WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestBoolSoap11WsaWsSc.svc";
+	}
+
+	endpoint TestBoolListSoap11WsaWsSc : ITestBoolList
+	{
+		binding Soap11WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestBoolListSoap11WsaWsSc.svc";
+	}
+
+	endpoint TestByteSoap11WsaWsSc : ITestByte
+	{
+		binding Soap11WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestByteSoap11WsaWsSc.svc";
+	}
+
+	endpoint TestByteListSoap11WsaWsSc : ITestByteList
+	{
+		binding Soap11WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestByteListSoap11WsaWsSc.svc";
+	}
+
+	endpoint TestIntSoap11WsaWsSc : ITestInt
+	{
+		binding Soap11WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestIntSoap11WsaWsSc.svc";
+	}
+
+	endpoint TestIntListSoap11WsaWsSc : ITestIntList
+	{
+		binding Soap11WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestIntListSoap11WsaWsSc.svc";
+	}
+
+	endpoint TestLongSoap11WsaWsSc : ITestLong
+	{
+		binding Soap11WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestLongSoap11WsaWsSc.svc";
+	}
+
+	endpoint TestLongListSoap11WsaWsSc : ITestLongList
+	{
+		binding Soap11WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestLongListSoap11WsaWsSc.svc";
+	}
+
+	endpoint TestFloatSoap11WsaWsSc : ITestFloat
+	{
+		binding Soap11WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestFloatSoap11WsaWsSc.svc";
+	}
+
+	endpoint TestFloatListSoap11WsaWsSc : ITestFloatList
+	{
+		binding Soap11WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestFloatListSoap11WsaWsSc.svc";
+	}
+
+	endpoint TestDoubleSoap11WsaWsSc : ITestDouble
+	{
+		binding Soap11WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestDoubleSoap11WsaWsSc.svc";
+	}
+
+	endpoint TestDoubleListSoap11WsaWsSc : ITestDoubleList
+	{
+		binding Soap11WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestDoubleListSoap11WsaWsSc.svc";
+	}
+
+	endpoint TestStringSoap11WsaWsSc : ITestString
+	{
+		binding Soap11WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestStringSoap11WsaWsSc.svc";
+	}
+
+	endpoint TestStringListSoap11WsaWsSc : ITestStringList
+	{
+		binding Soap11WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestStringListSoap11WsaWsSc.svc";
+	}
+
+	endpoint TestVoidSoap12WsaWsSc : ITestVoid
+	{
+		binding Soap12WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestVoidSoap12WsaWsSc.svc";
+	}
+
+	endpoint TestBoolSoap12WsaWsSc : ITestBool
+	{
+		binding Soap12WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestBoolSoap12WsaWsSc.svc";
+	}
+
+	endpoint TestBoolListSoap12WsaWsSc : ITestBoolList
+	{
+		binding Soap12WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestBoolListSoap12WsaWsSc.svc";
+	}
+
+	endpoint TestByteSoap12WsaWsSc : ITestByte
+	{
+		binding Soap12WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestByteSoap12WsaWsSc.svc";
+	}
+
+	endpoint TestByteListSoap12WsaWsSc : ITestByteList
+	{
+		binding Soap12WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestByteListSoap12WsaWsSc.svc";
+	}
+
+	endpoint TestIntSoap12WsaWsSc : ITestInt
+	{
+		binding Soap12WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestIntSoap12WsaWsSc.svc";
+	}
+
+	endpoint TestIntListSoap12WsaWsSc : ITestIntList
+	{
+		binding Soap12WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestIntListSoap12WsaWsSc.svc";
+	}
+
+	endpoint TestLongSoap12WsaWsSc : ITestLong
+	{
+		binding Soap12WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestLongSoap12WsaWsSc.svc";
+	}
+
+	endpoint TestLongListSoap12WsaWsSc : ITestLongList
+	{
+		binding Soap12WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestLongListSoap12WsaWsSc.svc";
+	}
+
+	endpoint TestFloatSoap12WsaWsSc : ITestFloat
+	{
+		binding Soap12WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestFloatSoap12WsaWsSc.svc";
+	}
+
+	endpoint TestFloatListSoap12WsaWsSc : ITestFloatList
+	{
+		binding Soap12WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestFloatListSoap12WsaWsSc.svc";
+	}
+
+	endpoint TestDoubleSoap12WsaWsSc : ITestDouble
+	{
+		binding Soap12WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestDoubleSoap12WsaWsSc.svc";
+	}
+
+	endpoint TestDoubleListSoap12WsaWsSc : ITestDoubleList
+	{
+		binding Soap12WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestDoubleListSoap12WsaWsSc.svc";
+	}
+
+	endpoint TestStringSoap12WsaWsSc : ITestString
+	{
+		binding Soap12WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestStringSoap12WsaWsSc.svc";
+	}
+
+	endpoint TestStringListSoap12WsaWsSc : ITestStringList
+	{
+		binding Soap12WsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestStringListSoap12WsaWsSc.svc";
+	}
+
+	endpoint TestVoidSoap11MtomWsaWsSc : ITestVoid
+	{
+		binding Soap11MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestVoidSoap11MtomWsaWsSc.svc";
+	}
+
+	endpoint TestBoolSoap11MtomWsaWsSc : ITestBool
+	{
+		binding Soap11MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestBoolSoap11MtomWsaWsSc.svc";
+	}
+
+	endpoint TestBoolListSoap11MtomWsaWsSc : ITestBoolList
+	{
+		binding Soap11MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestBoolListSoap11MtomWsaWsSc.svc";
+	}
+
+	endpoint TestByteSoap11MtomWsaWsSc : ITestByte
+	{
+		binding Soap11MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestByteSoap11MtomWsaWsSc.svc";
+	}
+
+	endpoint TestByteListSoap11MtomWsaWsSc : ITestByteList
+	{
+		binding Soap11MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestByteListSoap11MtomWsaWsSc.svc";
+	}
+
+	endpoint TestIntSoap11MtomWsaWsSc : ITestInt
+	{
+		binding Soap11MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestIntSoap11MtomWsaWsSc.svc";
+	}
+
+	endpoint TestIntListSoap11MtomWsaWsSc : ITestIntList
+	{
+		binding Soap11MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestIntListSoap11MtomWsaWsSc.svc";
+	}
+
+	endpoint TestLongSoap11MtomWsaWsSc : ITestLong
+	{
+		binding Soap11MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestLongSoap11MtomWsaWsSc.svc";
+	}
+
+	endpoint TestLongListSoap11MtomWsaWsSc : ITestLongList
+	{
+		binding Soap11MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestLongListSoap11MtomWsaWsSc.svc";
+	}
+
+	endpoint TestFloatSoap11MtomWsaWsSc : ITestFloat
+	{
+		binding Soap11MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestFloatSoap11MtomWsaWsSc.svc";
+	}
+
+	endpoint TestFloatListSoap11MtomWsaWsSc : ITestFloatList
+	{
+		binding Soap11MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestFloatListSoap11MtomWsaWsSc.svc";
+	}
+
+	endpoint TestDoubleSoap11MtomWsaWsSc : ITestDouble
+	{
+		binding Soap11MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestDoubleSoap11MtomWsaWsSc.svc";
+	}
+
+	endpoint TestDoubleListSoap11MtomWsaWsSc : ITestDoubleList
+	{
+		binding Soap11MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestDoubleListSoap11MtomWsaWsSc.svc";
+	}
+
+	endpoint TestStringSoap11MtomWsaWsSc : ITestString
+	{
+		binding Soap11MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestStringSoap11MtomWsaWsSc.svc";
+	}
+
+	endpoint TestStringListSoap11MtomWsaWsSc : ITestStringList
+	{
+		binding Soap11MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestStringListSoap11MtomWsaWsSc.svc";
+	}
+
+	endpoint TestVoidSoap12MtomWsaWsSc : ITestVoid
+	{
+		binding Soap12MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestVoidSoap12MtomWsaWsSc.svc";
+	}
+
+	endpoint TestBoolSoap12MtomWsaWsSc : ITestBool
+	{
+		binding Soap12MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestBoolSoap12MtomWsaWsSc.svc";
+	}
+
+	endpoint TestBoolListSoap12MtomWsaWsSc : ITestBoolList
+	{
+		binding Soap12MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestBoolListSoap12MtomWsaWsSc.svc";
+	}
+
+	endpoint TestByteSoap12MtomWsaWsSc : ITestByte
+	{
+		binding Soap12MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestByteSoap12MtomWsaWsSc.svc";
+	}
+
+	endpoint TestByteListSoap12MtomWsaWsSc : ITestByteList
+	{
+		binding Soap12MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestByteListSoap12MtomWsaWsSc.svc";
+	}
+
+	endpoint TestIntSoap12MtomWsaWsSc : ITestInt
+	{
+		binding Soap12MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestIntSoap12MtomWsaWsSc.svc";
+	}
+
+	endpoint TestIntListSoap12MtomWsaWsSc : ITestIntList
+	{
+		binding Soap12MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestIntListSoap12MtomWsaWsSc.svc";
+	}
+
+	endpoint TestLongSoap12MtomWsaWsSc : ITestLong
+	{
+		binding Soap12MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestLongSoap12MtomWsaWsSc.svc";
+	}
+
+	endpoint TestLongListSoap12MtomWsaWsSc : ITestLongList
+	{
+		binding Soap12MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestLongListSoap12MtomWsaWsSc.svc";
+	}
+
+	endpoint TestFloatSoap12MtomWsaWsSc : ITestFloat
+	{
+		binding Soap12MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestFloatSoap12MtomWsaWsSc.svc";
+	}
+
+	endpoint TestFloatListSoap12MtomWsaWsSc : ITestFloatList
+	{
+		binding Soap12MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestFloatListSoap12MtomWsaWsSc.svc";
+	}
+
+	endpoint TestDoubleSoap12MtomWsaWsSc : ITestDouble
+	{
+		binding Soap12MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestDoubleSoap12MtomWsaWsSc.svc";
+	}
+
+	endpoint TestDoubleListSoap12MtomWsaWsSc : ITestDoubleList
+	{
+		binding Soap12MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestDoubleListSoap12MtomWsaWsSc.svc";
+	}
+
+	endpoint TestStringSoap12MtomWsaWsSc : ITestString
+	{
+		binding Soap12MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestStringSoap12MtomWsaWsSc.svc";
+	}
+
+	endpoint TestStringListSoap12MtomWsaWsSc : ITestStringList
+	{
+		binding Soap12MtomWsaWsSc;
+		location "http://localhost/WsPerfTest/Services/TestStringListSoap12MtomWsaWsSc.svc";
+	}
+
+}

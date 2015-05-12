@@ -1,0 +1,795 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+include "GeneratorLib.mcg";
+
+configuration
+	string NamespaceName = "SoaMetaModel";
+	string ClassName = "VS2008Generator";
+	Type InstancesType = typeof(IEnumerable<SoaObject>);
+    properties Properties
+        string ProjectName = "VisualStudioProject";
+		string WebSiteGuid = "E24C65DC-7377-472B-9ABA-BC803B73C61A";
+		string CSGuid = "FAE04EC0-301F-11D3-BF4B-00C04F79EFBC";
+		string WebProjectGuid = Guid.NewGuid().ToString().ToUpper();
+		string CSProjectGuid = Guid.NewGuid().ToString().ToUpper();
+		string AssemblyInfoGuid = Guid.NewGuid().ToString().ToUpper();
+    end properties
+end configuration
+
+/*
+* Main function
+* Creates all folders and files
+*/
+function void Main()
+
+	Context.CreateFolder("VisualStudio2008");
+	Context.CreateFolder("VisualStudio2008/Projects");
+	Context.CreateFolder("VisualStudio2008/Projects/" + Properties.ProjectName);
+	Context.SetOutput("VisualStudio2008/Projects/" + Properties.ProjectName + "/" + Properties.ProjectName + ".sln");
+	Context.Output(GenerateSln());
+	Context.CreateFolder("VisualStudio2008/Projects/" + Properties.ProjectName + "/" + Properties.ProjectName + "Lib");
+	Context.SetOutput("VisualStudio2008/Projects/" + Properties.ProjectName + "/" + Properties.ProjectName + "Lib/app.config");
+	Context.Output(GenerateAppConfig());
+	Context.SetOutput("VisualStudio2008/Projects/" + Properties.ProjectName + "/" + Properties.ProjectName + "Lib/" + Properties.ProjectName + "Lib.cs");
+	Context.Output(GenerateLibCs());
+	Context.SetOutput("VisualStudio2008/Projects/" + Properties.ProjectName + "/" + Properties.ProjectName + "Lib/" + Properties.ProjectName + "Lib.csproj");
+	Context.Output(GenerateCsproj());
+	Context.CreateFolder("VisualStudio2008/Projects/" + Properties.ProjectName + "/" + Properties.ProjectName + "Lib/Properties");
+	Context.SetOutput("VisualStudio2008/Projects/" + Properties.ProjectName + "/" + Properties.ProjectName + "Lib/Properties/AssemblyInfo.cs");
+	Context.Output(GenerateAssemblyInfo());
+	Context.CreateFolder("VisualStudio2008/WebSites");
+	Context.CreateFolder("VisualStudio2008/WebSites/" + Properties.ProjectName);
+	Context.CreateFolder("VisualStudio2008/WebSites/" + Properties.ProjectName + "/App_Code");
+	loop(Instances->intf:typeof(Interface))
+		Context.SetOutput("VisualStudio2008/WebSites/" + Properties.ProjectName + "/App_Code/" + intf.Name + ".cs");
+		Context.Output(GenerateAppCode(intf));
+	end loop
+	Context.CreateFolder("VisualStudio2008/WebSites/" + Properties.ProjectName + "/App_Data");
+	Context.CreateFolder("VisualStudio2008/WebSites/" + Properties.ProjectName + "/Bin");
+	Context.CreateFolder("VisualStudio2008/WebSites/" + Properties.ProjectName + "/Services");
+	loop(Instances->intf:typeof(Interface))
+		Context.SetOutput("VisualStudio2008/WebSites/" + Properties.ProjectName + "/Services/" + intf.Name + ".svc");
+		Context.Output(GenerateService(intf));
+	end loop
+	Context.SetOutput("VisualStudio2008/WebSites/" + Properties.ProjectName + "/Default.aspx");
+	Context.Output(GenerateDefaultAspx());
+	Context.SetOutput("VisualStudio2008/WebSites/" + Properties.ProjectName + "/Default.aspx.cs");
+	Context.Output(GenerateDefaultAspxCs());
+	Context.SetOutput("VisualStudio2008/WebSites/" + Properties.ProjectName + "/Web.config");
+	Context.Output(GenerateWebConfig());
+
+end function
+
+/*
+* Print type, Namespace name before type if it is not built in
+*/
+template PrintType(Type type)
+[if(type is BuiltInType)]
+[type.Name]
+[else]
+	[if(type is StructType || type is EnumType || type is ExceptionType)]
+[type.Namespace.Name.ToLower()].[type.Name]
+	[end if]
+	[if(type is NullableType)]
+[FirstLetterUp(((NullableType)type).InnerType.Name)]
+	[end if]
+	[if(type is ArrayType)]
+[PrintType(((ArrayType)type).ItemType)]["[]"]
+	[end if]
+[end if]
+end template
+
+/*
+* Generate project solution
+*/
+template GenerateSln()
+Microsoft Visual Studio Solution File, Format Version 10.00
+# Visual Studio 2008
+Project("{[Properties.WebSiteGuid]}") = "[Properties.ProjectName]", "..\..\WebSites\[Properties.ProjectName]\", "{[Properties.WebProjectGuid]}"
+	ProjectSection(WebsiteProperties) = preProject
+		TargetFramework = "3.5"
+		ProjectReferences = "{[Properties.CSProjectGuid]}|[Properties.ProjectName]Lib.dll;"
+		Debug.AspNetCompiler.VirtualPath = "/[Properties.ProjectName]"
+		Debug.AspNetCompiler.PhysicalPath = "..\..\WebSites\[Properties.ProjectName]\"
+		Debug.AspNetCompiler.TargetPath = "PrecompiledWeb\[Properties.ProjectName]\"
+		Debug.AspNetCompiler.Updateable = "true"
+		Debug.AspNetCompiler.ForceOverwrite = "true"
+		Debug.AspNetCompiler.FixedNames = "false"
+		Debug.AspNetCompiler.Debug = "True"
+		Release.AspNetCompiler.VirtualPath = "/[Properties.ProjectName]"
+		Release.AspNetCompiler.PhysicalPath = "..\..\WebSites\[Properties.ProjectName]\"
+		Release.AspNetCompiler.TargetPath = "PrecompiledWeb\[Properties.ProjectName]\"
+		Release.AspNetCompiler.Updateable = "true"
+		Release.AspNetCompiler.ForceOverwrite = "true"
+		Release.AspNetCompiler.FixedNames = "false"
+		Release.AspNetCompiler.Debug = "False"
+		VWDPort = "4347"
+		DefaultWebSiteLanguage = "Visual C#"
+	EndProjectSection
+EndProject
+Project("{[Properties.CSGuid]}") = "[Properties.ProjectName]Lib", "[Properties.ProjectName]Lib\[Properties.ProjectName]Lib.csproj", "{[Properties.CSProjectGuid]}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|.NET = Debug|.NET
+		Debug|Any CPU = Debug|Any CPU
+		Debug|Mixed Platforms = Debug|Mixed Platforms
+		Release|.NET = Release|.NET
+		Release|Any CPU = Release|Any CPU
+		Release|Mixed Platforms = Release|Mixed Platforms
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{32AB86A0-075F-0D2F-6153-D5EED078701D}.Debug|.NET.ActiveCfg = Debug|.NET
+		{32AB86A0-075F-0D2F-6153-D5EED078701D}.Debug|.NET.Build.0 = Debug|.NET
+		{32AB86A0-075F-0D2F-6153-D5EED078701D}.Debug|Any CPU.ActiveCfg = Debug|.NET
+		{32AB86A0-075F-0D2F-6153-D5EED078701D}.Debug|Mixed Platforms.ActiveCfg = Debug|.NET
+		{32AB86A0-075F-0D2F-6153-D5EED078701D}.Debug|Mixed Platforms.Build.0 = Debug|.NET
+		{32AB86A0-075F-0D2F-6153-D5EED078701D}.Release|.NET.ActiveCfg = Debug|.NET
+		{32AB86A0-075F-0D2F-6153-D5EED078701D}.Release|.NET.Build.0 = Debug|.NET
+		{32AB86A0-075F-0D2F-6153-D5EED078701D}.Release|Any CPU.ActiveCfg = Debug|.NET
+		{32AB86A0-075F-0D2F-6153-D5EED078701D}.Release|Mixed Platforms.ActiveCfg = Debug|.NET
+		{32AB86A0-075F-0D2F-6153-D5EED078701D}.Release|Mixed Platforms.Build.0 = Debug|.NET
+		{AFDE8247-8FFF-7284-CC04-6960A0825808}.Debug|.NET.ActiveCfg = Debug|Any CPU
+		{AFDE8247-8FFF-7284-CC04-6960A0825808}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{AFDE8247-8FFF-7284-CC04-6960A0825808}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{AFDE8247-8FFF-7284-CC04-6960A0825808}.Debug|Mixed Platforms.ActiveCfg = Debug|Any CPU
+		{AFDE8247-8FFF-7284-CC04-6960A0825808}.Debug|Mixed Platforms.Build.0 = Debug|Any CPU
+		{AFDE8247-8FFF-7284-CC04-6960A0825808}.Release|.NET.ActiveCfg = Release|Any CPU
+		{AFDE8247-8FFF-7284-CC04-6960A0825808}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{AFDE8247-8FFF-7284-CC04-6960A0825808}.Release|Any CPU.Build.0 = Release|Any CPU
+		{AFDE8247-8FFF-7284-CC04-6960A0825808}.Release|Mixed Platforms.ActiveCfg = Release|Any CPU
+		{AFDE8247-8FFF-7284-CC04-6960A0825808}.Release|Mixed Platforms.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
+end template
+
+/*
+* Generate app.config file for lib project
+*/
+template GenerateAppConfig()
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <system.serviceModel>
+    [GenerateBindings()]
+    [GenerateClient()]
+  </system.serviceModel>
+</configuration>
+end template
+
+/*
+* Generate <bindings> section
+*/
+template GenerateBindings()
+<bindings>
+  <customBinding>
+[loop(Instances->binding:typeof(Binding))]
+    <binding name="[binding.Name]">
+
+[loop(binding.Protocols->security:typeof(SecurityProtocolBindingElement))]
+      <security defaultAlgorithmSuite="[security.AlgorithmSuite.ToString()]" securityHeaderLayout="[security.HeaderLayout.ToString()]" messageProtectionOrder="[security.ProtectionOrder.ToString()]" \
+[if(security is MutualCertificateSecurityProtocolBindingElement)]
+authenticationMode="MutualCertificateDuplex" messageSecurityVersion="WSSecurity10WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10">
+[end if]
+[if(security is StsSecurityProtocolBindingElement)]
+authenticationMode="IssuedToken" messageSecurityVersion="WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10" requireSignatureConfirmation="[((StsSecurityProtocolBindingElement)security).SignatureConfirmation.ToString().ToLower()]" requireDerivedKeys="[((StsSecurityProtocolBindingElement)security).DerivedKeys.ToString().ToLower()]">
+        [GenerateIssuedTokenParameters(((StsSecurityProtocolBindingElement)security).TokenVersion, ((StsSecurityProtocolBindingElement)security).TokenType, ((StsSecurityProtocolBindingElement)security).TokenIssuer, null)]
+[end if]
+[if(security is SamlSecurityProtocolBindingElement)]
+authenticationMode="IssuedToken" messageSecurityVersion="WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10" requireSignatureConfirmation="[((SamlSecurityProtocolBindingElement)security).SignatureConfirmation.ToString().ToLower()]">
+        [GenerateIssuedTokenParameters(((SamlSecurityProtocolBindingElement)security).TokenVersion, ((SamlSecurityProtocolBindingElement)security).TokenType, ((SamlSecurityProtocolBindingElement)security).TokenIssuer, ((SamlSecurityProtocolBindingElement)security).Claims)]
+[end if]
+[if(security is SecureConversationSecurityProtocolBindingElement)]
+authenticationMode="IssuedToken" messageSecurityVersion="WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10" requireDerivedKeys="[((SecureConversationSecurityProtocolBindingElement)security).DerivedKeys.ToString().ToLower()]">
+[if(((SecureConversationSecurityProtocolBindingElement)security).Bootstrap != null)]
+        <secureConversationBootstrap defaultAlgorithmSuite="[security.AlgorithmSuite.ToString()]" securityHeaderLayout="[security.HeaderLayout.ToString()]" messageProtectionOrder="[security.ProtectionOrder.ToString()]" \
+[if(((SecureConversationSecurityProtocolBindingElement)security).Bootstrap is MutualCertificateBootstrapProtocolBindingElement)]
+authenticationMode="MutualCertificateDuplex" messageSecurityVersion="WSSecurity10WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10" />
+[end if]
+[if(((SecureConversationSecurityProtocolBindingElement)security).Bootstrap is StsBootstrapProtocolBindingElement)]
+authenticationMode="IssuedToken" messageSecurityVersion="WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10" requireSignatureConfirmation="[((StsBootstrapProtocolBindingElement)((SecureConversationSecurityProtocolBindingElement)security).Bootstrap).SignatureConfirmation.ToString().ToLower()]" requireDerivedKeys="[((StsBootstrapProtocolBindingElement)((SecureConversationSecurityProtocolBindingElement)security).Bootstrap).DerivedKeys.ToString().ToLower()]">
+          [GenerateIssuedTokenParameters(((StsBootstrapProtocolBindingElement)((SecureConversationSecurityProtocolBindingElement)security).Bootstrap).TokenVersion, ((StsBootstrapProtocolBindingElement)((SecureConversationSecurityProtocolBindingElement)security).Bootstrap).TokenType, ((StsBootstrapProtocolBindingElement)((SecureConversationSecurityProtocolBindingElement)security).Bootstrap).TokenIssuer, null)]
+        </secureConversationBootstrap>
+[end if]
+[if(((SecureConversationSecurityProtocolBindingElement)security).Bootstrap is SamlBootstrapProtocolBindingElement)]
+authenticationMode="SecureConversation" messageSecurityVersion="WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10" requireSignatureConfirmation="[((SamlBootstrapProtocolBindingElement)((SecureConversationSecurityProtocolBindingElement)security).Bootstrap).SignatureConfirmation.ToString().ToLower()]">
+          [GenerateIssuedTokenParameters(((SamlBootstrapProtocolBindingElement)((SecureConversationSecurityProtocolBindingElement)security).Bootstrap).TokenVersion, ((SamlBootstrapProtocolBindingElement)((SecureConversationSecurityProtocolBindingElement)security).Bootstrap).TokenType, ((SamlBootstrapProtocolBindingElement)((SecureConversationSecurityProtocolBindingElement)security).Bootstrap).TokenIssuer, ((SamlBootstrapProtocolBindingElement)((SecureConversationSecurityProtocolBindingElement)security).Bootstrap).Claims)]
+        </secureConversationBootstrap>
+[end if]
+[else]
+        <secureConversationBootstrap />
+[end if]
+[else]
+        <secureConversationBootstrap />
+[end if]
+      </security>
+[end loop]
+
+[loop(binding.Protocols->transaction:typeof(AtomicTransactionProtocolBindingElement))]
+[if(transaction.Version == AtomicTransactionVersion.AtomicTransaction10)]
+      <transactionFlow transactionProtocol="WSAtomicTransactionOctober2004" />
+[end if]
+[end loop]
+
+[loop(binding.Protocols->reliable:typeof(ReliableMessagingProtocolBindingElement))]
+[if(reliable.Version == ReliableMessagingVersion.ReliableMessaging11)]
+[if(reliable.InOrder == true)]
+      <reliableSession reliableMessagingVersion="WSReliableMessaging11" ordered="true" />
+[else]
+      <reliableSession reliableMessagingVersion="WSReliableMessaging11" ordered="false" />
+[end if]
+[end if]
+[end loop]
+
+[if(binding.Encoding is SoapEncodingBindingElement)]
+[if(((SoapEncodingBindingElement)binding.Encoding).MtomEnabled == true)]
+      <mtomMessageEncoding messageVersion="\
+[else]
+      <textMessageEncoding messageVersion="\
+[end if]
+[if(((SoapEncodingBindingElement)binding.Encoding).Version == SoapVersion.Soap11)]
+Soap11\
+[else]
+Soap12\
+[end if]
+[loop(binding.Protocols->addressing:typeof(AddressingProtocolBindingElement))]
+[if(addressing.Version == AddressingVersion.Addressing10)]
+WSAddressing10\
+[else]
+WSAddressingAugust2004\
+[end if]
+[end loop]
+" />
+[end if]
+
+[if(binding.Transport is HttpTransportBindingElement)]
+      <httpTransport />
+[end if]
+[if(binding.Transport is HttpsTransportBindingElement)]
+[if(((HttpsTransportBindingElement)binding.Transport).ClientAuthentication == HttpsClientAuthentication.Certificate)]
+      <httpsTransport requireClientCertificate="true" />
+[else]
+      <httpsTransport requireClientCertificate="false" />
+[end if]
+[end if]
+    </binding>
+[end loop]
+  </customBinding>
+</bindings>
+end template
+
+/*
+* Generate <issuedTokenParameters> section
+*/
+template GenerateIssuedTokenParameters(IssuedTokenVersion tokenVersion, IssuedTokenType tokenType, IssuedTokenIssuer tokenIssuer, IEnumerable<ClaimsetType> tokenClaims)
+<issuedTokenParameters \
+[if(tokenVersion == IssuedTokenVersion.Token10)]
+tokenType="urn:oasis:names:tc:SAML:1.0:assertion" \
+[end if]
+[if(tokenVersion == IssuedTokenVersion.Token11)]
+tokenType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1" \
+[end if]
+[if(tokenVersion == IssuedTokenVersion.Token20)]
+tokenType="urn:oasis:names:tc:SAML:2.0:assertion" \
+[end if]
+[if(tokenType == IssuedTokenType.Symmetric128)]
+keyType="SymmetricKey" keySize="128">
+[end if]
+[if(tokenType == IssuedTokenType.Symmetric192)]
+keyType="SymmetricKey" keySize="192">
+[end if]
+[if(tokenType == IssuedTokenType.Symmetric256)]
+keyType="SymmetricKey" keySize="256">
+[end if]
+[if(tokenType == IssuedTokenType.Asymmetric1024)]
+keyType="AsymmetricKey" keySize="1024">
+[end if]
+[if(tokenType == IssuedTokenType.Asymmetric2048)]
+keyType="AsymmetricKey" keySize="2048">
+[end if]
+[if(tokenType == IssuedTokenType.Asymmetric3072)]
+keyType="AsymmetricKey" keySize="3072">
+[end if]
+[if(tokenClaims != null)]
+  <claimTypeRequirements>
+  [loop(tokenClaims->claim:typeof(ClaimsetType))]
+    <add claimType="http://schemas.xmlsoap.org/ws/2005/05/identity/claims/[claim.Name]" isOptional="false" />
+  [end loop]
+  </claimTypeRequirements>
+[end if]
+[if(tokenIssuer != null)]
+  <issuer address="[tokenIssuer.Address]" />
+  [if(tokenIssuer.MetadataAddress != null && tokenIssuer.MetadataAddress.Length > 0)]
+  <issuerMetadata address="[tokenIssuer.MetadataAddress]" />
+  [end if]
+[end if]
+</issuedTokenParameters>
+end template
+
+/*
+* Generate <behaviors> section
+*/
+template GenerateBehaviors()
+<behaviors>
+  <serviceBehaviors>
+[loop(Instances->endpoint:typeof(Endpoint))]
+    <behavior name="[endpoint.Name]Behavior">
+      <serviceMetadata httpGetEnabled="true"/>
+      <serviceDebug includeExceptionDetailInFaults="false" />
+	[loop(endpoint->binding:Binding)]
+		[loop(binding->Protocols->security:typeof(SecurityProtocolBindingElement))]
+      <serviceCredentials>
+        <serviceCertificate storeLocation="LocalMachine" storeName="My" x509FindType="FindBySubjectName" findValue="WspService"/>
+        <clientCertificate>
+          <authentication certificateValidationMode="PeerOrChainTrust" trustedStoreLocation="LocalMachine"/>
+        </clientCertificate>
+      </serviceCredentials>
+		[end loop]
+	[end loop]
+    </behavior>
+[end loop]
+  </serviceBehaviors>
+</behaviors>
+end template
+
+/*
+* Generate <services> section
+*/
+template GenerateServices()
+<services>
+[loop(Instances->endpoint:typeof(Endpoint))]
+  <service behaviorConfiguration="[endpoint.Name]Behavior" name="[endpoint.Interface.Namespace.Name].[endpoint.Interface.Name]">
+    <endpoint address="[endpoint.Address.Uri]" binding="customBinding" bindingConfiguration="[endpoint.Binding.Name]" contract="[endpoint.Interface.Namespace.Name].I[endpoint.Interface.Name]">
+      <identity>
+        <dns value="localhost" />
+      </identity>
+    </endpoint>
+    <endpoint address="[endpoint.Address.Uri]/mex" binding="mexHttpBinding" contract="IMetadataExchange" />
+  </service>
+[end loop]
+</services>
+end template
+
+/*
+* Generate <client> section
+*/
+template GenerateClient()
+<client>
+[loop(Instances->endpoint:typeof(Endpoint))]
+  <endpoint address="[endpoint.Address.Uri]" binding="customBinding" bindingConfiguration="[endpoint.Binding.Name]" contract="[endpoint.Interface.Namespace.Name].I[endpoint.Interface.Name]" name="[endpoint.Name]" />
+[end loop]
+</client>
+end template
+
+/*
+* Generate lib .cs file
+* Generates interfaces, client partial classes and chanels
+*/
+template GenerateLibCs()
+//------------------------------------------------------------------------------
+// <auto-generated>
+//     This code was generated by a tool.
+//     Runtime Version:2.0.50727.4952
+//
+//     Changes to this file may cause incorrect behavior and will be lost if
+//     the code is regenerated.
+// </auto-generated>
+//------------------------------------------------------------------------------
+[loop(Instances->ns:typeof(Namespace))]
+^
+namespace [ns.Name]
+{
+[loop(ns.Declarations->intf:typeof(Interface))]
+^
+    ["[System.CodeDom.Compiler.GeneratedCodeAttribute(\"System.ServiceModel\", \"3.0.0.0\")]"]
+    ["["]System.ServiceModel.ServiceContractAttribute(Namespace="[intf.Namespace.Uri]", ConfigurationName="[intf.Namespace.Name].I[intf.Name]")["]"]
+    public interface I[intf.Name]
+    {
+[loop(intf.Operations->op:typeof(Operation))]
+^
+        ["["]System.ServiceModel.OperationContractAttribute(Action="[GetUriWithSlash(intf.Namespace) + intf.Name + "/" + op.Name]", ReplyAction="[GetUriWithSlash(intf.Namespace) + intf.Name + "/" + op.Name]Response")["]"]
+        [PrintType(op.ReturnType)] [FirstLetterUp(op.Name)](\
+[loop(op.Parameters->pa:typeof(OperationParameter); string comma=""; comma=", ")]
+[comma][PrintType(pa.Type)] [pa.Name]\
+[end loop]
+);
+[end loop]
+    }
+^
+    ["["]System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")["]"]
+    public interface I[intf.Name]Channel : [ns.Name].I[intf.Name], System.ServiceModel.IClientChannel
+    {
+    }
+^
+    ["["]System.Diagnostics.DebuggerStepThroughAttribute()["]"]
+    ["["]System.CodeDom.Compiler.GeneratedCodeAttribute("System.ServiceModel", "3.0.0.0")["]"]
+    public partial class [intf.Name]Client : System.ServiceModel.ClientBase<[intf.Namespace.Name].I[intf.Name]>, [intf.Namespace.Name].I[intf.Name]
+    {
+^
+        public [intf.Name]Client()
+        {
+        }
+^
+        public [intf.Name]Client(string endpointConfigurationName) : 
+                base(endpointConfigurationName)
+        {
+        }
+^
+        public [intf.Name]Client(string endpointConfigurationName, string remoteAddress) : 
+                base(endpointConfigurationName, remoteAddress)
+        {
+        }
+^
+        public [intf.Name]Client(string endpointConfigurationName, System.ServiceModel.EndpointAddress remoteAddress) : 
+                base(endpointConfigurationName, remoteAddress)
+        {
+        }
+^
+        public [intf.Name]Client(System.ServiceModel.Channels.Binding binding, System.ServiceModel.EndpointAddress remoteAddress) : 
+                base(binding, remoteAddress)
+        {
+        }
+[loop(intf.Operations->op:typeof(Operation))]
+^
+        public [PrintType(op.ReturnType)] [FirstLetterUp(op.Name)](\
+[loop(op.Parameters->pa:typeof(OperationParameter); string comma=""; comma=", ")]
+[comma][PrintType(pa.Type)] [pa.Name]\
+[end loop]
+)
+        {
+            base.Channel.[op.Name](\
+[loop(op.Parameters->pa:typeof(OperationParameter); string comma2=""; comma2=", ")]
+[comma2][pa.Name]\
+[end loop]
+);
+        }
+[end loop]
+    }
+[end loop]
+}
+[end loop]
+end template
+
+/*
+* Generate csproj file
+*/
+template GenerateCsproj()
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="3.5" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>9.0.21022</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{[Properties.CSProjectGuid]}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>[Properties.ProjectName]Lib</RootNamespace>
+    <AssemblyName>[Properties.ProjectName]Lib</AssemblyName>
+    <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Runtime.Serialization">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.ServiceModel">
+      <RequiredTargetFramework>3.0</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Xml.Linq">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data.DataSetExtensions">
+      <RequiredTargetFramework>3.5</RequiredTargetFramework>
+    </Reference>
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="[Properties.ProjectName]Lib.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
+end template
+
+/*
+* Generate AsssemblyInfo.cs file
+*/
+template GenerateAssemblyInfo()
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+^
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+["[assembly: AssemblyTitle(\"" + Properties.ProjectName + "Lib\")]"]
+["[assembly: AssemblyDescription(\"\")]"]
+["[assembly: AssemblyConfiguration(\"\")]"]
+["[assembly: AssemblyCompany(\"BME IK\")]"]
+["[assembly: AssemblyProduct(\"" + Properties.ProjectName + "Lib\")]"]
+["[assembly: AssemblyCopyright(\"Copyright © BME IK 2010\")]"]
+["[assembly: AssemblyTrademark(\"\")]"]
+["[assembly: AssemblyCulture(\"\")]"]
+
+// Setting ComVisible to false makes the types in this assembly not visible
+// to COM components.  If you need to access a type in this assembly from
+// COM, set the ComVisible attribute to true on that type.
+["[assembly: ComVisible(false)]"]
+^
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+["[assembly: Guid(\"" + Properties.AssemblyInfoGuid + "\")]"]
+^
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version 
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers 
+// by using the '*' as shown below:
+// ["[assembly: AssemblyVersion(\"1.0.*\")]"]
+["[assembly: AssemblyVersion(\"1.0.0.0\")]"]
+["[assembly: AssemblyFileVersion(\"1.0.0.0\")]"]
+end template
+
+/*
+* Generate Default.aspx file
+*/
+template GenerateDefaultAspx()
+<%@ Page Language="C#" AutoEventWireup="true"  CodeFile="Default.aspx.cs" Inherits="_Default" %>
+^
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+^
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head runat="server">
+    <title>Untitled Page</title>
+</head>
+<body>
+    <form id="form1" runat="server">
+    <div>
+^
+    </div>
+    </form>
+</body>
+</html>
+end template
+
+/*
+* Generate Default.aspx.cs file
+*/
+template GenerateDefaultAspxCs()
+using System;
+using System.Configuration;
+using System.Data;
+using System.Linq;
+using System.Web;
+using System.Web.Security;
+using System.Web.UI;
+using System.Web.UI.HtmlControls;
+using System.Web.UI.WebControls;
+using System.Web.UI.WebControls.WebParts;
+using System.Xml.Linq;
+^
+public partial class _Default : System.Web.UI.Page 
+{
+    protected void Page_Load(object sender, EventArgs e)
+    {
+^
+    }
+}
+end template
+
+/*
+* Generate web.config file
+*/
+template GenerateWebConfig()
+<?xml version="1.0"?>
+<!-- 
+    Note: As an alternative to hand editing this file you can use the 
+    web admin tool to configure settings for your application. Use
+    the Website->Asp.Net Configuration option in Visual Studio.
+    A full list of settings and comments can be found in 
+    machine.config.comments usually located in 
+    \Windows\Microsoft.Net\Framework\v2.x\Config 
+-->
+<configuration>
+
+
+  <configSections>
+    <sectionGroup name="system.web.extensions" type="System.Web.Configuration.SystemWebExtensionsSectionGroup, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35">
+      <sectionGroup name="scripting" type="System.Web.Configuration.ScriptingSectionGroup, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35">
+        <section name="scriptResourceHandler" type="System.Web.Configuration.ScriptingScriptResourceHandlerSection, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35" requirePermission="false" allowDefinition="MachineToApplication"/>
+        <sectionGroup name="webServices" type="System.Web.Configuration.ScriptingWebServicesSectionGroup, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35">
+          <section name="jsonSerialization" type="System.Web.Configuration.ScriptingJsonSerializationSection, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35" requirePermission="false" allowDefinition="Everywhere" />
+          <section name="profileService" type="System.Web.Configuration.ScriptingProfileServiceSection, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35" requirePermission="false" allowDefinition="MachineToApplication" />
+          <section name="authenticationService" type="System.Web.Configuration.ScriptingAuthenticationServiceSection, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35" requirePermission="false" allowDefinition="MachineToApplication" />
+          <section name="roleService" type="System.Web.Configuration.ScriptingRoleServiceSection, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35" requirePermission="false" allowDefinition="MachineToApplication" />
+        </sectionGroup>
+      </sectionGroup>
+    </sectionGroup>
+  </configSections>
+
+
+  <appSettings/>
+  <connectionStrings/>
+  <system.web>
+    <!-- 
+            Set compilation debug="true" to insert debugging 
+            symbols into the compiled page. Because this 
+            affects performance, set this value to true only 
+            during development.
+        -->
+    <compilation debug="false">
+
+      <assemblies>
+        <add assembly="System.Core, Version=3.5.0.0, Culture=neutral, PublicKeyToken=B77A5C561934E089"/>
+        <add assembly="System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35"/>
+        <add assembly="System.Data.DataSetExtensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=B77A5C561934E089"/>
+        <add assembly="System.Xml.Linq, Version=3.5.0.0, Culture=neutral, PublicKeyToken=B77A5C561934E089"/>
+      </assemblies>
+
+    </compilation>
+    <!--
+            The <authentication> section enables configuration 
+            of the security authentication mode used by 
+            ASP.NET to identify an incoming user. 
+        -->
+    <authentication mode="Windows" />
+    <!--
+            The <customErrors> section enables configuration 
+            of what to do if/when an unhandled error occurs 
+            during the execution of a request. Specifically, 
+            it enables developers to configure html error pages 
+            to be displayed in place of a error stack trace.
+
+        <customErrors mode="RemoteOnly" defaultRedirect="GenericErrorPage.htm">
+            <error statusCode="403" redirect="NoAccess.htm" />
+            <error statusCode="404" redirect="FileNotFound.htm" />
+        </customErrors>
+        -->
+
+
+    <pages>
+      <controls>
+        <add tagPrefix="asp" namespace="System.Web.UI" assembly="System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35"/>
+        <add tagPrefix="asp" namespace="System.Web.UI.WebControls" assembly="System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35"/>
+      </controls>
+    </pages>
+
+    <httpHandlers>
+      <remove verb="*" path="*.asmx"/>
+      <add verb="*" path="*.asmx" validate="false" type="System.Web.Script.Services.ScriptHandlerFactory, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35"/>
+      <add verb="*" path="*_AppService.axd" validate="false" type="System.Web.Script.Services.ScriptHandlerFactory, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35"/>
+      <add verb="GET,HEAD" path="ScriptResource.axd" type="System.Web.Handlers.ScriptResourceHandler, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35" validate="false"/>
+    </httpHandlers>
+    <httpModules>
+      <add name="ScriptModule" type="System.Web.Handlers.ScriptModule, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35"/>
+    </httpModules>
+
+
+  </system.web>
+
+  <system.codedom>
+    <compilers>
+      <compiler language="c#;cs;csharp" extension=".cs" warningLevel="4"
+        type="Microsoft.CSharp.CSharpCodeProvider, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+        <providerOption name="CompilerVersion" value="v3.5"/>
+        <providerOption name="WarnAsError" value="false"/>
+      </compiler>
+      <compiler language="vb;vbs;visualbasic;vbscript" extension=".vb" warningLevel="4"
+        type="Microsoft.VisualBasic.VBCodeProvider, System, Version=2.0.0.0, Culture=neutral, PublicKeyToken=b77a5c561934e089">
+        <providerOption name="CompilerVersion" value="v3.5"/>
+        <providerOption name="OptionInfer" value="true"/>
+        <providerOption name="WarnAsError" value="false"/>
+      </compiler>
+    </compilers>
+  </system.codedom>
+
+  <!-- 
+        The system.webServer section is required for running ASP.NET AJAX under Internet
+        Information Services 7.0.  It is not necessary for previous version of IIS.
+    -->
+  <system.webServer>
+    <validation validateIntegratedModeConfiguration="false"/>
+    <modules>
+      <remove name="ScriptModule" />
+      <add name="ScriptModule" preCondition="managedHandler" type="System.Web.Handlers.ScriptModule, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35"/>
+    </modules>
+    <handlers>
+      <remove name="WebServiceHandlerFactory-Integrated"/>
+      <remove name="ScriptHandlerFactory" />
+      <remove name="ScriptHandlerFactoryAppServices" />
+      <remove name="ScriptResource" />
+      <add name="ScriptHandlerFactory" verb="*" path="*.asmx" preCondition="integratedMode"
+      type="System.Web.Script.Services.ScriptHandlerFactory, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35"/>
+      <add name="ScriptHandlerFactoryAppServices" verb="*" path="*_AppService.axd" preCondition="integratedMode"
+      type="System.Web.Script.Services.ScriptHandlerFactory, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35"/>
+      <add name="ScriptResource" preCondition="integratedMode" verb="GET,HEAD" path="ScriptResource.axd" type="System.Web.Handlers.ScriptResourceHandler, System.Web.Extensions, Version=3.5.0.0, Culture=neutral, PublicKeyToken=31BF3856AD364E35" />
+    </handlers>
+  </system.webServer>
+
+  <runtime>
+    <assemblyBinding xmlns="urn:schemas-microsoft-com:asm.v1">
+      <dependentAssembly>
+        <assemblyIdentity name="System.Web.Extensions" publicKeyToken="31bf3856ad364e35"/>
+        <bindingRedirect oldVersion="1.0.0.0-1.1.0.0" newVersion="3.5.0.0"/>
+      </dependentAssembly>
+      <dependentAssembly>
+        <assemblyIdentity name="System.Web.Extensions.Design" publicKeyToken="31bf3856ad364e35"/>
+        <bindingRedirect oldVersion="1.0.0.0-1.1.0.0" newVersion="3.5.0.0"/>
+      </dependentAssembly>
+    </assemblyBinding>
+  </runtime>
+
+  <system.serviceModel>
+    [GenerateBindings()]
+    [GenerateBehaviors()]
+    [GenerateServices()]
+  </system.serviceModel>
+
+</configuration>
+end template
+
+/*
+* Generate class for interface in App_Code folder
+*/
+template GenerateAppCode(Interface intf)
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.ServiceModel;
+using System.Text;
+^
+namespace [intf.Namespace.Name]
+{
+	public class [intf.Name] : I[intf.Name]
+	{
+	}
+}
+end template
+
+/*
+* Generate service for interface in Services folder
+*/
+template GenerateService(Interface intf)
+<%@ ServiceHost Language="C#" Debug="true" Service="[intf.Namespace.Name].[intf.Name]" CodeBehind="~/App_Code/[intf.Name].cs" %>
+end template

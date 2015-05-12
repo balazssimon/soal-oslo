@@ -1,0 +1,54 @@
+﻿[Uri("http://iit.bme.hu/Example")]
+namespace Example
+{
+    claimset PersonDataConfirmation
+    {
+        string Name;
+        Date DateOfBirth;
+        string Company;
+    }
+    
+    interface SimpleCalculator 
+    {
+        double Add(double left, double right);
+    }
+
+    interface ExtendedCalculator : SimpleCalculator
+    {
+        double Multiply(double left, double right);
+    }
+
+    authorization CalculatorAuth : ExtendedCalculator
+    {
+        double Add(double left, double right)
+        {
+            PersonDataConfirmation.Name s;
+		    demand "s != null" 
+		    {
+			    s != null;
+		    }
+        }
+    
+        double Multiply(double left, double right)
+        {
+            PersonDataConfirmation pdc;
+            demand "pdc.Company == IIT" 
+		    {
+			    pdc.Company == "IIT";
+		    }
+        }
+    }
+
+    binding SimpleBinding
+    {
+        transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+    }
+
+    endpoint CalculatorEndpoint : ExtendedCalculator
+    {
+        binding SimpleBinding;
+        authorization CalculatorAuth;
+	    location "http://default";
+    }
+}

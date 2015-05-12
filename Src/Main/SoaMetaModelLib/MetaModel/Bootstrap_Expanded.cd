@@ -1,0 +1,74 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="SoaMetaModel.BootstrapProtocolBindingElement">
+    <Position X="8" Y="4.75" Width="3" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAQAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BootstrapProtocolBindingElement.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.IssuedTokenBootstrapProtocolBindingElement">
+    <Position X="6.25" Y="7.25" Width="3" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAIAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAgA=</HashCode>
+      <FileName>IssuedTokenBootstrapProtocolBindingElement.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.IssuedTokenIssuer">
+    <Position X="5.5" Y="5.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAQAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAA=</HashCode>
+      <FileName>IssuedTokenIssuer.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.MutualCertificateBootstrapProtocolBindingElement">
+    <Position X="9.75" Y="7.25" Width="3.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>MutualCertificateBootstrapProtocolBindingElement.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.SamlBootstrapProtocolBindingElement">
+    <Position X="7.75" Y="9.75" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SamlBootstrapProtocolBindingElement.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.SecureConversationSecurityProtocolBindingElement">
+    <Position X="12" Y="4.5" Width="3.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAAAAAAAAAAAAAAAAAAAgAAAAAgAAAAAAAAAA=</HashCode>
+      <FileName>SecureConversationSecurityProtocolBindingElement.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.StsBootstrapProtocolBindingElement">
+    <Position X="4.5" Y="9.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>StsBootstrapProtocolBindingElement.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.Claim">
+    <Position X="12" Y="9.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAgAA=</HashCode>
+      <FileName>Claim.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="SoaMetaModel.IssuedTokenType">
+    <Position X="3.25" Y="7" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAACCAQAAAAAABAAAAEAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>IssuedTokenType.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="SoaMetaModel.IssuedTokenVersion">
+    <Position X="3.25" Y="5.5" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IssuedTokenVersion.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

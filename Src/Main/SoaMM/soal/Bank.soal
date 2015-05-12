@@ -1,0 +1,27 @@
+﻿[Uri("http://www.iit.bme.hu/SoaIntegr/Bank")]
+namespace BankNs
+{
+	exception BankFault
+	{
+		int ErrorCode;
+		string ErrorMessage;
+	}
+
+	interface IBank
+	{
+		long GetBalance(string accountNumber) throws BankFault;
+		void Transfer(string fromAccount, string toAccount, long amount) throws BankFault;
+	}
+
+	binding BasicHttpBinding
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap12 };
+	}
+
+	endpoint Bank : IBank
+	{
+		binding BasicHttpBinding;
+		location "http://www.iit.bme.hu/Services/Bank";
+	}
+}

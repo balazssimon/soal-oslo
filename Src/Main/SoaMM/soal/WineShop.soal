@@ -1,0 +1,45 @@
+﻿namespace WineShoppingSample
+{
+	claimset SampleClaims 
+	{
+		string BirthDate;
+	}
+	
+	interface IWebShop 
+	{
+		bool BuyWine();
+	}
+	
+	binding WebShopBinding 
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+		
+        protocol SamlSecurity
+		{
+			AlgorithmSuite = SecurityAlgorithmSuite.Basic128,
+			ProtectionOrder = SecurityProtectionOrder.EncryptBeforeSign,
+			TokenVersion = TokenVersion.Token10,
+			TokenType = TokenType.Symmetric128,
+			TokenIssuer = new TokenIssuer() { Address = "http://www.webshop.com/sts" },
+			SignatureConfirmation = true
+		};
+	}
+
+	authorization WebShopAuthorization : IWebShop
+	{
+		bool BuyWine()
+		{
+			SampleClaims.BirthDate bd;
+			
+		}
+	}
+
+	endpoint WebShop : IWebShop 
+	{
+		binding WebShopBinding;
+		authorization WebShopAuthorization;
+		location "http://www.webshop.com/ws";
+	}
+}
+

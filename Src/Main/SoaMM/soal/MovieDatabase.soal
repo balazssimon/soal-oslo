@@ -1,0 +1,41 @@
+﻿namespace MovieDatabase
+{
+	exception MovieException
+	{
+		int ErrorCode;
+		string ErrorMessage;
+	}
+
+	struct Person
+	{
+		int Id;
+		string FirstName;
+		string LastName;
+	}
+
+	struct Movie
+	{
+		int Id;
+		string Title;
+		int Year;
+		Person Director;
+		Person[] Actors;
+	}
+
+	interface IMovieDatabase
+	{
+		Person GetP
+	}
+
+	binding HttpSoap11
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+	}
+
+	endpoint CinemaService : ICinema
+	{
+		binding HttpSoap11;
+		location "http://www.tempuri.org";
+	}
+}

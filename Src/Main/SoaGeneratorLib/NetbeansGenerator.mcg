@@ -1,0 +1,290 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.IO;
+include "GeneratorLib.mcg";
+import JavaGenerator;
+import XsdWsdlGenerator;
+
+configuration
+    string NamespaceName = "SoaMetaModel";
+    string ClassName = "NetbeansGenerator";
+    Type InstancesType = typeof(IEnumerable<SoaObject>);
+    properties Properties
+		NetbeansVersion NetbeansVersion = NetbeansVersion.Netbeans8;
+        string ProjectName = "NetbeansProject";
+        string ResourcesDir = "../Resources";
+        string OutputDir = "../../Output";
+        bool NoImplementationDelegates = true;
+        bool ThrowNotImplementedException = true;
+        bool GenerateProxyFeatureConstructors = false;
+        bool GenerateImplementationBase = false;
+		bool GenerateMetroJksService = true;
+		bool GenerateMetroJksClient = true;
+    end properties
+end configuration
+
+/*
+* Main function for creating folders and calling file templates.
+*/
+function void Main()
+	JavaGenerator.Properties.NoImplementationDelegates = Properties.NoImplementationDelegates;
+	JavaGenerator.Properties.ThrowNotImplementedException = Properties.ThrowNotImplementedException;
+	JavaGenerator.Properties.GenerateProxyFeatureConstructors = Properties.GenerateProxyFeatureConstructors;
+	JavaGenerator.Properties.GenerateImplementationBase = Properties.GenerateImplementationBase;
+
+    Context.SetOutputFolder(Properties.OutputDir);
+    Context.CreateFolder("Netbeans");
+    Context.CreateFolder("Netbeans/" + GetProjectName());
+    Context.SetOutput("Netbeans/" + GetProjectName() + "/build.xml");
+    Context.Output(Generate_build_xml());
+    Context.CreateFolder("Netbeans/" + GetProjectName() + "/nbproject");
+    File.Copy(Properties.ResourcesDir+"/Netbeans/ant-deploy.xml", "Netbeans/" + GetProjectName() + "/nbproject/ant-deploy.xml", true);
+    Context.SetOutput("Netbeans/" + GetProjectName() + "/nbproject/build-impl.xml");
+    Context.Output(Generate_nbproject_build_impl());
+    Context.SetOutput("Netbeans/" + GetProjectName() + "/nbproject/jax-ws.xml");
+    Context.Output(Generate_nbproject_jax_ws());
+    Context.SetOutput("Netbeans/" + GetProjectName() + "/nbproject/jaxws-build.xml");
+    Context.Output(Generate_nbproject_jaxws_build());
+    Context.SetOutput("Netbeans/" + GetProjectName() + "/nbproject/project.properties");
+    Context.Output(Generate_nbproject_project_properties());
+    Context.SetOutput("Netbeans/" + GetProjectName() + "/nbproject/project.xml");
+    Context.Output(Generate_nbproject_project_xml());
+    Context.SetOutput("Netbeans/" + GetProjectName() + "/nbproject/wsit-deploy.xml");
+    Context.Output(Generate_nbproject_wsit_deploy());
+
+    Context.CreateFolder("Netbeans/" + GetProjectName() + "/src");
+    Context.CreateFolder("Netbeans/" + GetProjectName() + "/src/conf");
+    File.Copy(Properties.ResourcesDir+"/Netbeans/MANIFEST.MF", "Netbeans/" + GetProjectName() + "/src/conf/MANIFEST.MF", true);
+    Context.CreateFolder("Netbeans/" + GetProjectName() + "/src/java");
+	JavaGenerator.Properties.GenerateServerStubs = true;
+	JavaGenerator.Properties.GenerateClientProxies = false;
+    JavaGenerator.GenerateJavaCode("Netbeans/" + GetProjectName() + "/src/java");
+
+    Context.CreateFolder("Netbeans/" + GetProjectName() + "/src/java/META-INF");
+    File.Copy(Properties.ResourcesDir+"/Java/server_keystore.jks", "Netbeans/" + GetProjectName() + "/src/java/META-INF/server_keystore.jks", true);
+    File.Copy(Properties.ResourcesDir+"/Java/server_truststore.jks", "Netbeans/" + GetProjectName() + "/src/java/META-INF/server_truststore.jks", true);
+
+    Context.CreateFolder("Netbeans/" + GetProjectName() + "/test");
+
+    Context.CreateFolder("Netbeans/" + GetProjectName() + "/web");
+    Context.SetOutput("Netbeans/" + GetProjectName() + "/web/services.jsp");
+    Context.Output(Generate_web_services_jsp());
+    Context.CreateFolder("Netbeans/" + GetProjectName() + "/web/WEB-INF");
+    Context.CreateFolder("Netbeans/" + GetProjectName() + "/web/WEB-INF/lib");
+    File.Copy(Properties.ResourcesDir+"/Netbeans/SAMLHelper.jar", "Netbeans/" + GetProjectName() + "/web/WEB-INF/lib/SAMLHelper.jar", true);
+    File.Copy(Properties.ResourcesDir+"/Netbeans/beans.xml", "Netbeans/" + GetProjectName() + "/web/WEB-INF/beans.xml", true);
+    Context.SetOutput("Netbeans/" + GetProjectName() + "/web/WEB-INF/sun-web.xml");
+    Context.Output(Generate_web_WEB_INF_sun_web());
+	if (Properties.NetbeansVersion == NetbeansVersion.Netbeans8)
+		Context.SetOutput("Netbeans/" + GetProjectName() + "/web/WEB-INF/sun-jaxws.xml");
+		Context.Output(Generate_sun_jaxws());
+	end if
+    File.Copy(Properties.ResourcesDir+"/Netbeans/web.xml", "Netbeans/" + GetProjectName() + "/web/WEB-INF/web.xml", true);
+    Context.CreateFolder("Netbeans/" + GetProjectName() + "/web/WEB-INF");
+	Context.SetOutputFolder(Properties.OutputDir+"/Netbeans/" + GetProjectName() + "/web/WEB-INF");
+	XsdWsdlGenerator.Properties.OutputDir = Properties.OutputDir+"/Netbeans/" + GetProjectName() + "/web/WEB-INF";
+	XsdWsdlGenerator.Properties.GenerateMetroJksService = Properties.GenerateMetroJksService;
+	XsdWsdlGenerator.Properties.GenerateMetroJksClient = false;
+	loop(Instances->ns:typeof(Namespace))
+		XsdWsdlGenerator.GenerateXsdWsdl(ns);
+	end loop
+	Context.SetOutputFolder(Properties.OutputDir);
+
+	// === CLIENT ===
+	JavaGenerator.Properties.WsdlDirectory = "META-INF/wsdl/";
+	JavaGenerator.Properties.GenerateServerStubs = false;
+	JavaGenerator.Properties.GenerateClientProxies = true;
+	Context.CreateFolder("Netbeans/" + GetClientProjectName());
+    Context.CreateFolder("Netbeans/" + GetClientProjectName());
+    Context.SetOutput("Netbeans/" + GetClientProjectName() + "/build.xml");
+    Context.Output(Generate_Client_build_xml());
+    Context.CreateFolder("Netbeans/" + GetClientProjectName() + "/nbproject");
+    Context.SetOutput("Netbeans/" + GetClientProjectName() + "/nbproject/build-impl.xml");
+    Context.Output(Generate_Client_nbproject_build_impl());
+    Context.SetOutput("Netbeans/" + GetClientProjectName() + "/nbproject/project.properties");
+    Context.Output(Generate_Client_nbproject_project_properties());
+    Context.SetOutput("Netbeans/" + GetClientProjectName() + "/nbproject/project.xml");
+    Context.Output(Generate_Client_nbproject_project_xml());
+    Context.SetOutput("Netbeans/" + GetClientProjectName() + "/manifest.mf");
+    Context.Output(Generate_Client_manifest_mf());
+
+	Context.CreateFolder("Netbeans/" + GetClientProjectName() + "/src");
+	Context.CreateFolder("Netbeans/" + GetClientProjectName() + "/src/META-INF");
+	Context.SetOutputFolder(Properties.OutputDir+"/Netbeans/" + GetClientProjectName() + "/src/META-INF");
+	XsdWsdlGenerator.Properties.GenerateMetroJksService = false;
+	XsdWsdlGenerator.Properties.GenerateMetroJksClient = Properties.GenerateMetroJksClient;
+	XsdWsdlGenerator.Properties.OutputDir = Properties.OutputDir+"/Netbeans/" + GetClientProjectName() + "/META-INF";
+	loop(Instances->ns:typeof(Namespace))
+		XsdWsdlGenerator.GenerateXsdWsdl(ns);
+		Context.SetOutputFolder(Properties.OutputDir+"/Netbeans/" + GetClientProjectName() + "/src/META-INF/wsdl");
+		XsdWsdlGenerator.Properties.GenerateServiceUrl = true;
+		Context.SetOutput(ns.FullName+"EndpointWcf.wsdl");
+		XsdWsdlGenerator.Properties.ServiceUrlPattern = "http://localhost/WsInteropTest/Services/{0}.svc";
+		Context.Output(XsdWsdlGenerator.GenerateWsdlEndpoint(ns));
+		Context.SetOutput(ns.FullName+"EndpointMetro.wsdl");
+		XsdWsdlGenerator.Properties.ServiceUrlPattern = "http://localhost:8080/WsInteropTest/services/{0}";
+		Context.Output(XsdWsdlGenerator.GenerateWsdlEndpoint(ns));
+		Context.SetOutput(ns.FullName+"EndpointJBossCxf.wsdl");
+		XsdWsdlGenerator.Properties.ServiceUrlPattern = "http://localhost:8080/WsInteropTest/services/{0}";
+		Context.Output(XsdWsdlGenerator.GenerateWsdlEndpoint(ns));
+		Context.SetOutput(ns.FullName+"EndpointTomcatCxf.wsdl");
+		XsdWsdlGenerator.Properties.ServiceUrlPattern = "http://localhost:9080/WsInteropTest/services/{0}";
+		Context.Output(XsdWsdlGenerator.GenerateWsdlEndpoint(ns));
+		Context.SetOutput(ns.FullName+"EndpointOracle.wsdl");
+		XsdWsdlGenerator.Properties.ServiceUrlPattern = "http://192.168.136.128:7101/WsInteropTest/services/{0}";
+		Context.Output(XsdWsdlGenerator.GenerateWsdlEndpoint(ns));
+		Context.SetOutput(ns.FullName+"EndpointIbm.wsdl");
+		XsdWsdlGenerator.Properties.ServiceUrlPattern = "http://192.168.136.128:9080/WsInteropTest/{0}";
+		Context.Output(XsdWsdlGenerator.GenerateWsdlEndpoint(ns));
+	end loop
+	Context.SetOutputFolder(Properties.OutputDir);
+	JavaGenerator.Properties.GenerateServerStubs = false;
+	JavaGenerator.Properties.GenerateClientProxies = true;
+	JavaGenerator.GenerateJavaCode("Netbeans/" + GetClientProjectName() + "/src");
+	loop(Instances->ns:typeof(Namespace))
+		Context.CreateFolder("Netbeans/" + GetClientProjectName() + "/src/"+GetPackage(ns).ToLower()+"client");
+		Context.SetOutput("Netbeans/" + GetClientProjectName() + "/src/"+GetPackage(ns).ToLower()+"client/Program.java");
+		Context.Output(Generate_Program_java(ns));
+	end loop
+	File.Copy(Properties.ResourcesDir+"/Java/client_keystore.jks", "Netbeans/" + GetClientProjectName() + "/src/META-INF/client_keystore.jks", true);
+	File.Copy(Properties.ResourcesDir+"/Java/client_truststore.jks", "Netbeans/" + GetClientProjectName() + "/src/META-INF/client_truststore.jks", true);
+end function
+
+/*
+* Get project name
+*/
+function string GetProjectName()
+    return Properties.ProjectName;
+end function
+
+/*
+* Get client project name
+*/
+function string GetClientProjectName()
+    return Properties.ProjectName+"Client";
+end function
+
+template Generate_web_services_jsp()
+<%-- 
+    Document   : services
+    Created on : Aug 19, 2011, 3:44:15 PM
+    Author     : sb
+--%>
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>JSP Page</title>
+    </head>
+    <body>
+        <h1>List of Services</h1>
+[loop(Instances->endpoint:typeof(Endpoint))]
+        <a href="[endpoint.Name]?wsdl">[endpoint.Name]</a><br/>
+[end loop]
+    </body>
+</html>
+end template
+
+template Generate_Program_java(Namespace ns)
+/*
+ * To change this license header, choose License Headers in Project Properties.
+ * To change this template file, choose Tools | Templates
+ * and open the template in the editor.
+ */
+package [GetPackage(ns).ToLower()]client;
+
+import java.io.Closeable;
+import java.net.URL;
+import java.text.MessageFormat;
+import java.util.HashMap;
+import javax.xml.namespace.QName;
+import javax.xml.ws.BindingProvider;
+import javax.xml.ws.Service;
+import [GetPackage(ns).ToLower()].*;
+
+/*
+VM options for logging:
+-Dcom.sun.metro.soap.dump=true
+*/
+
+public class Program {
+
+    enum TargetFramework {
+        Metro,
+        Wcf,
+        TomcatCxf,
+        Oracle,
+        Ibm
+    }
+    
+    private static final boolean PRINT_EXCEPTIONS = true;
+    private static final String NAMESPACE_URI = "[GetUri(ns)]";
+    private static final String WSDL_NAME = "[ns.FullName]Endpoint{0}.wsdl";
+    private static final HashMap<TargetFramework, String> URLS = new HashMap<>();
+
+    private static final TargetFramework TARGET = TargetFramework.Metro;
+    
+    /**
+     * @param args the command line arguments
+     */
+    public static void main(String["[]"] args) {
+        try {
+            URLS.put(TargetFramework.Metro, "http://localhost:8080/[GetProjectName()]/services/{0}");
+            URLS.put(TargetFramework.Wcf, "http://localhost/[GetProjectName()]/Services/{0}.svc");
+            URLS.put(TargetFramework.TomcatCxf, "http://localhost:9080/[GetProjectName()]/services/{0}");
+            URLS.put(TargetFramework.Oracle, "http://192.168.136.128:7101/[GetProjectName()]/services/{0}");
+            URLS.put(TargetFramework.Ibm, "http://192.168.136.128:9080/[GetProjectName()]/{0}");
+            String url = URLS.get(TARGET);
+			[loop(ns->Declarations->endp:typeof(Endpoint))]
+            test[endp.Interface.Name]("[endp.Name]", "[endp.Interface.Name]_[endp.Binding.Name]_Port", url, true);
+			[end loop]
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+    }
+
+	[loop(ns->Declarations->intf:typeof(Interface))]
+    private static void test[intf.Name](String endpoint, String port, String url, boolean close) {
+        System.out.println(endpoint);
+        try {
+            String address = MessageFormat.format(url, endpoint);
+            Service factory = Service.create(new URL("file:META-INF/wsdl/"+MessageFormat.format(WSDL_NAME, TARGET)), new QName(NAMESPACE_URI, endpoint));
+            [intf.Name] service = factory.getPort(new QName(NAMESPACE_URI, port), IInterop.class); 
+            BindingProvider bp = (BindingProvider)service;
+            bp.getRequestContext().put(BindingProvider.ENDPOINT_ADDRESS_PROPERTY, address);
+            try {
+                // call the service
+                try {
+                    if (close) {
+                        ((Closeable)service).close();
+                    }
+                } catch (Exception ex) {
+                    System.out.println("Close failed.");
+                    if (PRINT_EXCEPTIONS) {
+                        ex.printStackTrace();
+                    }
+                }
+            } catch (Exception ex) {
+                System.out.println("Call failed.");
+                if (PRINT_EXCEPTIONS) {
+                    ex.printStackTrace();
+                }
+            }
+        } catch (Exception ex) {
+            System.out.println("Init failed.");
+            if (PRINT_EXCEPTIONS) {
+                ex.printStackTrace();
+            }
+        }
+        System.out.println("----");
+    }
+	[end loop]
+
+}
+end template

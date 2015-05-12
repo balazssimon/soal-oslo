@@ -1,0 +1,149 @@
+﻿// Interface, authorization and contract test
+
+[Uri("urn:soal:namespace:Company")]
+namespace Company
+{
+	enum Severity
+	{
+		Error,
+		Warning
+	}
+
+	struct Trace
+	{
+		string Method;
+		string? File;
+		int? Line;
+	}
+
+	exception General
+	{
+		Severity Severity;
+	    string? Message;
+		Trace[] Trace;
+	}
+}
+
+[Uri("urn:soal:namespace:Company.Calculator")]
+namespace Company.Calculator
+{
+	using Company;
+	using Company.HumanResources;
+
+	exception DivisionByZero : General
+	{
+	}
+
+	interface Calculator
+	{
+		double Multiply(double left, double right);
+		double Divide(double left, double right) throws DivisionByZero;
+	}
+
+	interface ExtendedCalculator : Calculator
+	{
+		bool Dividable(double left, double right);
+	}
+
+	contract ExtendedCalculatorContract : ExtendedCalculator
+	{
+		double Multiply(double factor1, double factor2)
+		{
+			ensures "Result is correct"
+			{
+				result == factor1 * factor2;
+			}
+		}
+
+		double Divide(double divident, double divisor) throws DivisionByZero
+		{
+			requires "Divisor is not zero"
+			{
+				divisor != 0.34;
+			}
+			otherwise
+			{
+				new DivisionByZero();
+			}
+			ensures "Result is correct"
+			{
+				result == divident / divisor;
+			}
+		}
+	}
+
+	authorization ExtendedCalculatorAuthorization : ExtendedCalculator
+	{
+		double Multiply(double factor1, double factor2)
+		{
+			Worker worker;
+			demand "At least third level"
+			{
+				worker.Level >= 3;
+			}
+		}
+
+		double Divide(double dividable, double divisor) throws DivisionByZero
+		{
+			HumanResources.Worker.Department department;
+			demand "Only developers"
+			{
+				department == Company.HumanResources.Department.IT;
+			}
+		}
+
+		bool Dividable(double dividable, double divisor)
+		{
+			Company.HumanResources.Worker worker;
+			demand "Only senior developers"
+			{
+				(worker.Department == HumanResources.Department.IT) && (worker.AtCompany > 1999-06-01);
+			}
+		}
+	}
+
+	binding CalculatorBinding
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap12, MTOM = true };
+		protocol Addressing;
+		protocol SamlSecurity
+		{
+			AlgorithmSuite = SecurityAlgorithmSuite.Basic256,
+			ProtectionOrder = SecurityProtectionOrder.SignBeforeEncryptAndEncryptSignature,
+			TokenVersion = TokenVersion.Token20,
+			TokenType = TokenType.Symmetric256,
+			TokenIssuer = new TokenIssuer() { Address = "http://the.company.com/Sts" },
+			SignatureConfirmation = true
+		};
+	}
+
+	endpoint ExtendedCalculatorEndpoint : ExtendedCalculator
+	{
+		binding CalculatorBinding;
+		authorization ExtendedCalculatorAuthorization;
+		contract ExtendedCalculatorContract;
+		location "http://the.company.com/Calculator";
+	}
+}
+
+[Uri("urn:soal:namespace:Company.HumanResources")]
+namespace Company.HumanResources
+{
+	enum Department
+	{
+		HR,
+		Sales,
+		IT,
+		Management
+	}
+
+	[Uri("urn:soal:claimset:Company.HumanResources.Worker")]
+	claimset Worker
+	{
+		[Uri("urn:soal:claim:Company.HumanResources.Worker:Department")]
+		Department Department;
+		int Level;
+		Date AtCompany;
+	}
+}

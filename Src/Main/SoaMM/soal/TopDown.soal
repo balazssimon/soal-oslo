@@ -1,0 +1,42 @@
+﻿[Uri("http://www.iit.bme.hu/SoaIntegr/Government")]
+namespace GovernmentNs
+{
+	exception GeneralFault
+	{
+		int ErrorCode;
+		string ErrorMessage;
+	}
+
+	struct Address
+	{
+		string Country;
+		string City;
+		string Street;
+		string ZipCode;
+	}
+
+	struct PersonId
+	{
+		string Name;
+		string BirthPlace;
+		DateTime BirthDate;
+		string MotherName;
+	}
+
+	interface IGovernment
+	{
+		bool ChangeAddress(PersonId person, Address newAddress) throws GeneralFault;
+	}
+
+	binding BasicHttpBinding
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+	}
+
+	endpoint Government : IGovernment
+	{
+		binding BasicHttpBinding;
+		location "http://www.tempuri.org";
+	}
+}

@@ -1,0 +1,92 @@
+﻿// Generator tester
+
+[Uri("http://hi.test/")]
+namespace Calculator
+{
+
+    exception MyEx
+    {
+        string s;
+    }
+
+	struct StructA
+	{
+		string s;
+	}
+
+	interface ICalculator
+	{
+		double Add(double left, double right) throws MyEx;
+	}
+
+    
+	claimset ClaimA
+	{
+		string Caller;
+	}
+
+	claimset ClaimB
+	{
+		string A;
+		int[] B;
+	}
+
+    contract CalculatorContract : ICalculator
+    {
+        double Add(double l, double r) throws MyEx
+		{
+			requires "left > 0" 
+			{
+                //l > 0;
+                new StructA() {s = "vmi"}.s == "vmi";
+			}
+            requires "right > 0" 
+			{
+				r > 0;
+			}
+            ensures "left + right > 0" 
+			{
+				l + r > 0;
+			}
+		}
+    }
+
+	authorization CalculatorAuthorization : ICalculator
+	{
+		double Add(double bal, double jobb) throws MyEx
+		{
+			ClaimA.Caller s;
+			ClaimB r;
+			demand "s != null" 
+			{
+				s != null;
+			}
+		}
+	}
+    
+	binding ClaculatorBinding
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap12 };
+		
+        protocol SamlSecurity
+		{
+			AlgorithmSuite = SecurityAlgorithmSuite.Basic256,
+			ProtectionOrder = SecurityProtectionOrder.SignBeforeEncryptAndEncryptSignature,
+			TokenVersion = TokenVersion.Token20,
+			TokenType = TokenType.Symmetric256,
+			TokenIssuer = new TokenIssuer() { Address = "http://the.company.com/Sts" },
+			SignatureConfirmation = true
+		};
+        
+        
+	}
+
+	endpoint CalculatorService : ICalculator
+	{
+		binding ClaculatorBinding;
+		authorization CalculatorAuthorization;
+        contract CalculatorContract;
+		location "http://default";
+	}
+}

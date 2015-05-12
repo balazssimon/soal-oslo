@@ -1,0 +1,91 @@
+﻿[Uri("http://the.company.com/Services")]
+namespace Services
+{
+	using Database;
+
+	interface HROperations
+	{
+		Worker HireWorker(string name, Department department);
+	}
+
+    interface ChiefOperations : HROperations
+    {
+        void PromoteWorker(Worker worker);
+    }
+
+	authorization ChiefAuthorization : ChiefOperations
+	{
+		Worker HireWorker(string name, Department department)
+		{
+			Employee employee;
+			demand "Caller is chief of department or works at HR" {
+				(employee.Worker.Department == department && employee.Status == Status.Chief) || employee.Worker.Department == Database.Department.HR;
+			}
+		}
+
+		void PromoteWorker(Database.Worker employee)
+		{
+			Employee.Worker worker;
+			Employee.Status status;
+			demand "Caller is chief of department" {
+				worker.Department == employee.Department && status == Status.Chief;
+			}
+		}
+	}
+
+    binding SamlBinding
+    {
+        transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+        protocol SamlSecurity
+		{
+			AlgorithmSuite = SecurityAlgorithmSuite.Basic256,
+			ProtectionOrder = SecurityProtectionOrder.SignBeforeEncryptAndEncryptSignature,
+			TokenVersion = TokenVersion.Token20,
+			TokenType = TokenType.Symmetric256,
+			TokenIssuer = new TokenIssuer() { Address = "http://the.company.com/HumanResources" },
+			SignatureConfirmation = true
+		};
+    }
+
+    endpoint HREndpoint : HROperations
+    {
+        binding SamlBinding;
+		authorization ChiefAuthorization;
+		location "http://the.company.com/Services/HR";
+    }
+
+    endpoint ChiefEndpoint : ChiefOperations
+    {
+        binding SamlBinding;
+		authorization ChiefAuthorization;
+		location "http://the.company.com/Services/Chief";
+    }
+}
+
+[Uri("http://the.company.com/Database")]
+namespace Database
+{
+    enum Department
+    {
+        Management, IT, Accounting, HR
+    }
+
+	enum Status
+	{
+		Junior, Senior, Chief
+	}
+
+	struct Worker
+	{
+		string Name;
+        Department Department;
+	}
+
+    claimset Employee
+    {
+		Worker Worker;
+		Status Status;
+    }
+}

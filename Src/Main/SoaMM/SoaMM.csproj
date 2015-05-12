@@ -1,0 +1,135 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{A33E447A-2041-4158-A727-BE06F5C99D30}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SoaMM</RootNamespace>
+    <AssemblyName>SoaMM</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>
+    </TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.M, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    </Reference>
+    <Reference Include="Sb.OsloExtensions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=61d7564ac0cf7b10, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Dataflow, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Sb.Meta\Sb.Meta.csproj">
+      <Project>{264D2AF3-9F8E-4C34-B733-AE51923ED976}</Project>
+      <Name>Sb.Meta</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SoaGeneratorLib\SoaGeneratorLib.csproj">
+      <Project>{360B30A1-0A45-4977-8460-57DD36131F8A}</Project>
+      <Name>SoaGeneratorLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SoaMetaModelLib\SoaMetaModelLib.csproj">
+      <Project>{29F8B50B-F187-45E0-A299-B9AE94294B1D}</Project>
+      <Name>SoaMetaModelLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SoaParserLib\SoaParserLib.csproj">
+      <Project>{45456458-A7BC-46A4-96FC-25DE0669B8E5}</Project>
+      <Name>SoaParserLib</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SoaRefactorLib\SoaRefactorLib.csproj">
+      <Project>{C928C7C2-E3DB-4CE9-978F-468B9DB40AC7}</Project>
+      <Name>SoaRefactorLib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
+    <None Include="soal\Bank.soal" />
+    <None Include="soal\Bindings.soal" />
+    <None Include="soal\BpelCinemaReservation.soal" />
+    <None Include="soal\Calculator.soal" />
+    <None Include="soal\GridOoTvSeries.soal" />
+    <None Include="soal\Hello.soal" />
+    <None Include="soal\MovieDatabase.soal" />
+    <None Include="soal\OrderProcess.soal" />
+    <None Include="soal\SeatReservation.soal" />
+    <None Include="soal\SoiSamples1.soal" />
+    <None Include="soal\SoiXmlWsApi.soal" />
+    <None Include="soal\TDK_Example.soal" />
+    <None Include="soal\Test1.soal" />
+    <None Include="soal\Test2.soal" />
+    <None Include="soal\Test3.soal" />
+    <None Include="soal\Test4.soal" />
+    <None Include="soal\Test5.soal" />
+    <None Include="soal\Test6.soal" />
+    <None Include="soal\Test7.soal" />
+    <None Include="soal\TopDown.soal" />
+    <None Include="soal\WineShop.soal" />
+    <None Include="soal\WsInteropTest.soal" />
+    <None Include="soal\WsPerfTest.soal" />
+    <None Include="soal\WsPerfTestAdv.soal" />
+    <None Include="soal\WspPaper.soal" />
+    <None Include="Wsdl\header.wsdl" />
+    <None Include="Wsdl\HelloNamespace.wsdl" />
+    <None Include="Wsdl\HelloNamespace.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Wsdl\HelloNamespaceBinding.wsdl" />
+    <None Include="Wsdl\HelloNamespaceEndpoint.wsdl" />
+    <None Include="Wsdl\hnTest.wsdl" />
+    <None Include="Wsdl\schema1.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Wsdl\schema2.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Wsdl\schema3.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Wsdl\schema4.xsd">
+      <SubType>Designer</SubType>
+    </None>
+    <None Include="Wsdl\service.wsdl" />
+    <None Include="Wsdl\t.wsdl" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

@@ -1,0 +1,287 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+import XsdWsdlGenerator;
+
+configuration
+    string NamespaceName = "SoaMetaModel";
+	string ClassName = "IbmRadGenerator";
+end configuration
+
+template Generate_project()
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>[GetProjectName()]</name>
+	<comment></comment>
+	<projects>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.wst.jsdt.core.javascriptValidator</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.jdt.core.javabuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.wst.common.project.facet.core.builder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.wst.validation.validationbuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.jem.workbench.JavaEMFNature</nature>
+		<nature>org.eclipse.wst.common.modulecore.ModuleCoreNature</nature>
+		<nature>org.eclipse.wst.common.project.facet.core.nature</nature>
+		<nature>org.eclipse.jdt.core.javanature</nature>
+		<nature>org.eclipse.wst.jsdt.core.jsNature</nature>
+	</natures>
+</projectDescription>
+end template
+
+template Generate_classpath()
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/WebSphere Application Server V8.5 JRE">
+		<attributes>
+			<attribute name="owner.project.facets" value="java"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="src" path=".apt_generated">
+		<attributes>
+			<attribute name="optional" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jst.server.core.container/com.ibm.ws.ast.st.runtime.runtimeTarget.v85/was.base.v85">
+		<attributes>
+			<attribute name="owner.project.facets" value="jst.web"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.web.container"/>
+	<classpathentry kind="con" path="org.eclipse.jst.j2ee.internal.module.container"/>
+	<classpathentry kind="output" path="WebContent/WEB-INF/classes"/>
+</classpath>
+end template
+
+template Generate_factorypath()
+<factorypath>
+    <factorypathentry kind="PLUGIN" id="com.ibm.jee.annotations.processor" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="PLUGIN" id="com.ibm.ws.ast.wsfp.annotations.processor" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="PLUGIN" id="com.ibm.etools.webtools.jpa.managerbean" enabled="true" runInBatchMode="false"/>
+    <factorypathentry kind="PLUGIN" id="com.ibm.jaxrs.annotations.processor" enabled="false" runInBatchMode="false"/>
+</factorypath> 
+end template
+
+template Generate_jsdtscope()
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="WebContent"/>
+	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.JRE_CONTAINER"/>
+	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.WebProject">
+		<attributes>
+			<attribute name="hide" value="true"/>
+		</attributes>
+	</classpathentry>
+	<classpathentry kind="con" path="org.eclipse.wst.jsdt.launching.baseBrowserLibrary"/>
+	<classpathentry kind="output" path=""/>
+</classpath>
+end template
+
+template Generate_apt_core_prefs()
+org.eclipse.jdt.apt.processorOptions/com.ibm.ws.ast.jws.annotations.processor.validateWSDL=on
+org.eclipse.jdt.apt.aptEnabled=true
+eclipse.preferences.version=1
+org.eclipse.jdt.apt.reconcileEnabled=true
+end template
+
+template Generate_core_prefs()
+org.eclipse.jdt.core.compiler.problem.enumIdentifier=error
+org.eclipse.jdt.core.compiler.codegen.targetPlatform=1.6
+eclipse.preferences.version=1
+org.eclipse.jdt.core.compiler.codegen.inlineJsrBytecode=enabled
+org.eclipse.jdt.core.compiler.problem.assertIdentifier=error
+org.eclipse.jdt.core.compiler.source=1.6
+org.eclipse.jdt.core.compiler.processAnnotations=enabled
+org.eclipse.jdt.core.compiler.compliance=1.6
+end template
+
+template Generate_common_component()
+<?xml version="1.0" encoding="UTF-8"?><project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="[GetProjectName()]">
+        <wb-resource deploy-path="/" source-path="/WebContent" tag="defaultRootSource"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/src"/>
+        <wb-resource deploy-path="/WEB-INF/classes" source-path="/.apt_generated"/>
+        <property name="context-root" value="[GetProjectName()]"/>
+        <property name="java-output-path" value="/[GetProjectName()]/WebContent/WEB-INF/classes"/>
+    </wb-module>
+</project-modules>
+end template
+
+template Generate_facet_core()
+<?xml version="1.0" encoding="UTF-8"?>
+<faceted-project>
+  <runtime name="was.base.v85"/>
+  <fixed facet="java"/>
+  <fixed facet="wst.jsdt.web"/>
+  <fixed facet="jst.web"/>
+  <installed facet="java" version="1.6"/>
+  <installed facet="jst.web" version="3.0"/>
+  <installed facet="com.ibm.websphere.coexistence.web" version="8.5"/>
+  <installed facet="com.ibm.websphere.extended.web" version="8.5"/>
+  <installed facet="wst.jsdt.web" version="1.0"/>
+</faceted-project>
+end template
+
+template Generate_etools_references_prefs()
+com.ibm.etools.references.ui.validation.projectPropertiesEnabled=true
+eclipse.preferences.version=1
+com.ibm.etools.references.ui.validation.severityLevel=0
+end template
+
+template Generate_superType_container()
+org.eclipse.wst.jsdt.launching.baseBrowserLibrary
+end template
+
+template Generate_superType_name()
+Window
+end template
+
+template Generate_service_policy_prefs()
+org.eclipse.wst.ws.service.policy.projectEnabled=false
+com.ibm.ast.ws.jaxws.annotations.v7.jaxws.default.value.key=com.ibm.ast.ws.jaxws.annotations.v7.default
+eclipse.preferences.version=1
+end template
+
+template Generate_MetaInf_Manifest()
+Manifest-Version: 1.0
+Class-Path: 
+
+end template
+
+template Generate_ibm_web_bnd()
+<?xml version="1.0" encoding="UTF-8"?>
+<web-bnd 
+	xmlns="http://websphere.ibm.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://websphere.ibm.com/xml/ns/javaee http://websphere.ibm.com/xml/ns/javaee/ibm-web-bnd_1_1.xsd"
+	version="1.1">
+
+	<virtual-host name="default_host" />
+
+</web-bnd>
+end template
+
+template Generate_ibm_web_ext()
+<?xml version="1.0" encoding="UTF-8"?>
+<web-ext
+	xmlns="http://websphere.ibm.com/xml/ns/javaee"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://websphere.ibm.com/xml/ns/javaee http://websphere.ibm.com/xml/ns/javaee/ibm-web-ext_1_1.xsd"
+	version="1.1">
+
+	<reload-interval value="3"/>
+	<enable-directory-browsing value="false"/>
+	<enable-file-serving value="true"/>
+	<enable-reloading value="true"/>
+	<enable-serving-servlets-by-class-name value="false" />
+
+</web-ext>
+end template
+
+template Generate_web_xml()
+<?xml version="1.0" encoding="UTF-8"?>
+<web-app
+ version="2.5" xmlns="http://java.sun.com/xml/ns/javaee" 
+ xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" 
+ xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd">
+
+</web-app>
+end template
+
+
+template Generate_project_ear()
+<?xml version="1.0" encoding="UTF-8"?>
+<projectDescription>
+	<name>[GetEarProjectName()]</name>
+	<comment></comment>
+	<projects>
+		<project>[GetProjectName()]</project>
+	</projects>
+	<buildSpec>
+		<buildCommand>
+			<name>org.eclipse.wst.common.project.facet.core.builder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+		<buildCommand>
+			<name>org.eclipse.wst.validation.validationbuilder</name>
+			<arguments>
+			</arguments>
+		</buildCommand>
+	</buildSpec>
+	<natures>
+		<nature>org.eclipse.wst.common.project.facet.core.nature</nature>
+		<nature>org.eclipse.wst.common.modulecore.ModuleCoreNature</nature>
+	</natures>
+</projectDescription>
+end template
+
+template Generate_service_policy_prefs_ear()
+org.eclipse.wst.ws.service.policy.projectEnabled=false
+com.ibm.ast.ws.jaxws.annotations.v7.jaxws.default.value.key=com.ibm.ast.ws.jaxws.annotations.v7.default
+eclipse.preferences.version=1
+end template
+
+template Generate_common_component_ear()
+<?xml version="1.0" encoding="UTF-8"?>
+<project-modules id="moduleCoreId" project-version="1.5.0">
+    <wb-module deploy-name="[GetEarProjectName()]">
+        <wb-resource deploy-path="/" source-path="/" tag="defaultRootSource"/>
+        <dependent-module archiveName="[GetProjectName()].war" deploy-path="/" handle="module:/resource/[GetProjectName()]/[GetProjectName()]">
+            <dependent-object></dependent-object>
+            <dependency-type>uses</dependency-type>
+        </dependent-module>
+    </wb-module>
+</project-modules>
+end template
+
+template Generate_facet_core_ear()
+<?xml version="1.0" encoding="UTF-8"?>
+<faceted-project>
+  <runtime name="was.base.v85"/>
+  <fixed facet="jst.ear"/>
+  <installed facet="jst.ear" version="6.0"/>
+  <installed facet="com.ibm.websphere.coexistence.ear" version="8.5"/>
+  <installed facet="com.ibm.websphere.extended.ear" version="8.5"/>
+</faceted-project>
+end template
+
+
+template Generate_policy_attachments()
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<psa:PolicySetAttachment xmlns:psa="http://www.ibm.com/xmlns/prod/websphere/200605/policysetattachment" xmlns:ps="http://www.ibm.com/xmlns/prod/websphere/200605/policyset">
+[loop(Instances->endp:typeof(Endpoint))]
+	[if (endp.Binding.HasPolicy())]
+    <psa:PolicySetReference name="[endp.Binding.Name]_Policy">
+        <psa:PolicySetBinding name="[endp.Binding.Name]_Binding" scope="domain"/>
+        <psa:Resource pattern="WebService:/[GetProjectName()].war:{[GetUri(endp.Namespace)]}[endp.Name]"/>
+    </psa:PolicySetReference>
+	[end if]
+[end loop]
+</psa:PolicySetAttachment>
+end template
+
+template Generate_ws_policy_service_control()
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ns2:WSPolicyServiceControl xmlns:ns2="http://www.ibm.com/xmlns/prod/websphere/200709/WSPolicyServiceControl" Version="1.0"/>
+end template

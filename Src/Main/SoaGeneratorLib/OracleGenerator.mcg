@@ -1,0 +1,658 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.IO;
+using Ionic.Zip;
+include "GeneratorLib.mcg";
+import JavaGenerator;
+import XsdWsdlGenerator;
+
+configuration
+    string NamespaceName = "SoaMetaModel";
+	string ClassName = "OracleGenerator";
+    Type InstancesType = typeof(IEnumerable<SoaObject>);
+    properties Properties
+        string ProjectName = "JDeveloperProject";
+        string ResourcesDir = "../Resources";
+        string OutputDir = "../../Output";
+        bool NoImplementationDelegates = true;
+        bool ThrowNotImplementedException = true;
+        bool GenerateProxyFeatureConstructors = false;
+        bool GenerateImplementationBase = false;
+    end properties
+end configuration
+
+/*
+* Main function for creating folders and calling file templates.
+*/
+function void Main()
+	JavaGenerator.Properties.NoImplementationDelegates = Properties.NoImplementationDelegates;
+	JavaGenerator.Properties.ThrowNotImplementedException = Properties.ThrowNotImplementedException;
+	JavaGenerator.Properties.GenerateProxyFeatureConstructors = Properties.GenerateProxyFeatureConstructors;
+	JavaGenerator.Properties.GenerateImplementationBase = Properties.GenerateImplementationBase;
+
+	Context.SetOutputFolder(Properties.OutputDir);
+	Context.CreateFolder("Oracle");
+	Context.SetOutput("Oracle/" + GetProjectName() + "_weblogic_script.py");
+	Context.Output(Generate_weblogic_script());
+	Context.CreateFolder("Oracle/" + GetProjectName() + "App");
+	Context.SetOutput("Oracle/" + GetProjectName() + "App/" + GetProjectName() + "App.jws");
+	Context.Output(GenerateApplicationFile());
+	Context.CreateFolder("Oracle/" + GetProjectName() + "App/" + GetProjectName());
+	Context.SetOutput("Oracle/" + GetProjectName() + "App/" + GetProjectName() + "/" + GetProjectName() +".jpr");
+	Context.Output(GenerateProjectFile());
+
+	Context.CreateFolder("Oracle/" + GetProjectName() + "App/" + GetProjectName() + "/src");
+	JavaGenerator.Properties.WsdlSuffix = "";
+	JavaGenerator.Properties.GenerateOracleAnnotations = true;
+	JavaGenerator.Properties.GenerateServerStubs = true;
+	JavaGenerator.Properties.GenerateClientProxies = false;
+	JavaGenerator.Properties.SeparateWsdlsForEndpoints = true;
+	JavaGenerator.GenerateJavaCode("Oracle/" + GetProjectName() + "App/" + GetProjectName() + "/src");
+	loop(Instances->endp:typeof(Endpoint))
+		Context.SetOutput("Oracle/" + GetProjectName() + "App/" + GetProjectName() + "/src/"+JavaGenerator.NamespaceToPath(endp.Namespace)+"/"+endp.Name+".jaxrpc");
+		Context.Output(GenerateJaxRpc(endp));
+	end loop
+
+	Context.CreateFolder(Properties.OutputDir+"/Oracle/" + GetProjectName() + "App/" + GetProjectName() + "/public_html/WEB-INF");
+	Context.SetOutputFolder(Properties.OutputDir+"/Oracle/" + GetProjectName() + "App/" + GetProjectName() + "/public_html/WEB-INF");
+	Context.SetOutput("web.xml");
+	Context.Output(GenerateWebXml());
+
+	Context.CreateFolder(Properties.OutputDir+"/Oracle/" + GetProjectName() + "App/" + GetProjectName() + "/public_html/WEB-INF/wsdl");
+	Context.SetOutputFolder(Properties.OutputDir+"/Oracle/" + GetProjectName() + "App/" + GetProjectName() + "/public_html/WEB-INF/wsdl");
+	XsdWsdlGenerator.Properties.OutputDir = Properties.OutputDir+"/Oracle/" + GetProjectName() + "/public_html/WEB-INF/wsdl";
+	XsdWsdlGenerator.Properties.GenerateSingleWsdl = true;
+	XsdWsdlGenerator.Properties.GenerateSeparateXsdWsdlFolder = false;
+	XsdWsdlGenerator.Properties.GeneratePolicies = false;
+	loop(Instances->ns:typeof(Namespace))
+		Context.SetOutput(ns.FullName+".xsd");
+		Context.Output(XsdWsdlGenerator.GenerateXsd(ns));
+		loop(ns->Declarations->endp:typeof(Endpoint))
+			Context.SetOutput(endp.Name+".wsdl");
+			Context.Output(XsdWsdlGenerator.GenerateSingleWsdl(endp));
+		end loop
+	end loop
+	Context.CreateFolder(Properties.OutputDir+"/Oracle/" + GetProjectName() + "App/" + GetProjectName() + "/public_html/WEB-INF/policies");
+	Context.SetOutputFolder(Properties.OutputDir+"/Oracle/" + GetProjectName() + "App/" + GetProjectName() + "/public_html/WEB-INF/policies");
+	loop(Instances->ns:typeof(Namespace)->Declarations->binding:typeof(Binding))
+		if (binding.HasPolicy())
+			Context.SetOutput(binding.Name+"_Policy.xml");
+			Context.Output(XsdWsdlGenerator.GeneratePolicy(ns, binding, true, true));
+		end if
+	end loop
+	
+	Context.SetOutputFolder(Properties.OutputDir);
+	Context.CreateFolder("Oracle/" + GetProjectName() + "App/" + GetClientProjectName());
+	Context.SetOutput("Oracle/" + GetProjectName() + "App/" + GetClientProjectName() + "/" + GetClientProjectName() +".jpr");
+	Context.Output(GenerateClientProjectFile());
+
+	Context.CreateFolder("Oracle/" + GetProjectName() + "App/" + GetClientProjectName() + "/src");
+	JavaGenerator.Properties.WsdlSuffix = "";
+	JavaGenerator.Properties.WsdlDirectory = "META-INF/wsdl/";
+	JavaGenerator.Properties.GenerateOracleAnnotations = true;
+	JavaGenerator.Properties.GenerateServerStubs = false;
+	JavaGenerator.Properties.GenerateClientProxies = true;
+	JavaGenerator.Properties.SeparateWsdlsForEndpoints = true;
+	JavaGenerator.GenerateJavaCode("Oracle/" + GetProjectName() + "App/" + GetClientProjectName() + "/src");
+	loop(Instances->endp:typeof(Endpoint))
+		Context.SetOutput("Oracle/" + GetProjectName() + "App/" + GetClientProjectName() + "/src/"+JavaGenerator.NamespaceToPath(endp.Namespace)+"/"+endp.Name+".proxy");
+		Context.Output(GenerateJaxRpcProxy(endp));
+	end loop
+
+	Context.CreateFolder(Properties.OutputDir+"/Oracle/" + GetProjectName() + "App/" + GetClientProjectName() + "/src/META-INF/wsdl");
+	Context.SetOutputFolder(Properties.OutputDir+"/Oracle/" + GetProjectName() + "App/" + GetClientProjectName() + "/src/META-INF/wsdl");
+	XsdWsdlGenerator.Properties.OutputDir = Properties.OutputDir+"/Oracle/" + GetClientProjectName() + "/src/META-INF/wsdl";
+	XsdWsdlGenerator.Properties.GenerateSingleWsdl = true;
+	XsdWsdlGenerator.Properties.GenerateSeparateXsdWsdlFolder = false;
+	XsdWsdlGenerator.Properties.GeneratePolicies = false;
+	loop(Instances->ns:typeof(Namespace))
+		Context.SetOutput(ns.FullName+".xsd");
+		Context.Output(XsdWsdlGenerator.GenerateXsd(ns));
+		loop(ns->Declarations->endp:typeof(Endpoint))
+			Context.SetOutput(endp.Name+".wsdl");
+			Context.Output(XsdWsdlGenerator.GenerateSingleWsdl(endp));
+		end loop
+	end loop
+	Context.CreateFolder(Properties.OutputDir+"/Oracle/" + GetProjectName() + "App/" + GetClientProjectName() + "/src/META-INF/policies");
+	Context.SetOutputFolder(Properties.OutputDir+"/Oracle/" + GetProjectName() + "App/" + GetClientProjectName() + "/src/META-INF/policies");
+	loop(Instances->ns:typeof(Namespace)->Declarations->binding:typeof(Binding))
+		if (binding.HasPolicy())
+			Context.SetOutput(binding.Name+"_Policy.xml");
+			Context.Output(XsdWsdlGenerator.GeneratePolicy(ns, binding, true, true));
+		end if
+	end loop
+	
+	Context.SetOutputFolder(Properties.OutputDir);
+end function
+
+/*
+* Get project name
+*/
+function string GetProjectName()
+    return Properties.ProjectName;
+end function
+
+/*
+* Get client project name
+*/
+function string GetClientProjectName()
+    return Properties.ProjectName+"Client";
+end function
+
+template GenerateApplicationFile()
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<jws:workspace xmlns:jws="http://xmlns.oracle.com/ide/project">
+   <value n="appTemplateId" v="#genericApplicationTemplate"/>
+   <hash n="component-versions">
+      <value n="oracle.adf.share.dt.migration.jps.JaznCredStoreMigratorHelper" v="11.1.1.1.0"/>
+      <value n="oracle.adf.share.dt.migration.wsm.PolicyAttachmentMigratorHelper" v="12.1.2.0.0"/>
+      <value n="oracle.adfdtinternal.model.ide.security.extension.AdfSecurityMigrator" v="11.1.1.1.0.13"/>
+      <value n="oracle.ide.model.Project" v="11.1.1.1.0;12.1.2.0.0"/>
+      <value n="oracle.jbo.dt.jdevx.deployment.JbdProjectMigrator" v="11.1.2.0.0"/>
+      <value n="oracle.jdevimpl.appresources.ApplicationSrcDirMigrator" v="11.1.2.0.0"/>
+      <value n="oracle.jdevimpl.deploy.migrators.JeeDeploymentMigrator" v="12.1.2.0.0"/>
+      <value n="oracle.jdevimpl.xml.wl.WeblogicMigratorHelper" v="11.1.1.1.0"/>
+      <value n="oracle.mds.internal.dt.deploy.base.MarMigratorHelper" v="11.1.1.1.0"/>
+      <value n="oracle.mds.internal.dt.ide.migrator.MDSConfigMigratorHelper" v="11.1.1.0.5313"/>
+   </hash>
+   <list n="contentSets">
+      <string v="oracle.mds.internal.dt.ide.appresources.MDSAppResourceCSProvider/MDSAppContentSet"/>
+      <string v="oracle.jdeveloper.model.PathsConfiguration/ADFContentSet"/>
+      <string v="oracle.jdeveloper.model.PathsConfiguration/ApplicationSrcContentSet"/>
+      <string v="oracle.jdeveloper.model.PathsConfiguration/ApplicationBuildToolContentSet"/>
+      <string v="oracle.jdeveloper.model.PathsConfiguration/ResourceBundlesContentSet"/>
+   </list>
+   <list n="listOfChildren">
+      <hash><url n="URL" path="[GetProjectName()]/[GetProjectName()].jpr"/></hash>
+      <hash><url n="URL" path="[GetClientProjectName()]/[GetClientProjectName()].jpr"/></hash>
+   </list>
+</jws:workspace>
+end template
+
+template GenerateProjectFile()
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<jpr:project xmlns:jpr="http://xmlns.oracle.com/ide/project">
+   <hash n="component-versions">
+      <value n="oracle.adfdt.controller.migrate.TrinidadDatabindingsProjectMigrator" v="11.1.2.0.0"/>
+      <value n="oracle.adfdtinternal.dvt.datapresdt.migration.DVTDataMapMigrator" v="11.1.1.1.0.3"/>
+      <value n="oracle.adfdtinternal.model.ide.security.wizard.FormPageMigrator" v="11.1.1.0.0"/>
+      <value n="oracle.adfdtinternal.model.ide.security.wizard.JpsFilterMigrator" v="11.1.1.1.0"/>
+      <value n="oracle.adfdtinternal.view.common.migration.wizards.MigrationHelper" v="11.1.1.1.0.3"/>
+      <value n="oracle.adfdtinternal.view.rich.migration.ComponentIdNodeMigratorHelper" v="11.1.1.1.0.01"/>
+      <value n="oracle.adfdtinternal.view.rich.migration.FacesLibraryVersionMigrator" v="11.1.1.1.0.1"/>
+      <value n="oracle.ide.model.Project" v="12.1.2.0.0"/>
+      <value n="oracle.ide.model.ResourcePathsMigrator" v="11.1.1.1.0"/>
+      <value n="oracle.ideimpl.model.TechnologyScopeUpdateMigrator" v="11.1.2.0.0.4"/>
+      <value n="oracle.jbo.dt.jdevx.deployment.JbdProjectMigrator" v="11.1.2.0.0"/>
+      <value n="oracle.jbo.dt.jdevx.ui.appnav.APProjectMigrator" v="11.1.1.0.1.5"/>
+      <value n="oracle.jbo.dt.migrate.ResourceBundlePathMigrator" v="11.1.1.0.1.5"/>
+      <value n="oracle.jbo.dt.migration.ServiceInterfaceMigrator" v="11.1.1.1.0"/>
+      <value n="oracle.jdeveloper.dbmodeler.Migration" v="12.1.1.0.0"/>
+      <value n="oracle.jdeveloper.library.ProjectLibraryMigrator" v="11.1.1.1.0"/>
+      <value n="oracle.jdeveloper.model.OutputDirectoryMigrator" v="11.1.1.1.0"/>
+      <value n="oracle.jdevimpl.deploy.migrators.DeploymentMigrator" v="12.1.2.0.1"/>
+      <value n="oracle.jdevimpl.jsp.JspMigrator" v="11.1.1"/>
+      <value n="oracle.jdevimpl.offlinedb.migration.OfflineDBProjectMigrator" v="12.1.1.0.0"/>
+      <value n="oracle.jdevimpl.webapp.jsp.libraries.JspLibraryMigrator" v="11.1.1.1.4"/>
+      <value n="oracle.jdevimpl.webapp.jsp.taglibraries.trinidad.migration.TrinidadLibraryVersionMigrator" v="11.1.1.1.0.1"/>
+      <value n="oracle.jdevimpl.webapp.WebAppContentSetNodeMigratorHelper" v="11.1.1"/>
+      <value n="oracle.jdevimpl.webapp.WebAppProjectNodeMigratorHelper" v="12.1.2.0.0"/>
+      <value n="oracle.jdevimpl.webservices.rest.migration.RestLibraryMigrator" v="12.1.1.0.0"/>
+      <value n="oracle.jdevimpl.webservices.rest.migration.RestPathMigrator" v="11.1.2.0.0"/>
+      <value n="oracle.jdevimpl.xml.wl.WeblogicMigratorHelper" v="11.1.1.1.0"/>
+      <value n="oracle.modeler.bmmigrate.management.Migration" v="11.1.1.1.0"/>
+      <value n="oracle.toplink.workbench.addin.migration.PersistenceProjectMigrator" v="11.1.1.1.0"/>
+      <value n="oracle.toplink.workbench.addin.migration.TopLinkProjectMigrator" v="11.1.1.1.0"/>
+   </hash>
+   <list n="contentSets">
+      <string v="oracle.bm.commonIde.data.project.ModelerProjectSettings/modelersContentSet"/>
+      <string v="oracle.jdeveloper.model.J2eeSettings/webContentSet"/>
+      <string v="oracle.mds.internal.dt.ide.MDSLibraryCustCSProvider/mdsContentSet"/>
+      <string v="oracle.mds.internal.dt.ide.MDSADFLibVirtualNodeCSProvider/mdsLibVirtualNodeContentSet"/>
+      <string v="oracle.jdeveloper.model.PathsConfiguration/javaContentSet"/>
+      <string v="oracle.ide.model.ResourcePaths/resourcesContentSet"/>
+      <string v="oracle.jdeveloper.offlinedb.model.OfflineDBProjectSettings/offlineDBContentSet"/>
+      <string v="oracle.adfdtinternal.model.ide.settings.ADFMSettings/adfmContentSet"/>
+      <string v="oracle.toplink.workbench.addin/toplinkContentSet"/>
+   </list>
+   <value n="defaultPackage" v=""/>
+   <hash n="oracle.ide.model.TechnologyScopeConfiguration">
+      <list n="technologyScope">
+         <string v="Java"/>
+         <string v="WSDL"/>
+         <string v="WSPolicy"/>
+         <string v="WebServices"/>
+         <string v="XML"/>
+         <string v="XML_SCHEMA"/>
+      </list>
+   </hash>
+   <hash n="oracle.jdeveloper.compiler.OjcConfiguration">
+      <value n="internalEncoding" v="Cp1252"/>
+      <value n="webIANAEncoding" v="windows-1252"/>
+   </hash>
+   <hash n="oracle.jdeveloper.deploy.dt.DeploymentProfiles">
+      <hash n="profileDefinitions">
+         <hash n="WebServices">
+            <hash n="appletArchives"/>
+            <hash n="appletFiles">
+               <value n="autoInclude" v="true"/>
+               <list n="selectionFilters">
+                  <string v="oracle.jdevimpl.deploy.common.JavaSelectionFilter"/>
+               </list>
+            </hash>
+            <hash n="archiveOptions">
+               <value n="hasManifest" v="false"/>
+            </hash>
+            <url n="earURL" path="deploy/[GetProjectName()].ear"/>
+            <value n="enterpriseAppName" v="[GetProjectName()]"/>
+            <hash n="fileGroups">
+               <list n="groups">
+                  <hash>
+                     <list n="contributors">
+                        <hash>
+                           <value n="type" v="5"/>
+                        </hash>
+                     </list>
+                     <value n="displayName" v="Web Files"/>
+                     <hash n="filters">
+                        <list n="rules">
+                           <hash>
+                              <value n="pattern" v="**"/>
+                              <value n="type" v="0"/>
+                           </hash>
+                        </list>
+                     </hash>
+                     <value n="internalName" v="web-files"/>
+                     <value n="type" v="1"/>
+                  </hash>
+                  <hash>
+                     <list n="contributors">
+                        <hash>
+                           <value n="type" v="2"/>
+                        </hash>
+                        <hash>
+                           <value n="type" v="7"/>
+                        </hash>
+                     </list>
+                     <value n="displayName" v="WEB-INF/classes"/>
+                     <hash n="filters">
+                        <list n="rules">
+                           <hash>
+                              <value n="pattern" v="**"/>
+                              <value n="type" v="0"/>
+                           </hash>
+                        </list>
+                     </hash>
+                     <value n="internalName" v="project-output"/>
+                     <value n="targetWithinJar" v="WEB-INF/classes"/>
+                     <value n="type" v="1"/>
+                  </hash>
+                  <hash>
+                     <value n="displayName" v="WEB-INF/lib"/>
+                     <hash n="filters">
+                        <list n="rules">
+                           <hash>
+                              <value n="pattern" v="**"/>
+                              <value n="type" v="0"/>
+                           </hash>
+                        </list>
+                     </hash>
+                     <value n="internalName" v="libraries"/>
+                     <value n="targetWithinJar" v="WEB-INF/lib"/>
+                     <value n="type" v="3"/>
+                  </hash>
+               </list>
+            </hash>
+            <url n="jarURL" path="deploy/[GetProjectName()].war"/>
+            <value n="platformType" v="WEBLOGIC"/>
+            <value n="platformVersion" v="12.0.0.0"/>
+            <value n="profileClass" v="oracle.jdeveloper.deploy.war.WarProfile"/>
+            <value n="profileName" v="WebServices"/>
+         </hash>
+      </hash>
+      <list n="profileList">
+         <string v="WebServices"/>
+      </list>
+   </hash>
+   <hash n="oracle.jdevimpl.config.JProjectLibraries">
+      <list n="exportedReferences">
+         <hash>
+            <value n="id" v="JAX-WS Web Services"/>
+            <value n="isJDK" v="false"/>
+         </hash>
+      </list>
+      <list n="libraryReferences">
+         <hash>
+            <value n="id" v="JAX-WS Web Services"/>
+            <value n="isJDK" v="false"/>
+         </hash>
+      </list>
+   </hash>
+   <hash n="oracle.jdevimpl.config.JProjectPaths">
+      <url n="outputDirectory" path="classes/"/>
+   </hash>
+</jpr:project>
+end template
+
+template GenerateClientProjectFile()
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<jpr:project xmlns:jpr="http://xmlns.oracle.com/ide/project">
+   <hash n="component-versions">
+      <value n="oracle.adfdt.controller.migrate.TrinidadDatabindingsProjectMigrator" v="11.1.2.0.0"/>
+      <value n="oracle.adfdtinternal.dvt.datapresdt.migration.DVTDataMapMigrator" v="11.1.1.1.0.3"/>
+      <value n="oracle.adfdtinternal.model.ide.security.wizard.FormPageMigrator" v="11.1.1.0.0"/>
+      <value n="oracle.adfdtinternal.model.ide.security.wizard.JpsFilterMigrator" v="11.1.1.1.0"/>
+      <value n="oracle.adfdtinternal.view.common.migration.wizards.MigrationHelper" v="11.1.1.1.0.3"/>
+      <value n="oracle.adfdtinternal.view.rich.migration.ComponentIdNodeMigratorHelper" v="11.1.1.1.0.01"/>
+      <value n="oracle.adfdtinternal.view.rich.migration.FacesLibraryVersionMigrator" v="11.1.1.1.0.1"/>
+      <value n="oracle.ide.model.Project" v="12.1.2.0.0"/>
+      <value n="oracle.ide.model.ResourcePathsMigrator" v="11.1.1.1.0"/>
+      <value n="oracle.ideimpl.model.TechnologyScopeUpdateMigrator" v="11.1.2.0.0.4"/>
+      <value n="oracle.jbo.dt.jdevx.deployment.JbdProjectMigrator" v="11.1.2.0.0"/>
+      <value n="oracle.jbo.dt.jdevx.ui.appnav.APProjectMigrator" v="11.1.1.0.1.5"/>
+      <value n="oracle.jbo.dt.migrate.ResourceBundlePathMigrator" v="11.1.1.0.1.5"/>
+      <value n="oracle.jbo.dt.migration.ServiceInterfaceMigrator" v="11.1.1.1.0"/>
+      <value n="oracle.jdeveloper.dbmodeler.Migration" v="12.1.1.0.0"/>
+      <value n="oracle.jdeveloper.ejb.EjbMigrator" v="11.1.1.1.0"/>
+      <value n="oracle.jdeveloper.library.ProjectLibraryMigrator" v="11.1.1.1.0"/>
+      <value n="oracle.jdeveloper.model.OutputDirectoryMigrator" v="11.1.1.1.0"/>
+      <value n="oracle.jdevimpl.deploy.jps.JpsDataMigrator" v="11.1.1.1.0"/>
+      <value n="oracle.jdevimpl.deploy.migrators.DeploymentMigrator" v="12.1.2.0.1"/>
+      <value n="oracle.jdevimpl.jsp.JspMigrator" v="11.1.1"/>
+      <value n="oracle.jdevimpl.offlinedb.migration.OfflineDBProjectMigrator" v="12.1.1.0.0"/>
+      <value n="oracle.jdevimpl.resourcebundle.XliffAddin$XliffMigratorHelper" v="11.1.1.1.0"/>
+      <value n="oracle.jdevimpl.webapp.jsp.libraries.JspLibraryMigrator" v="11.1.1.1.4"/>
+      <value n="oracle.jdevimpl.webapp.jsp.taglibraries.trinidad.migration.TrinidadLibraryVersionMigrator" v="11.1.1.1.0.1"/>
+      <value n="oracle.jdevimpl.webapp.WebAppContentSetNodeMigratorHelper" v="11.1.1"/>
+      <value n="oracle.jdevimpl.webapp.WebAppProjectNodeMigratorHelper" v="12.1.2.0.0"/>
+      <value n="oracle.jdevimpl.webservices.rest.migration.RestLibraryMigrator" v="12.1.1.0.0"/>
+      <value n="oracle.jdevimpl.webservices.rest.migration.RestPathMigrator" v="11.1.2.0.0"/>
+      <value n="oracle.jdevimpl.webservices.WebServicesMigratorHelper" v="11.1.1.1.0"/>
+      <value n="oracle.jdevimpl.xml.wl.WeblogicMigratorHelper" v="11.1.1.1.0"/>
+      <value n="oracle.modeler.bmmigrate.management.Migration" v="11.1.1.1.0"/>
+      <value n="oracle.toplink.workbench.addin.migration.PersistenceProjectMigrator" v="11.1.1.1.0"/>
+      <value n="oracle.toplink.workbench.addin.migration.TopLinkProjectMigrator" v="11.1.1.1.0"/>
+   </hash>
+   <list n="contentSets">
+      <string v="oracle.bm.commonIde.data.project.ModelerProjectSettings/modelersContentSet"/>
+      <string v="oracle.jdeveloper.model.J2eeSettings/webContentSet"/>
+      <string v="oracle.mds.internal.dt.ide.MDSLibraryCustCSProvider/mdsContentSet"/>
+      <string v="oracle.mds.internal.dt.ide.MDSADFLibVirtualNodeCSProvider/mdsLibVirtualNodeContentSet"/>
+      <string v="oracle.jdeveloper.model.PathsConfiguration/javaContentSet"/>
+      <string v="oracle.ide.model.ResourcePaths/resourcesContentSet"/>
+      <string v="oracle.jdeveloper.offlinedb.model.OfflineDBProjectSettings/offlineDBContentSet"/>
+      <string v="oracle.adfdtinternal.model.ide.settings.ADFMSettings/adfmContentSet"/>
+      <string v="oracle.toplink.workbench.addin/toplinkContentSet"/>
+   </list>
+   <value n="defaultPackage" v=""/>
+   <hash n="oracle.ide.model.TechnologyScopeConfiguration">
+      <list n="technologyScope">
+         <string v="Database"/>
+         <string v="Java"/>
+         <string v="TopLink"/>
+         <string v="WSDL"/>
+         <string v="WSPolicy"/>
+         <string v="WebServices"/>
+         <string v="XML"/>
+      </list>
+   </hash>
+   <hash n="oracle.jdeveloper.compiler.OjcConfiguration">
+      <value n="internalEncoding" v="Cp1252"/>
+      <value n="webIANAEncoding" v="windows-1252"/>
+   </hash>
+   <hash n="oracle.jdeveloper.model.J2eeSettings">
+      <value n="j2eeWebAppName" v="[GetProjectName()]App-[GetClientProjectName()]-webapp"/>
+      <value n="j2eeWebContextRoot" v="[GetProjectName()]App-[GetClientProjectName()]-context-root"/>
+   </hash>
+   <hash n="oracle.jdevimpl.config.JProjectLibraries">
+      <list n="exportedReferences">
+         <hash>
+            <value n="id" v="JAX-WS Client"/>
+            <value n="isJDK" v="false"/>
+         </hash>
+         <hash>
+            <value n="id" v="JAX-WS Web Services"/>
+            <value n="isJDK" v="false"/>
+         </hash>
+         <hash>
+            <value n="id" v="TopLink"/>
+            <value n="isJDK" v="false"/>
+         </hash>
+      </list>
+      <list n="libraryReferences">
+         <hash>
+            <value n="id" v="JAX-WS Client"/>
+            <value n="isJDK" v="false"/>
+         </hash>
+         <hash>
+            <value n="id" v="JAX-WS Web Services"/>
+            <value n="isJDK" v="false"/>
+         </hash>
+         <hash>
+            <value n="id" v="TopLink"/>
+            <value n="isJDK" v="false"/>
+         </hash>
+      </list>
+   </hash>
+   <hash n="oracle.jdevimpl.config.JProjectPaths">
+      <url n="outputDirectory" path="classes/"/>
+   </hash>
+</jpr:project>
+end template
+
+template GenerateJaxRpc(Endpoint endp)
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<jdevws:WebService xmlns:jdevws="http://xmlns.oracle.com/jdeveloper/10130/webservice">
+   <list n="CHILD_NODES">
+      <url path="[endp.Namespace.GetRootDirForJava()]/../public_html/WEB-INF/wsdl/[endp.Name].wsdl"/>
+      <url path="[endp.Name].java"/>
+      <url path="[endp.Interface.Name].java"/>
+   </list>
+   <hash n="DATA_MODEL">
+      <value n="ANNOTATE_ADDRESSING" v="true"/>
+      <value n="ATTACHMENT_ENCODING" v="MIME"/>
+      <list n="BD_">
+         <hash>
+            <value n="BOUND_PORT_TYPE" v="{[GetUri(endp.Namespace)]}[endp.Interface.Name]"/>
+            <value n="DEFAULT_NAME" v="false"/>
+            <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.SOAPBinding"/>
+            <value n="NAME" v="{[GetUri(endp.Namespace)]}[endp.Interface.Name]_[endp.Binding.Name]_Binding"/>
+            <hash n="PROPERTY_GROUPS"/>
+         </hash>
+      </list>
+      <list n="BINDING_FILES"/>
+      <value n="GENERATE_TOP_DOWN" v="TRUE"/>
+      <value n="GENERATION_OPTION" v="ANNOTATIONS_WSDL_SEI"/>
+      <value n="LAST_GENERATION_BOTTOM_UP" v="false"/>
+      <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.java.JavaWebService"/>
+      <list n="PO_">
+         <hash>
+            <value n="DEFAULT_NAME" v="false"/>
+            <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.SOAPPort"/>
+            <value n="NAME" v="[endp.Interface.Name]_[endp.Binding.Name]_Port"/>
+            <value n="PORT_BINDING_NAME" v="{[GetUri(endp.Namespace)]}[endp.Interface.Name]_[endp.Binding.Name]_Binding"/>
+			[if(endp.Binding.HasPolicy())]
+            <hash n="PROPERTY_GROUPS">
+               <hash n="WLS_POLICY_MODEL">
+                  <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.policy.WlsPolicyModel"/>
+                  <list n="POLICY_LIST">
+                     <string v="policy:[endp.Binding.Name]_Policy.xml"/>
+                  </list>
+                  <hash n="policy:[endp.Binding.Name]_Policy.xml">
+                     <value n="ATTACH_TO_WSDL" v="false"/>
+                     <value n="CUSTOM_POLICY" v="false"/>
+                     <value n="DIRECTION" v="Both"/>
+                  </hash>
+               </hash>
+            </hash>
+			[end if]
+         </hash>
+      </list>
+      <hash n="PROPERTY_GROUPS">
+         <hash n="WSDL_TO_JAVA_PROPERTIES">
+            <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.java.WSDLToJavaProperties"/>
+            <value n="WSDL2JAVA_DEFAULT_PACKAGE" v="[GetPackage(endp.Namespace).ToLower()]"/>
+            <value n="WSDL2JAVA_ROOT_VALUE_PACKAGE" v="[GetPackage(endp.Namespace).ToLower()]"/>
+         </hash>
+      </hash>
+      <list n="PT_">
+         <hash>
+            <value n="AUTO_SERVICE_INTERFACE"/>
+            <value n="DEFAULT_NAME" v="false"/>
+            <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.java.JavaPortType"/>
+            <value n="NAME" v="{[GetUri(endp.Namespace)]}[endp.Interface.Name]"/>
+            <hash n="PROPERTY_GROUPS"/>
+            <value n="PT_CLASS" v="[GetPackage(endp.Namespace).ToLower()].[endp.Name]"/>
+            <value n="PT_SERVICE_INTERFACE" v="[GetPackage(endp.Namespace).ToLower()].[endp.Interface.Name]"/>
+            <value n="PT_TOP_DOWN_GENERATED_SEI_NAME" v="[GetPackage(endp.Namespace).ToLower()].[endp.Interface.Name]"/>
+         </hash>
+      </list>
+      <value n="SERVICE_ASYNC" v="false"/>
+      <url n="TARGET_PROJECT" path="../../[GetProjectName()].jpr"/>
+      <value n="TOPDOWN_GENERATION_OPTION" v="JAVA_SEI"/>
+      <list n="WS_DEPENDENT_VALUE_TYPES"/>
+      <value n="WS_ORIG_GEN_DIRECTION" v="BOTTOM_UP"/>
+      <url n="WS_REFERENCE_WSDL" path="../../public_html/WEB-INF/wsdl/[endp.Name].wsdl"/>
+      <value n="WS_TARGET_NAMESPACE" v="[GetUri(endp.Namespace)]"/>
+      <value n="WS_URI" v="[endp.Name]"/>
+      <url n="WS_WSDL_FILE" path="../../public_html/WEB-INF/wsdl/[endp.Name].wsdl"/>
+      <value n="WS_WSDL_LOC_ON_SEI" v="false"/>
+      <value n="WS_WSDL_LOC_VALUE" v="WEB-INF/wsdl/[endp.Name].wsdl"/>
+   </hash>
+</jdevws:WebService>
+end template
+
+template GenerateJaxRpcProxy(Endpoint endp)
+<?xml version = '1.0' encoding = 'UTF-8'?>
+<jdevws:WebServiceProxy xmlns:jdevws="http://xmlns.oracle.com/jdeveloper/10130/webserviceproxy">
+   <list n="CHILD_NODES">
+      <url path="[endp.Namespace.GetRootDirForJava()]/META-INF/wsdl/[endp.Name].wsdl"/>
+      <url path="[endp.Name]Service.java"/>
+      <url path="[endp.Interface.Name].java"/>
+   </list>
+   <hash n="DATA_MODEL">
+      <value n="ATTACHMENT_ENCODING" v="MIME"/>
+      <list n="LOCAL_FILES"/>
+      <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.proxy.WebServiceProxy"/>
+      <hash n="PROPERTY_GROUPS">
+         <hash n="WSDL_TO_JAVA_PROPERTIES">
+            <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.java.WSDLToJavaProperties"/>
+            <value n="WSDL2JAVA_DEFAULT_PACKAGE" v="[GetPackage(endp.Namespace).ToLower()]"/>
+            <value n="WSDL2JAVA_ROOT_VALUE_PACKAGE" v="[GetPackage(endp.Namespace).ToLower()]"/>
+         </hash>
+      </hash>
+      <value n="PROXY_ASYNC_METHODS" v="FOR_ENABLED"/>
+      <list n="PROXY_CLIENTS">
+         <url path="[endp.Name]Service.java"/>
+      </list>
+      <value n="PROXY_MAPPING_URL"/>
+      <url n="PROXY_ORIGINAL_WSDL_URL" path="[endp.Namespace.GetRootDirForJava()]/META-INF/wsdl/[endp.Name].wsdl"/>
+      <hash n="PROXY_PORTS">
+         <hash n="[endp.Interface.Name]_[endp.Binding.Name]_Port">
+            <value n="ACCESSES_DOC_WRAPPPED" v="true"/>
+            <value n="ACCESSES_RPC_ENCODED" v="false"/>
+            <value n="CLASS_NAME" v="[GetPackage(endp.Namespace).ToLower()].[endp.Interface.Name]"/>
+            <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.proxy.ProxyPort"/>
+            <value n="NAME" v="[endp.Interface.Name]_[endp.Binding.Name]_Port"/>
+			[if(endp.Binding.HasPolicy())]
+            <hash n="PROPERTY_GROUPS">
+               <hash n="WLS_POLICY_MODEL">
+                  <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.policy.WlsPolicyModel"/>
+                  <list n="POLICY_LIST">
+                     <string v="policy:[endp.Binding.Name]_Policy.xml"/>
+                  </list>
+                  <hash n="policy:[endp.Binding.Name]_Policy.xml">
+                     <value n="ATTACH_TO_WSDL" v="false"/>
+                     <value n="CUSTOM_POLICY" v="false"/>
+                     <value n="DIRECTION" v="Both"/>
+                  </hash>
+               </hash>
+            </hash>
+			[end if]
+            <url n="PROXY_ORIGINAL_PORT_ENDPOINT" protocol="http" host="[endp.Address.Uri]" path=""/>
+            <url n="PROXY_PORT_ENDPOINT" protocol="http" host="[endp.Address.Uri]" path=""/>
+         </hash>
+      </hash>
+      <value n="PROXY_SERVICE_NAME" v="[endp.Name]"/>
+      <value n="PROXY_SERVICE_NAMESPACE" v="[GetUri(endp.Namespace)]"/>
+      <url n="PROXY_TARGET_PROJECT" path="[endp.Namespace.GetRootDirForJava()]/../[GetClientProjectName()].jpr"/>
+      <url n="PROXY_WSDL_URL" path="[endp.Namespace.GetRootDirForJava()]/META-INF/wsdl/[endp.Name].wsdl"/>
+      <hash n="REFERENCED_WEBSERVICE">
+         <list n="BD_">
+            <hash>
+               <value n="BOUND_PORT_TYPE" v="{[GetUri(endp.Namespace)]}[endp.Interface.Name]"/>
+               <value n="DEFAULT_NAME" v="false"/>
+               <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.SOAPBinding"/>
+               <value n="NAME" v="{[GetUri(endp.Namespace)]}[endp.Interface.Name]_[endp.Binding.Name]_Binding"/>
+               <hash n="PROPERTY_GROUPS"/>
+            </hash>
+         </list>
+         <list n="BINDING_FILES"/>
+         <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.proxy.WebServiceProxy$ProxyJavaWebService"/>
+         <list n="PO_">
+            <hash>
+               <value n="DEFAULT_NAME" v="false"/>
+               <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.SOAPPort"/>
+               <value n="NAME" v="[endp.Interface.Name]_[endp.Binding.Name]_Port"/>
+               <value n="PORT_BINDING_NAME" v="{[GetUri(endp.Namespace)]}[endp.Interface.Name]_[endp.Binding.Name]_Binding"/>
+               <hash n="PROPERTY_GROUPS"/>
+               <url n="URL" protocol="http" host="" path=""/>
+            </hash>
+         </list>
+         <hash n="PROPERTY_GROUPS">
+            <hash n="WSDL_TO_JAVA_PROPERTIES">
+               <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.java.WSDLToJavaProperties"/>
+               <value n="WSDL2JAVA_DEFAULT_PACKAGE" v="[GetPackage(endp.Namespace).ToLower()]"/>
+               <value n="WSDL2JAVA_ROOT_VALUE_PACKAGE" v="[GetPackage(endp.Namespace).ToLower()]"/>
+            </hash>
+         </hash>
+         <list n="PT_">
+            <hash>
+               <value n="AUTO_SERVICE_INTERFACE"/>
+               <value n="DEFAULT_NAME" v="false"/>
+               <value n="MODEL_CLASS" v="oracle.jdeveloper.webservices.model.java.JavaPortType"/>
+               <value n="NAME" v="{[GetUri(endp.Namespace)]}[endp.Interface.Name]"/>
+               <hash n="PROPERTY_GROUPS"/>
+               <value n="PT_CLASS" v="[GetPackage(endp.Namespace).ToLower()].[endp.Name]Service"/>
+               <value n="PT_SERVICE_INTERFACE" v="[GetPackage(endp.Namespace).ToLower()].[endp.Interface.Name]"/>
+               <value n="PT_TOP_DOWN_GENERATED_SEI_NAME" v="[GetPackage(endp.Namespace).ToLower()].[endp.Interface.Name]"/>
+            </hash>
+         </list>
+         <url n="TARGET_PROJECT" path="[endp.Namespace.GetRootDirForJava()]/../[GetClientProjectName()].jpr"/>
+         <value n="WS_ORIG_GEN_DIRECTION" v="TOP_DOWN"/>
+         <value n="WS_TARGET_NAMESPACE" v="[GetUri(endp.Namespace)]"/>
+         <value n="WS_URI" v="[endp.Name]"/>
+         <url n="WS_WSDL_FILE" path="[endp.Namespace.GetRootDirForJava()]/META-INF/wsdl/[endp.Name].wsdl"/>
+      </hash>
+      <value n="SERVICE_ASYNC" v="false"/>
+      <value n="USE_WSDL_LOCATION" v="true"/>
+   </hash>
+</jdevws:WebServiceProxy>
+end template
+
+template GenerateWebXml()
+<?xml version = '1.0' encoding = 'windows-1252'?>
+<web-app xmlns="http://java.sun.com/xml/ns/javaee" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_3_0.xsd"
+         version="3.0">
+[loop(Instances->endp:typeof(Endpoint))]
+  <servlet>
+    <servlet-name>[endp.Interface.Name]_[endp.Name]_Port</servlet-name>
+    <servlet-class>[GetPackage(endp.Namespace).ToLower()].[endp.Name]</servlet-class>
+    <load-on-startup>1</load-on-startup>
+  </servlet>
+[end loop]
+[loop(Instances->endp:typeof(Endpoint))]
+  <servlet-mapping>
+    <servlet-name>[endp.Interface.Name]_[endp.Name]_Port</servlet-name>
+    <url-pattern>/services/[endp.Name]</url-pattern>
+  </servlet-mapping>
+[end loop]
+</web-app>
+end template
+
+template Generate_weblogic_script()
+^
+end template

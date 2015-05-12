@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="SoaMetaModel.Authorization" Collapsed="true">
+    <Position X="3.75" Y="5.25" Width="1.25" />
+    <AssociationLine Name="OperationAuthorizations" Type="SoaMetaModel.OperationAuthorization" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="5" Y="5.75" />
+        <Point X="9.25" Y="5.75" />
+        <Point X="9.25" Y="4.941" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAABAAAGAAAAAAAEAAAAAAAAAAAA=</HashCode>
+      <FileName>Authorization.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Interface" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="OperationAuthorizations" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.Declaration" Collapsed="true">
+    <Position X="4.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAgAAAAAAAAAAAAAAAQAAAAAIAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Declaration.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.SoaObject" Collapsed="true">
+    <Position X="8.5" Y="0.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAACAAAAAAAAAAAAAAAAIAAAACAAAAEAAAAA=</HashCode>
+      <FileName>SoaObject.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.Interface" Collapsed="true">
+    <Position X="5.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAAAgAACQAAAAAAAAAgAAAAIAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Interface.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.OperationAuthorization" Collapsed="true">
+    <Position X="8.25" Y="4.25" Width="2" />
+    <AssociationLine Name="Authorization" Type="SoaMetaModel.Authorization" ManuallyRouted="true" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="8.25" Y="4.847" />
+        <Point X="6.939" Y="4.847" />
+        <Point X="6.939" Y="5.563" />
+        <Point X="5" Y="5.563" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AEAAAAAAAAAAAAAAIAAAAAAAAABAAAAAAAEAAAAAAAQ=</HashCode>
+      <FileName>OperationAuthorization.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Authorization" />
+      <Property Name="Demand" />
+      <Property Name="Operation" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.Demand" Collapsed="true">
+    <Position X="11.25" Y="4.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Demand.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.RuleType" Collapsed="true">
+    <Position X="11.25" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAEAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAA=</HashCode>
+      <FileName>RuleType.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Rule" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.Operation" Collapsed="true">
+    <Position X="6.75" Y="2" Width="1.25" />
+    <AssociationLine Name="Interface" Type="SoaMetaModel.Interface">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.857" Y="0.127" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAgAAAApAAAUAgQAAAIAAAIAABAAEAAA=</HashCode>
+      <FileName>Operation.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Interface" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.Expression" Collapsed="true">
+    <Position X="13.5" Y="2" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAACAAAAAAgAAAAAAAAAAAAAACCAAAAQAAAAAAAAA=</HashCode>
+      <FileName>Expression.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.Endpoint" Collapsed="true">
+    <Position X="2.5" Y="3.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAAIABAAAEAAABAAAACAAAIAAAAECA=</HashCode>
+      <FileName>Endpoint.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Authorization" />
+    </ShowAsAssociation>
+  </Class>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

@@ -1,0 +1,321 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+configuration
+	string NamespaceName = "SoaMetaModel";
+	string ClassName = "VSGenerator";
+end configuration
+
+/*
+* Generate service for interface in Services folder
+*/
+template GenerateService(Endpoint endp)
+<%@ ServiceHost Language="C#" Debug="true" Service="[endp.Namespace.FullName].[endp.Name]" CodeBehind="~/App_Code/[endp.Name].cs" %>
+end template
+
+/*
+* Generate web.config file in Services folder
+* Uses: GenerateBindings(), GenerateBehaviors(), GenerateServices()
+*/
+template GenerateWebConfig()
+<?xml version="1.0"?>
+<configuration>
+
+  <system.serviceModel>
+    [GenerateBindings()]
+    [GenerateBehaviors()]
+    [GenerateServices()]
+  </system.serviceModel>
+
+</configuration>
+end template
+
+template GenerateClientAppConfig()
+<?xml version="1.0"?>
+<configuration>
+
+  <system.serviceModel>
+    [GenerateBindings()]
+    [GenerateClientBehaviors()]
+    [GenerateClientEndpoints()]
+  </system.serviceModel>
+
+</configuration>
+end template
+
+/*
+* Generate <bindings> section
+* Uses: GenerateIssuedTokenParameters()
+*/
+template GenerateBindings()
+<bindings>
+  <customBinding>
+[loop(Instances->binding:typeof(Binding))]
+    <binding name="[binding.Name]">
+
+[loop(binding.Protocols->security:typeof(SecurityProtocolBindingElement))]
+      <security defaultAlgorithmSuite="[security.AlgorithmSuite.ToString()]" securityHeaderLayout="[security.HeaderLayout.ToString()]" messageProtectionOrder="[security.ProtectionOrder.ToString()]" requireSignatureConfirmation="[security.RequireSignatureConfirmation.ToString().ToLower()]" \
+[if(security is MutualCertificateSecurityProtocolBindingElement)]
+authenticationMode="MutualCertificateDuplex" messageSecurityVersion="WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10">
+[end if]
+[if(security is StsSecurityProtocolBindingElement)]
+authenticationMode="IssuedToken" messageSecurityVersion="WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10" requireDerivedKeys="[((StsSecurityProtocolBindingElement)security).DerivedKeys.ToString().ToLower()]">
+        [GenerateIssuedTokenParameters(((StsSecurityProtocolBindingElement)security).TokenVersion, ((StsSecurityProtocolBindingElement)security).TokenType, ((StsSecurityProtocolBindingElement)security).TokenIssuer, null)]
+[end if]
+[if(security is SamlSecurityProtocolBindingElement)]
+authenticationMode="IssuedToken" messageSecurityVersion="WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10" >
+        [GenerateIssuedTokenParameters(((SamlSecurityProtocolBindingElement)security).TokenVersion, ((SamlSecurityProtocolBindingElement)security).TokenType, ((SamlSecurityProtocolBindingElement)security).TokenIssuer, ((SamlSecurityProtocolBindingElement)security).Claims)]
+[end if]
+[if(security is SecureConversationSecurityProtocolBindingElement)]
+authenticationMode="SecureConversation" messageSecurityVersion="WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10" requireDerivedKeys="[((SecureConversationSecurityProtocolBindingElement)security).DerivedKeys.ToString().ToLower()]">
+[if(((SecureConversationSecurityProtocolBindingElement)security).Bootstrap != null)]
+        <secureConversationBootstrap defaultAlgorithmSuite="[security.AlgorithmSuite.ToString()]" securityHeaderLayout="[security.HeaderLayout.ToString()]" messageProtectionOrder="[security.ProtectionOrder.ToString()]"  requireSignatureConfirmation="[((SecureConversationSecurityProtocolBindingElement)security).Bootstrap.RequireSignatureConfirmation.ToString().ToLower()]"  requireDerivedKeys="[((SecureConversationSecurityProtocolBindingElement)security).DerivedKeys.ToString().ToLower()]" \
+[if(((SecureConversationSecurityProtocolBindingElement)security).Bootstrap is MutualCertificateBootstrapProtocolBindingElement)]
+authenticationMode="MutualCertificateDuplex" messageSecurityVersion="WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10"/>
+[end if]
+[if(((SecureConversationSecurityProtocolBindingElement)security).Bootstrap is StsBootstrapProtocolBindingElement)]
+authenticationMode="IssuedToken" messageSecurityVersion="WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10">
+          [GenerateIssuedTokenParameters(((StsBootstrapProtocolBindingElement)((SecureConversationSecurityProtocolBindingElement)security).Bootstrap).TokenVersion, ((StsBootstrapProtocolBindingElement)((SecureConversationSecurityProtocolBindingElement)security).Bootstrap).TokenType, ((StsBootstrapProtocolBindingElement)((SecureConversationSecurityProtocolBindingElement)security).Bootstrap).TokenIssuer, null)]
+        </secureConversationBootstrap>
+[end if]
+[if(((SecureConversationSecurityProtocolBindingElement)security).Bootstrap is SamlBootstrapProtocolBindingElement)]
+authenticationMode="SecureConversation" messageSecurityVersion="WSSecurity11WSTrust13WSSecureConversation13WSSecurityPolicy12BasicSecurityProfile10">
+          [GenerateIssuedTokenParameters(((SamlBootstrapProtocolBindingElement)((SecureConversationSecurityProtocolBindingElement)security).Bootstrap).TokenVersion, ((SamlBootstrapProtocolBindingElement)((SecureConversationSecurityProtocolBindingElement)security).Bootstrap).TokenType, ((SamlBootstrapProtocolBindingElement)((SecureConversationSecurityProtocolBindingElement)security).Bootstrap).TokenIssuer, ((SamlBootstrapProtocolBindingElement)((SecureConversationSecurityProtocolBindingElement)security).Bootstrap).Claims)]
+        </secureConversationBootstrap>
+[end if]
+[else]
+        <secureConversationBootstrap />
+[end if]
+[else]
+        <secureConversationBootstrap />
+[end if]
+      </security>
+[end loop]
+
+[loop(binding.Protocols->transaction:typeof(AtomicTransactionProtocolBindingElement))]
+[if(transaction.Version == AtomicTransactionVersion.AtomicTransaction10)]
+      <transactionFlow transactionProtocol="WSAtomicTransactionOctober2004" />
+[end if]
+[end loop]
+
+[loop(binding.Protocols->reliable:typeof(ReliableMessagingProtocolBindingElement))]
+[if(reliable.Version == ReliableMessagingVersion.ReliableMessaging11)]
+[if(reliable.InOrder == true)]
+      <reliableSession reliableMessagingVersion="WSReliableMessaging11" ordered="true" />
+[else]
+      <reliableSession reliableMessagingVersion="WSReliableMessaging11" ordered="false" />
+[end if]
+[end if]
+[end loop]
+
+[if(binding.Encoding is SoapEncodingBindingElement)]
+[if(((SoapEncodingBindingElement)binding.Encoding).MtomEnabled == true)]
+      <mtomMessageEncoding messageVersion="\
+[else]
+      <textMessageEncoding messageVersion="\
+[end if]
+[if(((SoapEncodingBindingElement)binding.Encoding).Version == SoapVersion.Soap11)]
+Soap11\
+[else]
+Soap12\
+[end if]
+[loop(binding.Protocols->addressing:typeof(AddressingProtocolBindingElement))]
+[if(addressing.Version == AddressingVersion.Addressing10)]
+WSAddressing10\
+[else]
+WSAddressingAugust2004\
+[end if]
+[end loop]
+"  maxReadPoolSize="100000000" maxWritePoolSize="100000000" >
+        <readerQuotas maxArrayLength="100000000" maxDepth="200" maxStringContentLength="1000000" maxBytesPerRead="1000000"/>
+[if(((SoapEncodingBindingElement)binding.Encoding).MtomEnabled == true)]
+      </mtomMessageEncoding>
+[else]
+      </textMessageEncoding>
+[end if]
+[end if]
+
+[if(binding.Transport is HttpTransportBindingElement)]
+      <httpTransport maxReceivedMessageSize="100000000" maxBufferSize="100000000" maxBufferPoolSize="100000000"/>
+[end if]
+[if(binding.Transport is HttpsTransportBindingElement)]
+[if(((HttpsTransportBindingElement)binding.Transport).ClientAuthentication == HttpsClientAuthentication.Certificate)]
+      <httpsTransport requireClientCertificate="true" />
+[else]
+      <httpsTransport requireClientCertificate="false" />
+[end if]
+[end if]
+    </binding>
+[end loop]
+  </customBinding>
+</bindings>
+end template
+
+/*
+* Generate <issuedTokenParameters> section
+*/
+template GenerateIssuedTokenParameters(IssuedTokenVersion tokenVersion, IssuedTokenType tokenType, IssuedTokenIssuer tokenIssuer, IEnumerable<ClaimsetType> tokenClaims)
+<issuedTokenParameters \
+[if(tokenVersion == IssuedTokenVersion.Token10)]
+tokenType="urn:oasis:names:tc:SAML:1.0:assertion" \
+[end if]
+[if(tokenVersion == IssuedTokenVersion.Token11)]
+tokenType="http://docs.oasis-open.org/wss/oasis-wss-saml-token-profile-1.1#SAMLV1.1" \
+[end if]
+[if(tokenVersion == IssuedTokenVersion.Token20)]
+tokenType="urn:oasis:names:tc:SAML:2.0:assertion" \
+[end if]
+[if(tokenType == IssuedTokenType.Symmetric128)]
+keyType="SymmetricKey" keySize="128">
+[end if]
+[if(tokenType == IssuedTokenType.Symmetric192)]
+keyType="SymmetricKey" keySize="192">
+[end if]
+[if(tokenType == IssuedTokenType.Symmetric256)]
+keyType="SymmetricKey" keySize="256">
+[end if]
+[if(tokenType == IssuedTokenType.Asymmetric1024)]
+keyType="AsymmetricKey" keySize="1024">
+[end if]
+[if(tokenType == IssuedTokenType.Asymmetric2048)]
+keyType="AsymmetricKey" keySize="2048">
+[end if]
+[if(tokenType == IssuedTokenType.Asymmetric3072)]
+keyType="AsymmetricKey" keySize="3072">
+[end if]
+[if(tokenClaims != null)]
+  <claimTypeRequirements>
+  [loop(tokenClaims->claim:typeof(ClaimsetType))]
+    <add claimType="http://schemas.xmlsoap.org/ws/2005/05/identity/claims/[claim.Name]" isOptional="false" />
+  [end loop]
+  </claimTypeRequirements>
+[end if]
+[if(tokenIssuer != null)]
+  <issuer address="[tokenIssuer.Address]" />
+  [if(tokenIssuer.MetadataAddress != null && tokenIssuer.MetadataAddress.Length > 0)]
+  <issuerMetadata address="[tokenIssuer.MetadataAddress]" />
+  [end if]
+[end if]
+</issuedTokenParameters>
+end template
+
+/*
+* Generate <behaviors> section
+*/
+template GenerateBehaviors()
+<behaviors>
+  <serviceBehaviors>
+[loop(Instances->endpoint:typeof(Endpoint))]
+    <behavior name="[endpoint.Name]Behavior">
+	  <dataContractSerializer maxItemsInObjectGraph="2147483647"/>
+      <serviceMetadata httpGetEnabled="true"/>
+      <serviceDebug includeExceptionDetailInFaults="false" />
+	[loop(endpoint->binding:Binding)]
+		[loop(binding->Protocols->security:typeof(SecurityProtocolBindingElement))]
+      <serviceCredentials>
+        <serviceCertificate storeLocation="LocalMachine" storeName="My" x509FindType="FindBySubjectName" findValue="WspService"/>
+        <clientCertificate>
+          <authentication certificateValidationMode="PeerOrChainTrust" trustedStoreLocation="LocalMachine"/>
+        </clientCertificate>
+      </serviceCredentials>
+		[end loop]
+	[end loop]
+    </behavior>
+[end loop]
+  </serviceBehaviors>
+</behaviors>
+end template
+
+template GenerateClientBehaviors()
+<behaviors>
+  <endpointBehaviors>
+[loop(Instances->endpoint:typeof(Endpoint))]
+    <behavior name="[endpoint.Name]Behavior">
+	  <dataContractSerializer maxItemsInObjectGraph="2147483647"/>
+	[loop(endpoint->binding:Binding)]
+		[loop(binding->Protocols->security:typeof(SecurityProtocolBindingElement))]
+      <clientCredentials>
+        <clientCertificate storeLocation="LocalMachine" storeName="My" x509FindType="FindBySubjectName" findValue="WspClient"/>
+        <serviceCertificate>
+          <defaultCertificate storeLocation="LocalMachine" storeName="My" x509FindType="FindBySubjectName" findValue="WspService"/>
+          <authentication certificateValidationMode="PeerOrChainTrust" trustedStoreLocation="LocalMachine"/>
+        </serviceCertificate>
+      </clientCredentials>
+		[end loop]
+	[end loop]
+    </behavior>
+[end loop]
+  </endpointBehaviors>
+</behaviors>
+end template
+
+/*
+* Generate <services> section
+*/
+template GenerateServices()
+<services>
+[loop(Instances->endpoint:typeof(Endpoint))]
+  <service behaviorConfiguration="[endpoint.Name]Behavior" name="[endpoint.Interface.Namespace.FullName].[endpoint.Name]">
+    <endpoint binding="customBinding" bindingConfiguration="[endpoint.Binding.Name]" contract="[endpoint.Interface.Namespace.FullName].[endpoint.Interface.Name]"/>
+    <endpoint address="mex" binding="mexHttpBinding" contract="IMetadataExchange" />
+  </service>
+[end loop]
+</services>
+end template
+
+template GenerateClientEndpoints()
+<client>
+[loop(Instances->endpoint:typeof(Endpoint))]
+  <endpoint name="[endpoint.Interface.Namespace.FullName].[endpoint.Name]" contract="[endpoint.Interface.Namespace.FullName].[endpoint.Interface.Name]" binding="customBinding" bindingConfiguration="[endpoint.Binding.Name]" behaviorConfiguration="[endpoint.Name]Behavior" address="[endpoint.Address.Uri]">
+	[loop(endpoint->binding:Binding)]
+		[loop(binding->Protocols->security:typeof(SecurityProtocolBindingElement))]
+    <identity>
+      <dns value="WspService"/>
+    </identity>
+		[end loop]
+	[end loop]
+  </endpoint>
+[end loop]
+</client>
+end template
+
+template GenerateServicesDefaultAspx()
+<%@ Page Title="Services Home Page" Language="C#" MasterPageFile="~/Site.master" AutoEventWireup="true"
+    CodeFile="~/Services/Default.aspx.cs" Inherits="Services._Default" %>
+
+<asp:Content ID="HeaderContent" runat="server" ContentPlaceHolderID="HeadContent">
+</asp:Content>
+<asp:Content ID="BodyContent" runat="server" ContentPlaceHolderID="MainContent">
+    <h2>
+        Services
+    </h2>
+    <p>
+[loop(Instances->endpoint:typeof(Endpoint); int id = 1; id = id+1)]
+    <asp:HyperLink ID="HyperLink[id]" runat="server" NavigateUrl="~/Services/[endpoint.Name].svc">[endpoint.Name]</asp:HyperLink><br/>
+[end loop]
+    </p>
+</asp:Content>
+end template
+
+template GenerateServicesDefaultAspxCs()
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.Web.UI;
+using System.Web.UI.WebControls;
+
+namespace Services
+{
+	public partial class _Default : System.Web.UI.Page
+	{
+		protected void Page_Load(object sender, EventArgs e)
+		{
+
+		}
+	}
+}
+end template
+

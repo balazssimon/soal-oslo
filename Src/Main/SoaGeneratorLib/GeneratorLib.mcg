@@ -1,0 +1,55 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+configuration
+	string NamespaceName = "SoaMetaModel";
+	string ClassName = "GeneratorLib";
+end configuration
+
+/*
+* Return string with first letter low
+*/
+function string FirstLetterLow(string s)
+return s.Substring(0,1).ToLower() + s.Substring(1);
+end function
+
+/*
+* Return string with first letter high
+*/
+function string FirstLetterUp(string s)
+return s.Substring(0,1).ToUpper() + s.Substring(1);
+end function
+
+/*
+* template for getting namespace uri
+*/
+function string GetUri(Namespace ns)
+	return GeneratorLibExtensions.GetUri(ns);
+end function
+
+
+function string GetUriWithSlash(Namespace ns)
+	return GeneratorLibExtensions.GetUriWithSlash(ns);
+end function
+
+/*
+* function to get package name from namespace uri
+*/
+function string GetPackage(Namespace ns)
+	return GeneratorLibExtensions.GetPackage(ns);
+end function
+
+
+function string IsNillableType(Type t)
+	if(t is BuiltInType)
+		if (t == BuiltInType.String) return "true";
+		else return "false";
+		end if
+	else if(t is EnumType)
+		return "false";
+	else
+		return "true";
+	end if
+end function

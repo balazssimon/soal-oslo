@@ -1,0 +1,114 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="SoaMetaModel.BootstrapProtocolBindingElement" Collapsed="true">
+    <Position X="6.25" Y="4.75" Width="2" />
+    <AssociationLine Name="SecureConversation" Type="SoaMetaModel.SecureConversationSecurityProtocolBindingElement" FixedFromPoint="true">
+      <Path>
+        <Point X="6.25" Y="5.25" />
+        <Point X="4.5" Y="5.25" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAQAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SecureConversation.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="SecureConversation" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.IssuedTokenBootstrapProtocolBindingElement" Collapsed="true">
+    <Position X="4.75" Y="6.25" Width="2.5" />
+    <AssociationLine Name="TokenVersion" Type="SoaMetaModel.IssuedTokenVersion" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="5.028" Y="6.25" />
+        <Point X="5.028" Y="6.062" />
+        <Point X="3.75" Y="6.062" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="TokenIssuer" Type="SoaMetaModel.IssuedTokenIssuer" FixedFromPoint="true" FixedToPoint="true">
+      <Path>
+        <Point X="5.028" Y="6.941" />
+        <Point X="5.028" Y="7.469" />
+        <Point X="3.5" Y="7.469" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAIAAAAAAAAAAAAAAAAAACAAAAAAAAAAAAgA=</HashCode>
+      <FileName>IssuedToken.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="TokenVersion" />
+      <Property Name="TokenType" />
+      <Property Name="TokenIssuer" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.IssuedTokenIssuer" Collapsed="true">
+    <Position X="2" Y="7.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAQAAAAAAAAAAAAAAAAAAAAAACAAAAAAAAAAA=</HashCode>
+      <FileName>IssuedToken.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.MutualCertificateBootstrapProtocolBindingElement" Collapsed="true">
+    <Position X="7.5" Y="6.25" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>MutualCertificate.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.SamlBootstrapProtocolBindingElement" Collapsed="true">
+    <Position X="6.25" Y="8" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAAAAAAAAAAAAAAAAAAAAAIAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Saml.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsCollectionAssociation>
+      <Property Name="Claims" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.SecureConversationSecurityProtocolBindingElement" Collapsed="true">
+    <Position X="2" Y="4.75" Width="2.5" />
+    <AssociationLine Name="Bootstrap" Type="SoaMetaModel.BootstrapProtocolBindingElement" FixedFromPoint="true">
+      <Path>
+        <Point X="4.5" Y="4.938" />
+        <Point X="6.25" Y="4.938" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>AAAAIAAAAAAAAAAAAAAAAAAAAAgAAAAAgAAAAAAAAAA=</HashCode>
+      <FileName>SecureConversation.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Bootstrap" />
+    </ShowAsAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.StsBootstrapProtocolBindingElement" Collapsed="true">
+    <Position X="3.75" Y="8" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAgAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Sts.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.ClaimsetType" Collapsed="true">
+    <Position X="9" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAACAAAAAAAgAA=</HashCode>
+      <FileName>Claim.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="SoaMetaModel.IssuedTokenType" Collapsed="true">
+    <Position X="2" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAACCAQAAAAAABAAAAEAAAAAAAAAAAAAAAAAAAAAAAI=</HashCode>
+      <FileName>IssuedToken.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="SoaMetaModel.IssuedTokenVersion" Collapsed="true">
+    <Position X="2" Y="5.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAMAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>IssuedToken.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

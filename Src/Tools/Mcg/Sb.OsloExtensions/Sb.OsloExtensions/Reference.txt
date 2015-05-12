@@ -1,0 +1,2 @@
+Assembly Reference:
+Sb.OsloExtensions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=61d7564ac0cf7b10

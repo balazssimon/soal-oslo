@@ -1,0 +1,45 @@
+﻿[Uri("http://www.iit.bme.hu/OrderProcess")]
+namespace OrderNs
+{
+	struct Order
+	{
+		string Id;
+	}
+
+	struct Shipment
+	{
+		string Id;
+		string OrderId;
+	}
+
+	interface IOrderProcess
+	{
+		asynchronous PlaceOrder(Order order);
+		asynchronous ModifyOrder(string orderId, Order order);
+		asynchronous Shipped(string shipmentId);
+		asynchronous Delivered();
+	}
+
+	interface IShippingProcess
+	{
+		asynchronous StartShipping(Shipment shipment);		
+	}
+
+	binding BasicHttpBinding
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+	}
+
+	endpoint OrderProcess : IOrderProcess
+	{
+		binding BasicHttpBinding;
+		location "http://www.iit.bme.hu/Services/OrderProcess";
+	}
+
+	endpoint ShippingProcess : IShippingProcess
+	{
+		binding BasicHttpBinding;
+		location "http://www.iit.bme.hu/Services/ShippingProcess";
+	}
+}

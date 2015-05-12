@@ -1,0 +1,79 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="SoaMetaModel.MetaInfo.NameHelpers" Collapsed="true">
+    <Position X="3.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAgAAAAAAAAAAAAAAACAAAAAAAAAAAAAAQAQAAAA=</HashCode>
+      <FileName>MetaInfo\NameHelpers.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.MetaInfo.NameContext" Collapsed="true">
+    <Position X="3.25" Y="3.5" Width="1.5" />
+    <AssociationLine Name="Contexts" Type="SoaMetaModel.MetaInfo.NameContext">
+      <MemberNameLabel ManuallyPlaced="true">
+        <Position X="-0.088" Y="0.372" />
+      </MemberNameLabel>
+    </AssociationLine>
+    <AssociationLine Name="Scope" Type="SoaMetaModel.SoaObject" FixedFromPoint="true">
+      <Path>
+        <Point X="4.75" Y="3.938" />
+        <Point X="5.75" Y="3.938" />
+      </Path>
+    </AssociationLine>
+    <AssociationLine Name="Imports" Type="SoaMetaModel.SoaObject" FixedFromPoint="true">
+      <Path>
+        <Point X="4.75" Y="3.625" />
+        <Point X="5.75" Y="3.625" />
+      </Path>
+    </AssociationLine>
+    <TypeIdentifier>
+      <HashCode>QAAIAAAAAAEAACBAACCEACAAABAAAABAAAAAAEBAAAA=</HashCode>
+      <FileName>MetaInfo\NameContext.cs</FileName>
+    </TypeIdentifier>
+    <ShowAsAssociation>
+      <Property Name="Scope" />
+      <Property Name="Current" />
+    </ShowAsAssociation>
+    <ShowAsCollectionAssociation>
+      <Property Name="Contexts" />
+      <Property Name="Imports" />
+    </ShowAsCollectionAssociation>
+  </Class>
+  <Class Name="SoaMetaModel.MetaInfo.NameContextScope" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="3.25" Y="2.25" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>MetaInfo\NameContext.cs</FileName>
+    </TypeIdentifier>
+    <Lollipop Position="0.2" />
+  </Class>
+  <Class Name="SoaMetaModel.MetaInfo.NameException" Collapsed="true">
+    <Position X="5.75" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgAAAAAAAAAAACAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>MetaInfo\NameException.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.MetaInfo.NameNotFoundException" Collapsed="true">
+    <Position X="4.25" Y="5.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>MetaInfo\NameException.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.MetaInfo.NameCollisionException" Collapsed="true">
+    <Position X="6.75" Y="5.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>MetaInfo\NameException.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.SoaObject" Collapsed="true">
+    <Position X="5.75" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>QAAAAAAAAAAABAAAAAAAAAAUAAUgAAAAACgAAAACAAA=</HashCode>
+      <FileName>SoaObject.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Font Name="Tahoma" Size="8.25" />
+</ClassDiagram>

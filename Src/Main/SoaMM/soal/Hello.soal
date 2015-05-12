@@ -1,0 +1,20 @@
+﻿[Uri("http://www.hello.org/HelloNs")]
+namespace HelloNs
+{
+	interface IHello
+	{
+		string SayHello(string name);
+	}
+
+	binding HttpSoap11
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+	}
+
+	endpoint HelloService : IHello
+	{
+		binding HttpSoap11;
+		location "http://www.tempuri.org";
+	}
+}

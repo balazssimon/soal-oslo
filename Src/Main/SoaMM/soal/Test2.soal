@@ -1,0 +1,29 @@
+﻿// Namespace test
+
+namespace Parent.Son
+{
+}
+
+namespace Parent.Daughter
+{
+}
+
+namespace Parent = "urn:Parent"
+{
+}
+
+namespace Parent.Son.GrandSon = "urn:Grandson"
+{
+}
+
+namespace Parent
+{
+}
+
+namespace Parent.Son = "urn:Son"
+{
+}
+
+namespace Parent = "urn:Parent"
+{
+}

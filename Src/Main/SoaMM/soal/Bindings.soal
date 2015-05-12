@@ -1,0 +1,56 @@
+﻿namespace BindingsTest
+{
+	binding Soap11
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+	}
+
+	binding Soap11Wsa
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+	}
+
+	binding Soap11WsaWsRm
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+		protocol ReliableMessaging 
+		{
+			Version = ReliableMessagingVersion.ReliableMessaging11,
+			Delivery = ReliableMessagingDelivery.ExactlyOnce,
+			InOrder = true
+		};
+	}
+
+	binding Soap11WsaWsS
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+		protocol MutualCertificateSecurity
+		{
+			AlgorithmSuite = SecurityAlgorithmSuite.TripleDesRsa15,
+			HeaderLayout = SecurityHeaderLayout.Strict,
+			ProtectionOrder = SecurityProtectionOrder.SignBeforeEncryptAndEncryptSignature
+		};
+	}
+
+	binding Soap11WsaWsSc
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+		protocol SecureConversationSecurity
+		{
+			AlgorithmSuite = SecurityAlgorithmSuite.TripleDesRsa15,
+			HeaderLayout = SecurityHeaderLayout.Strict,
+			ProtectionOrder = SecurityProtectionOrder.SignBeforeEncryptAndEncryptSignature,
+			DerivedKeys = true
+		};
+		protocol MutualCertificateBootstrap;
+	}
+}

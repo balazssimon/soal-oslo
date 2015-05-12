@@ -1,0 +1,54 @@
+<xs:schema targetNamespace="http://www.iit.bme.hu/HelloNamespace"
+           xmlns:xs="http://www.w3.org/2001/XMLSchema"
+		       xmlns:tns="http://www.iit.bme.hu/HelloNamespace"
+           xmlns:ns0="http://www.iit.bme.hu/HelloNamespace">
+
+  <xs:import schemaLocation="HelloNamespaceEndpoint.wsdl" namespace="http://www.iit.bme.hu/HelloNamespace"/>  
+
+  <xs:complexType name="ArrayOfint">
+    <xs:sequence>
+      <xs:element name="int" nillable="true" type="xs:int" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="HelloStructType">
+    <xs:sequence>
+      <xs:element name="Name" type="xs:string"/>
+      <xs:element name="Age" type="xs:int"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="ArrayOfHelloStructType">
+    <xs:sequence>
+      <xs:element name="HelloStructType" nillable="true" type="tns:HelloStructType" minOccurs="0" maxOccurs="unbounded"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="HelloStructTypeExt">
+    <xs:complexContent>
+      <xs:extension base="tns:HelloStructType">
+        <xs:element name="Description" type="xs:string"/>
+      </xs:extension>
+    </xs:complexContent>
+  </xs:complexType>
+  
+  <xs:simpleType name="HelloEnumType">
+    <xs:restriction base="xs:string">
+      <xs:enumeration value="hello"/>
+      <xs:enumeration value="bye"/>
+    </xs:restriction>
+  </xs:simpleType>
+  
+  <xs:complexType name="helloOperation">
+    <xs:sequence>
+      <xs:element name="parameter" type="xs:boolean"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+  <xs:complexType name="helloOperationResponse">
+    <xs:sequence>
+      <xs:element name="helloOperationResult" type="tns:HelloEnumType"/>
+    </xs:sequence>
+  </xs:complexType>
+  
+</xs:schema>

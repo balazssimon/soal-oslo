@@ -1,0 +1,80 @@
+﻿// Robi
+
+[Uri("http://pilot.ik.bme.hu/PilotFeladatok")]
+namespace Pilot
+{
+
+    exception MathFault
+    {
+        string Operation;
+        string Problem;
+    }
+
+	interface ICalculator
+	{
+		double Add(double left, double right);
+        double Divide(double left, double right) throws MathFault;
+        double Multiply(double left, double right);
+        double Subtract(double left, double right);
+	}
+
+	binding WsHttpSoap11
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+	}
+
+    binding WsHttpSoap12
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap12 };
+	}
+
+    binding WsHttpsSoap12
+	{
+		transport HTTPS;
+		encoding SOAP { Version = SoapVersion.Soap12 };
+	}
+
+    binding MtomSoap11
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11, MTOM = true };
+	}
+
+    binding MtomSoap12
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap12, MTOM = true };
+	}
+
+	endpoint WsHttpService : ICalculator
+	{
+		binding WsHttpSoap11;
+		location "http://default";
+	}
+
+    endpoint WsHttpSoap12Service : ICalculator
+	{
+		binding WsHttpSoap12;
+		location "http://default";
+	}
+
+    endpoint WsHttpsSoap12Service : ICalculator
+	{
+		binding WsHttpsSoap12;
+		location "http://default";
+	}
+
+    endpoint MtomSoap11Service : ICalculator
+	{
+		binding MtomSoap11;
+		location "http://default";
+	}
+
+    endpoint MtomSoap12Service : ICalculator
+	{
+		binding MtomSoap12;
+		location "http://default";
+	}
+}

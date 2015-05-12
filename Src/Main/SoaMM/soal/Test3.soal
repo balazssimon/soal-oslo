@@ -1,0 +1,19 @@
+﻿// Type declarations test
+
+namespace NamespaceA
+{
+
+	struct StructA
+	{
+		int Field0;
+		int? Field1;
+		int[] Field2;
+		int?[] Field3;	
+	}
+
+	enum EnumA
+	{
+		Value1,
+		Value2
+	}
+}

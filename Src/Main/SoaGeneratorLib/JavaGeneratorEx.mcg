@@ -1,0 +1,154 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+configuration
+	string NamespaceName = "SoaMetaModel";
+	string ClassName = "JavaGenerator";
+end configuration
+
+function string GenerateExpression(Expression expr)
+    if(expr.Parent!=null && expr.Parent.NodeType > expr.NodeType && expr.NodeType != ExpressionType.Variable && expr.NodeType != ExpressionType.Constant)
+        return "(" + GenerateExpressionWB(expr) + ")";
+    else
+        return GenerateExpressionWB(expr);
+    end if
+    
+end function
+
+function string GenerateExpressionWB(Expression expr)
+
+    if(expr.NodeType == ExpressionType.Negate)
+        return "-" + GenerateExpression(((UnaryExpression)expr).Operand);
+    else if(expr.NodeType == ExpressionType.UnaryPlus)
+        return GenerateExpression(((UnaryExpression)expr).Operand);
+    else if(expr.NodeType == ExpressionType.OnesComplement)
+        return "~" + GenerateExpression(((UnaryExpression)expr).Operand);
+    else if(expr.NodeType == ExpressionType.Not)
+        return "!" + GenerateExpression(((UnaryExpression)expr).Operand);
+    else if(expr.NodeType == ExpressionType.Convert)
+        return "(" + PrintType((Type)((UnaryExpression)expr).Type) + ")" + GenerateExpression(((UnaryExpression)expr).Operand);
+    else if(expr.NodeType == ExpressionType.TypeAs)
+        return "((" + GenerateExpression(((UnaryExpression)expr).Operand) + ") instanceof "  + PrintType((Type)((UnaryExpression)expr).Type) + ") ? (" + PrintType((Type)((UnaryExpression)expr).Type) + ")(" + GenerateExpression(((UnaryExpression)expr).Operand) + ") : null"; 
+    else if(expr.NodeType == ExpressionType.New)
+        if(((NewExpression)expr).Members.Count == 0)
+            return "new " + PrintType((Type)((NewExpression)expr).Type) + "()";
+        else
+            StringBuilder s = new StringBuilder("new ExpressionHelper<" + PrintType((Type)((NewExpression)expr).Type) + ">() { public " + PrintType((Type)((NewExpression)expr).Type) + " doWork() { " + PrintType((Type)((NewExpression)expr).Type) +" retVal = new " + PrintType((Type)((NewExpression)expr).Type) + "(); ");
+            loop(((NewExpression)expr).Members->member:typeof(MemberInitExpression))
+                s.Append("retVal.set" + FirstLetterUp(member.Property.Name) + "(" + GenerateExpressionWB(member.ValueExpression) + "); ");
+            end loop
+            s.Append("return retVal;}}.doWork()");
+            return s.ToString();
+        end if
+    else if(expr.NodeType == ExpressionType.NewArrayInit)
+        StringBuilder s = new StringBuilder("new " + PrintType((Type)((NewArrayExpression)expr).Type) + "[] {");
+        string comma="";
+        loop(((NewArrayExpression)expr).Expressions->ex:typeof(Expression))
+        s.Append(comma + GenerateExpression(ex));
+         comma=", ";
+        end loop
+        s.Append("}");
+        return s.ToString();
+    else if(expr.NodeType == ExpressionType.NewArrayBounds)
+        return "new " + PrintType((Type)((NewArrayExpression)expr).Type) + "["+ GenerateExpression(((NewArrayExpression)expr).Expressions.ElementAt(0)) +"]";
+    else if(expr.NodeType == ExpressionType.LeftShift)
+        return GenerateExpression(((BinaryExpression)expr).Left) + " << " + GenerateExpression(((BinaryExpression)expr).Right);
+    else if(expr.NodeType == ExpressionType.RightShift)
+        return GenerateExpression(((BinaryExpression)expr).Left) + " >> " + GenerateExpression(((BinaryExpression)expr).Right);
+    else if(expr.NodeType == ExpressionType.Modulo)
+        return GenerateExpression(((BinaryExpression)expr).Left) + " % " + GenerateExpression(((BinaryExpression)expr).Right);
+    else if(expr.NodeType == ExpressionType.Add)
+        return GenerateExpression(((BinaryExpression)expr).Left) + " + " + GenerateExpression(((BinaryExpression)expr).Right);
+    else if(expr.NodeType == ExpressionType.Divide)
+        return GenerateExpression(((BinaryExpression)expr).Left) + " / " + GenerateExpression(((BinaryExpression)expr).Right);
+    else if(expr.NodeType == ExpressionType.Multiply)
+        return GenerateExpression(((BinaryExpression)expr).Left) + " * " + GenerateExpression(((BinaryExpression)expr).Right);
+    else if(expr.NodeType == ExpressionType.Subtract)
+        return GenerateExpression(((BinaryExpression)expr).Left) + " - " + GenerateExpression(((BinaryExpression)expr).Right);
+    else if(expr.NodeType == ExpressionType.And)
+        return GenerateExpression(((BinaryExpression)expr).Left) + " & " + GenerateExpression(((BinaryExpression)expr).Right);
+    else if(expr.NodeType == ExpressionType.AndAlso)
+        return GenerateExpression(((BinaryExpression)expr).Left) + " && " + GenerateExpression(((BinaryExpression)expr).Right);
+    else if(expr.NodeType == ExpressionType.Equal)
+        return GenerateExpression(((BinaryExpression)expr).Left) + " == " + GenerateExpression(((BinaryExpression)expr).Right);
+    else if(expr.NodeType == ExpressionType.ExclusiveOr)
+        return GenerateExpression(((BinaryExpression)expr).Left) + " ^ " + GenerateExpression(((BinaryExpression)expr).Right);
+    else if(expr.NodeType == ExpressionType.GreaterThan)
+        return GenerateExpression(((BinaryExpression)expr).Left) + " > " + GenerateExpression(((BinaryExpression)expr).Right);
+    else if(expr.NodeType == ExpressionType.GreaterThanOrEqual)
+        return GenerateExpression(((BinaryExpression)expr).Left) + " >= " + GenerateExpression(((BinaryExpression)expr).Right);
+    else if(expr.NodeType == ExpressionType.LessThan)
+        return GenerateExpression(((BinaryExpression)expr).Left) + " < " + GenerateExpression(((BinaryExpression)expr).Right);
+    else if(expr.NodeType == ExpressionType.LessThanOrEqual)
+        return GenerateExpression(((BinaryExpression)expr).Left) + " <= " + GenerateExpression(((BinaryExpression)expr).Right);
+    else if(expr.NodeType == ExpressionType.NotEqual)
+        return GenerateExpression(((BinaryExpression)expr).Left) + " != " + GenerateExpression(((BinaryExpression)expr).Right);
+    else if(expr.NodeType == ExpressionType.Or)
+        return GenerateExpression(((BinaryExpression)expr).Left) + " | " + GenerateExpression(((BinaryExpression)expr).Right);
+    else if(expr.NodeType == ExpressionType.OrElse)
+        return GenerateExpression(((BinaryExpression)expr).Left) + " || " + GenerateExpression(((BinaryExpression)expr).Right);
+    else if(expr.NodeType == ExpressionType.Coalesce)
+        return GenerateExpression(((BinaryExpression)expr).Left) + " ?? " + GenerateExpression(((BinaryExpression)expr).Right);
+    else if(expr.NodeType == ExpressionType.TypeIs)
+        return GenerateExpression(((TypeBinaryExpression)expr).Expression) + " instanceof " + PrintType(((TypeBinaryExpression)expr).TypeOperand);
+    else if(expr.NodeType == ExpressionType.Conditional)
+        return "(" + GenerateExpression(((ConditionalExpression)expr).Test) + ") ? " + GenerateExpression(((ConditionalExpression)expr).IfThen) + " : " + GenerateExpression(((ConditionalExpression)expr).IfElse);
+    else if(expr.NodeType == ExpressionType.Lambda)
+        return ""; // TODO
+    else if(expr.NodeType == ExpressionType.Constant)
+        if(((ConstantExpression)expr).Type == PseudoType.Object)
+            return "null";
+        else if(((ConstantExpression)expr).Type == BuiltInType.Bool)
+            return ((ConstantExpression)expr).Value.ToString().ToLower();
+        else if(((ConstantExpression)expr).Type == BuiltInType.Long || ((ConstantExpression)expr).Type == BuiltInType.Double)
+            return ((ConstantExpression)expr).Value.ToString();
+        else if(((ConstantExpression)expr).Type == BuiltInType.String || ((ConstantExpression)expr).Type == BuiltInType.Guid)
+            return "\"" + ((ConstantExpression)expr).Value.ToString() + "\"";
+        else if(((ConstantExpression)expr).Type == BuiltInType.Date || ((ConstantExpression)expr).Type == BuiltInType.Time || ((ConstantExpression)expr).Type == BuiltInType.DateTime || ((ConstantExpression)expr).Type == BuiltInType.TimeSpan)
+            return ""; // TODO
+        end if
+    else if(expr.NodeType == ExpressionType.Default)
+        return ""; // TODO
+    else if(expr.NodeType == ExpressionType.Old)
+        return ""; // TODO
+    else if(expr.NodeType == ExpressionType.Variable)
+        if(((IdentifierExpression)expr).Object is Reference)
+            return ((Reference)(((IdentifierExpression)expr).Object)).Name;
+        else
+            return ((Declaration)(((IdentifierExpression)expr).Object)).Name;
+        end if
+    else if(expr.NodeType == ExpressionType.ArrayIndex)
+        return GenerateExpression(((IndexExpression)expr).Object) + "[" + GenerateExpression(((IndexExpression)expr).Argument) + "]";
+    else if(expr.NodeType == ExpressionType.MemberAccess)
+        if(((MemberExpression)expr).Member is Declaration)
+            return GenerateExpression(((MemberExpression)expr).Object) + ".get" + FirstLetterUp(((Declaration)((MemberExpression)expr).Member).Name) + "()";
+        else if(((MemberExpression)expr).Member is Field)
+            return GenerateExpression(((MemberExpression)expr).Object) + ".get" + FirstLetterUp(((Field)((MemberExpression)expr).Member).Name) + "()";
+        else if(((MemberExpression)expr).Member is EnumValue)
+            return GenerateExpression(((MemberExpression)expr).Object) + "." + ((EnumValue)((MemberExpression)expr).Member).Name.ToUpper();
+        end if
+    else if(expr.NodeType == ExpressionType.Call)
+        StringBuilder s = new StringBuilder(GenerateExpression(((MethodCallExpression)expr).Object) + "." + ((MethodCallExpression)expr).Operation.Name + "(");
+        string comma="";
+        loop(((MethodCallExpression)expr).Arguments->ex:typeof(Expression))
+        s.Append(comma + GenerateExpression(ex));
+         comma=", ";
+        end loop
+        s.Append(")");
+        return s.ToString();
+    end if
+
+    return "";
+end function
+
+template GenerateExpressionHelper(Namespace ns)
+^
+package [GetPackage(ns).ToLower()];
+^
+public interface ExpressionHelper<T> {
+^
+    T doWork();
+}
+end template

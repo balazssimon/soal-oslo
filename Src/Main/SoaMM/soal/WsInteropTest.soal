@@ -1,0 +1,214 @@
+﻿[Uri("http://www.iit.bme.hu/WsInteropTest")]
+namespace WsInteropTest
+{
+	struct Complex
+	{
+		double Re;
+		double Im;
+	}
+
+	interface IInterop
+	{
+		string SayHello(string name);
+		Complex Add(Complex left, Complex right);
+		byte[] Bytes(byte[] data);
+	}
+
+	binding Soap11
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+	}
+
+	binding Soap12
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap12 };
+	}
+
+	binding Soap11Mtom
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11, MTOM = true };
+	}
+
+	binding Soap12Mtom
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap12, MTOM = true };
+	}
+
+	binding Soap11Wsa
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+	}
+
+	binding Soap12Wsa
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap12 };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+	}
+
+	binding Soap11WsaWsRm
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+		protocol ReliableMessaging 
+		{
+			Version = ReliableMessagingVersion.ReliableMessaging11,
+			Delivery = ReliableMessagingDelivery.ExactlyOnce,
+			InOrder = true
+		};
+	}
+
+	binding Soap12WsaWsRm
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap12 };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+		protocol ReliableMessaging 
+		{
+			Version = ReliableMessagingVersion.ReliableMessaging11,
+			Delivery = ReliableMessagingDelivery.ExactlyOnce,
+			InOrder = true
+		};
+	}
+
+	binding Soap11WsaWsS
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+		protocol MutualCertificateSecurity
+		{
+			AlgorithmSuite = SecurityAlgorithmSuite.Basic128Rsa15,
+			HeaderLayout = SecurityHeaderLayout.Strict,
+			ProtectionOrder = SecurityProtectionOrder.SignBeforeEncrypt,
+			RequireSignatureConfirmation = false
+		};
+	}
+
+	binding Soap12WsaWsS
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap12 };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+		protocol MutualCertificateSecurity
+		{
+			AlgorithmSuite = SecurityAlgorithmSuite.Basic128Rsa15,
+			HeaderLayout = SecurityHeaderLayout.Strict,
+			ProtectionOrder = SecurityProtectionOrder.SignBeforeEncrypt,
+			RequireSignatureConfirmation = false
+		};
+	}
+
+	binding Soap11WsaWsSc
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap11 };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+		protocol SecureConversationSecurity
+		{
+			AlgorithmSuite = SecurityAlgorithmSuite.Basic128Rsa15,
+			HeaderLayout = SecurityHeaderLayout.Strict,
+			ProtectionOrder = SecurityProtectionOrder.SignBeforeEncrypt,
+			DerivedKeys = false,
+			RequireSignatureConfirmation = false,
+			RequireSecurityContextCancellation = true
+		};
+		protocol MutualCertificateBootstrap;
+	}
+
+	binding Soap12WsaWsSc
+	{
+		transport HTTP;
+		encoding SOAP { Version = SoapVersion.Soap12 };
+		protocol Addressing { Version = AddressingVersion.Addressing10 };
+		protocol SecureConversationSecurity
+		{
+			AlgorithmSuite = SecurityAlgorithmSuite.Basic128Rsa15,
+			HeaderLayout = SecurityHeaderLayout.Strict,
+			ProtectionOrder = SecurityProtectionOrder.SignBeforeEncrypt,
+			DerivedKeys = false,
+			RequireSignatureConfirmation = false,
+			RequireSecurityContextCancellation = true
+		};
+		protocol MutualCertificateBootstrap;
+	}
+
+	endpoint InteropSoap11 : IInterop
+	{
+		binding Soap11;
+		location "http://tempuri.org";
+	}
+
+	endpoint InteropSoap12 : IInterop
+	{
+		binding Soap12;
+		location "http://tempuri.org";
+	}
+
+	endpoint InteropSoap11Mtom : IInterop
+	{
+		binding Soap11Mtom;
+		location "http://tempuri.org";
+	}
+
+	endpoint InteropSoap12Mtom : IInterop
+	{
+		binding Soap12Mtom;
+		location "http://tempuri.org";
+	}
+
+	endpoint InteropSoap11Wsa : IInterop
+	{
+		binding Soap11Wsa;
+		location "http://tempuri.org";
+	}
+
+	endpoint InteropSoap12Wsa : IInterop
+	{
+		binding Soap12Wsa;
+		location "http://tempuri.org";
+	}
+
+	endpoint InteropSoap11WsaWsRm : IInterop
+	{
+		binding Soap11WsaWsRm;
+		location "http://tempuri.org";
+	}
+
+	endpoint InteropSoap12WsaWsRm : IInterop
+	{
+		binding Soap12WsaWsRm;
+		location "http://tempuri.org";
+	}
+
+	endpoint InteropSoap11WsaWsS : IInterop
+	{
+		binding Soap11WsaWsS;
+		location "http://tempuri.org";
+	}
+
+	endpoint InteropSoap12WsaWsS : IInterop
+	{
+		binding Soap12WsaWsS;
+		location "http://tempuri.org";
+	}
+
+	endpoint InteropSoap11WsaWsSc : IInterop
+	{
+		binding Soap11WsaWsSc;
+		location "http://tempuri.org";
+	}
+
+	endpoint InteropSoap12WsaWsSc : IInterop
+	{
+		binding Soap12WsaWsSc;
+		location "http://tempuri.org";
+	}
+}

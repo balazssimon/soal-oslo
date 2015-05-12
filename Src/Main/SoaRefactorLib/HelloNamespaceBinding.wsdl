@@ -1,0 +1,20 @@
+	<!-- xmlns:wsdl="http://www.w3.org/2001/XMLSchema"-->
+<wsdl:definitions targetNamespace="http://www.iit.bme.hu/HelloNamespace"
+	xmlns:wsdl="http://schemas.xmlsoap.org/wsdl/"
+	xmlns:ns0="http://www.iit.bme.hu/HelloNamespace"
+	xmlns:wsdlpart="http://www.iit.bme.hu/HelloNamespace"
+	xmlns:soap="http://schemas.xmlsoap.org/wsdl/soap/">
+<!--  <wsdl:import location="HelloNamespace.wsdl" namespace="http://www.iit.bme.hu/HelloNamespace"/> -->
+  <wsdl:binding name="IHello_BasicHttpBinding_IHello" type="wsdlpart:IHello">
+    <soap:binding transport="http://schemas.xmlsoap.org/soap/http"/>
+    <wsdl:operation name="helloOperation">
+      <soap:operation soapAction="http://www.iit.bme.hu/HelloNamespace/IHello/helloOperation" style="document" />
+      <wsdl:input>
+        <soap:body use="literal" />
+      </wsdl:input>
+      <wsdl:output>
+        <soap:body use="literal" />
+      </wsdl:output>
+    </wsdl:operation>
+  </wsdl:binding>
+</wsdl:definitions>

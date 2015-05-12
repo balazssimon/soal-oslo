@@ -1,0 +1,931 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.IO;
+include "GeneratorLib.mcg";
+
+configuration
+    string NamespaceName = "SoaMetaModel";
+    string ClassName = "VSGenerator";
+    Type InstancesType = typeof(IEnumerable<SoaObject>);
+    properties Properties
+        string ProjectName = "VisualStudioProject";
+        string ResourcesDir = "../Resources";
+        string OutputDir = "../../Output";
+        bool NoImplementationDelegates = true;
+        bool ThrowNotImplementedException = true;
+        bool NoWindowsIdentityFoundation = true;
+        bool GenerateImplementationBase = false;
+    end properties
+end configuration
+
+/*
+* Main function
+* Creates all folders and files
+*/
+function void Main()
+
+    // project folder and files generation
+    Context.SetOutputFolder(Properties.OutputDir);
+    Context.CreateFolder("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName);
+    File.Copy(Properties.ResourcesDir+"/VisualStudio/About.aspx", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/About.aspx", true);
+    File.Copy(Properties.ResourcesDir+"/VisualStudio/About.aspx.cs", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/About.aspx.cs", true);
+    File.Copy(Properties.ResourcesDir+"/VisualStudio/Default.aspx", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Default.aspx", true);
+    File.Copy(Properties.ResourcesDir+"/VisualStudio/Default.aspx.cs", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Default.aspx.cs", true);
+    File.Copy(Properties.ResourcesDir+"/VisualStudio/Global.asax", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Global.asax", true);
+    File.Copy(Properties.ResourcesDir+"/VisualStudio/Site.master", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Site.master", true);
+    File.Copy(Properties.ResourcesDir+"/VisualStudio/Site.master.cs", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Site.master.cs", true);
+    File.Copy(Properties.ResourcesDir+"/VisualStudio/web.config", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/web.config", true);
+    
+    // Copy files to account folder
+    Context.CreateFolder("VisualStudio/" + Properties.ProjectName +"/" + Properties.ProjectName+ "/Account");
+    File.Copy(Properties.ResourcesDir+"/VisualStudio/ChangePassword.aspx", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Account/ChangePassword.aspx", true);
+    File.Copy(Properties.ResourcesDir+"/VisualStudio/ChangePassword.aspx.cs", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Account/ChangePassword.aspx.cs", true);
+    File.Copy(Properties.ResourcesDir+"/VisualStudio/ChangePasswordSuccess.aspx", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Account/ChangePasswordSuccess.aspx", true);
+    File.Copy(Properties.ResourcesDir+"/VisualStudio/ChangePasswordSuccess.aspx.cs", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Account/ChangePasswordSuccess.aspx.cs", true);
+    File.Copy(Properties.ResourcesDir+"/VisualStudio/Login.aspx", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Account/Login.aspx", true);
+    File.Copy(Properties.ResourcesDir+"/VisualStudio/Login.aspx.cs", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Account/Login.aspx.cs", true);
+    File.Copy(Properties.ResourcesDir+"/VisualStudio/Register.aspx", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Account/Register.aspx", true);
+    File.Copy(Properties.ResourcesDir+"/VisualStudio/Register.aspx.cs", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Account/Register.aspx.cs", true);
+    File.Copy(Properties.ResourcesDir+"/VisualStudio/AccountWeb.config", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Account/Web.config", true);
+
+    // Project code generation
+    Context.CreateFolder("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/App_Code");
+    if (!Properties.NoWindowsIdentityFoundation)
+        File.Copy(Properties.ResourcesDir+"/VisualStudio/SampleRequestValidator.cs", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/App_Code/SampleRequestValidator.cs", true);
+    end if
+    // File for all data types
+    loop(Instances->ns:typeof(Namespace))
+        // Count namespaces in namespace
+        int i = 0;
+        loop(ns.Declarations->d:typeof(Namespace))
+            i = i + 1;
+        end loop
+        // Only create files if not only containing namespaces
+        if(ns.Declarations.Count > i)
+            Context.SetOutput("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/App_Code/" + ns.FullName + ".cs");
+            Context.Output(GenerateDataTypes(ns));            
+        end if
+    end loop
+    // interface generated from interfaces, to avoid multiple generation
+    loop(Instances->intf:typeof(Interface))
+        Context.SetOutput("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/App_Code/" + intf.Name + ".cs");
+        Context.Output(GenerateInterface(intf));
+        if(Properties.GenerateImplementationBase)
+			Context.SetOutput("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/App_Code/" + intf.Name.Substring(1) + "Base.cs");
+			Context.Output(GenerateInterfaceImplBase(intf));
+		end if
+    end loop
+    // endpoint related files generated from endpoint, to avoid name collision
+    loop(Instances->endp:typeof(Endpoint))
+        if (!Properties.NoImplementationDelegates)
+            Context.SetOutput("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/App_Code/" + endp.Name + "Implementation.cs");
+            Context.Output(GenerateInterfaceImpl(endp));
+            Context.SetOutput("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/App_Code/" + endp.Name + ".cs");
+            Context.Output(GenerateEndpoint(endp));
+        else
+            Context.SetOutput("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/App_Code/" + endp.Name + ".cs");
+            Context.Output(GenerateInterfaceImpl(endp));
+        end if
+        Context.SetOutput("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/App_Code/" + endp.Name + "Client.cs");
+        Context.Output(GenerateClient(endp));
+    end loop
+
+    if (!Properties.NoImplementationDelegates)
+        // contracts
+        loop(Instances->con:typeof(Contract))
+            Context.SetOutput("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/App_Code/" + con.Name + ".cs");
+            Context.Output(GenerateContract(con));
+        end loop
+        // authorizations
+        loop(Instances->auth:typeof(Authorization))
+            Context.SetOutput("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/App_Code/" + auth.Name + ".cs");
+            Context.Output(GenerateAuthorization(auth));
+        end loop
+    end if
+
+    // app data folder
+    Context.CreateFolder("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/App_Data");
+
+    // javascript files
+    Context.CreateFolder("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Scripts");
+    File.Copy(Properties.ResourcesDir+"/VisualStudio/jquery-1.4.1.js", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Scripts/jquery-1.4.1.js", true);
+    File.Copy(Properties.ResourcesDir+"/VisualStudio/jquery-1.4.1.min.js", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Scripts/jquery-1.4.1.min.js", true);
+    File.Copy(Properties.ResourcesDir+"/VisualStudio/jquery-1.4.1-vsdoc.js", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Scripts/jquery-1.4.1-vsdoc.js", true);
+    
+    // services generated from endpoints
+    Context.CreateFolder("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Services");
+    loop(Instances->endp:typeof(Endpoint))
+        Context.SetOutput("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Services/" + endp.Name + ".svc");
+        Context.Output(GenerateService(endp));
+    end loop
+    // Web config file
+    Context.SetOutput("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Services/Web.config");
+    Context.Output(GenerateWebConfig());
+    // Client App config file
+    Context.CreateFolder("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Clients");
+    Context.SetOutput("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Clients/App.config");
+    Context.Output(GenerateClientAppConfig());
+    // Service list page
+    Context.SetOutput("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Services/Default.aspx");
+    Context.Output(GenerateServicesDefaultAspx());
+    Context.SetOutput("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Services/Default.aspx.cs");
+    Context.Output(GenerateServicesDefaultAspxCs());
+
+
+    // css file
+    Context.CreateFolder("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Styles");
+    File.Copy(Properties.ResourcesDir+"/VisualStudio/Site.css", "VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "/Styles/Site.css", true);
+
+
+    Context.SetOutputFolder(Properties.OutputDir);
+    Context.CreateFolder("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "Client");
+	Context.SetOutput("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + ".sln");
+	Context.Output(GenerateSolution());
+	Context.SetOutput("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "Client/" + Properties.ProjectName + "Client.csproj");
+	Context.Output(GenerateClientProject());
+	Context.SetOutput("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "Client/Program.cs");
+	Context.Output(GenerateProgramCs());
+	Context.SetOutput("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "Client/App.config");
+	Context.Output(GenerateClientAppConfig());
+    Context.CreateFolder("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "Client/Properties");
+	Context.SetOutput("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "Client/Properties/AssemblyInfo.cs");
+	Context.Output(GenerateAssemblyInfo());
+    loop(Instances->ns:typeof(Namespace))
+        // Only create files if not only containing namespaces
+        if(ns.HasDeclarations())
+            Context.SetOutput("VisualStudio/" + Properties.ProjectName + "/" + Properties.ProjectName + "Client/" + ns.FullName + ".cs");
+            Context.Output(GenerateFullNamespace(ns));            
+        end if
+    end loop
+
+	Context.SetOutput("VisualStudio/" + Properties.ProjectName + "_windows_script.bat");
+	Context.Output(GenerateInstallCertificates());
+end function
+
+/*
+* Template for printing type in C#
+*/
+template PrintType(Type type)
+[if(type == PseudoType.Void || type == PseudoType.Async)]
+void
+[else if(type is BuiltInType)]
+    [if(type == BuiltInType.Guid)]
+Guid
+    [else if(type == BuiltInType.Date || type == BuiltInType.Time)]
+string
+    [else if(type == BuiltInType.DateTime)]
+DateTime
+    [else if(type == BuiltInType.TimeSpan)]
+TimeSpan
+    [else]
+[type.Name]
+    [end if]
+[else if(type is StructType || type is EnumType || type is ExceptionType)]
+[FirstLetterUp(type.Name)]
+[else if(type is ArrayType)]
+[if(((ArrayType)type).ItemType == BuiltInType.Byte)]
+byte["[]"]
+[else if (((ArrayType)type).ItemType is NullableType)]
+ArrayOfNullable[PrintType(((NullableType)((ArrayType)type).ItemType).InnerType)]
+[else]
+ArrayOf[PrintType(((ArrayType)type).ItemType)]
+[end if]
+[else if(type is NullableType)]
+[PrintType(((NullableType)type).InnerType)]?
+[end if]
+end template
+
+template GenerateFullNamespace(Namespace ns)
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.ServiceModel;
+using System.Text;
+^
+namespace [ns.FullName]
+{
+[GenerateDataTypesPart(ns)]
+[GenerateInterfacePart(ns)]
+[GenerateClientPart(ns)]
+}
+end template
+
+/*
+* Generate all data types defined in namespace
+*/
+template GenerateDataTypes(Namespace ns)
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.ServiceModel;
+using System.Text;
+^
+namespace [ns.FullName]
+{
+[GenerateDataTypesPart(ns)]
+}
+end template
+
+template GenerateDataTypesPart(Namespace ns)
+[loop(Instances->type:typeof(ArrayType))]
+[if(((ArrayType)type).ItemType is NullableType)]
+^
+    ["["]System.Runtime.Serialization.CollectionDataContractAttribute(Name = "ArrayOfNullable[PrintType(((NullableType)((ArrayType)type).ItemType).InnerType)]", Namespace = "[GetUri(ns)]", ItemName = "[((NullableType)((ArrayType)type).ItemType).InnerType.Name]")["]"]
+    public class ArrayOfNullable[PrintType(((NullableType)((ArrayType)type).ItemType).InnerType)] : List<[PrintType(((NullableType)((ArrayType)type).ItemType).InnerType)]>
+    {
+    }
+[else if(((ArrayType)type).ItemType != BuiltInType.Byte)]
+^
+    ["["]System.Runtime.Serialization.CollectionDataContractAttribute(Name = "ArrayOf[PrintType(((ArrayType)type).ItemType)]", Namespace = "[GetUri(ns)]", ItemName = "[((ArrayType)type).ItemType.Name]")["]"]
+    public class ArrayOf[PrintType(((ArrayType)type).ItemType)] : List<[PrintType(((ArrayType)type).ItemType)]>
+    {
+    }
+[end if]
+[end loop]
+[loop(ns.Declarations->str:typeof(StructType))]
+^
+    ["["]System.Runtime.Serialization.DataContractAttribute(Name = "[str.Name]", Namespace = "[GetUri(ns)]")["]"]
+	[loop(strde:str.GetAllDescendants())]
+    ["["]System.Runtime.Serialization.KnownTypeAttribute(typeof([strde.Namespace.FullName].[strde.Name]))["]"]
+	[end loop]
+    [if(str.SuperType != null)]
+    public class [str.Name] : [str.SuperType.Namespace.FullName].[str.SuperType.Name]
+    [else]
+    public class [str.Name]
+    [end if]
+    {
+    [loop(str.Fields->field:typeof(StructField))]
+^
+        private [PrintType(field.Type)] [FirstLetterLow(field.Name)]Field;
+	[end loop]
+    [loop(str.Fields->field:typeof(StructField); int order = 0; order = order + 1)]
+^
+        ["["]System.Runtime.Serialization.DataMemberAttribute(IsRequired = true, Order = [order])["]"]
+        public [PrintType(field.Type)] [FirstLetterUp(field.Name)] 
+        { 
+            [if(field.Type is ArrayType && ((ArrayType)field.Type).ItemType != BuiltInType.Byte)]
+            get 
+            { 
+                if (this.[FirstLetterLow(field.Name)]Field == null)
+                {
+                    this.[FirstLetterLow(field.Name)]Field = new [PrintType(field.Type)]();
+                }
+                return this.[FirstLetterLow(field.Name)]Field; 
+            }
+            [else]
+            get { return this.[FirstLetterLow(field.Name)]Field; }
+            set { this.[FirstLetterLow(field.Name)]Field = value; }
+            [end if]
+        }
+    [end loop]
+    }
+[end loop]
+
+[loop(ns.Declarations->en:typeof(EnumType))]
+^
+    ["["]System.Runtime.Serialization.DataContractAttribute(Name = "[en.Name]", Namespace = "[GetUri(ns)]")["]"]
+    public enum [en.Name] : int
+    {
+[loop(en.Values->val:typeof(EnumValue); int counter = 0; counter = counter + 1)]
+        ["["]System.Runtime.Serialization.EnumMemberAttribute()["]"]
+        [val.Name] = [counter],
+[end loop]
+    }
+[end loop]
+
+[loop(ns.Declarations->ex:typeof(ExceptionType))]
+^
+    ["["]System.Runtime.Serialization.DataContractAttribute(Name = "[ex.Name]", Namespace = "[GetUri(ns)]")["]"]
+	[loop(exde:ex.GetAllDescendants())]
+    ["["]System.Runtime.Serialization.KnownTypeAttribute(typeof([exde.Namespace.FullName].[exde.Name]))["]"]
+	[end loop]
+    [if(ex.SuperType != null)]
+    public class [ex.Name] : [ex.SuperType.Namespace.FullName].[ex.SuperType.Name]
+    [else]
+    public class [ex.Name]
+    [end if]
+    {
+    [loop(ex.Fields->field:typeof(ExceptionField))]
+^
+        private [PrintType(field.Type)] [FirstLetterLow(field.Name)]Field;
+	[end loop]
+    [loop(ex.Fields->field:typeof(ExceptionField); int order = 0; order = order + 1)]
+^
+        ["["]System.Runtime.Serialization.DataMemberAttribute(IsRequired = true, Order = [order])["]"]
+        public [PrintType(field.Type)] [FirstLetterUp(field.Name)] 
+        { 
+            [if(field.Type is ArrayType && ((ArrayType)field.Type).ItemType != BuiltInType.Byte)]
+            get 
+            { 
+                if (this.[FirstLetterLow(field.Name)]Field == null)
+                {
+                    this.[FirstLetterLow(field.Name)]Field = new [PrintType(field.Type)]();
+                }
+                return this.[FirstLetterLow(field.Name)]Field; 
+            }
+            [else]
+            get { return this.[FirstLetterLow(field.Name)]Field; }
+            set { this.[FirstLetterLow(field.Name)]Field = value; }
+            [end if]
+        }
+    [end loop]
+    }
+[end loop]
+end template
+
+template GenerateInterfacePart(Namespace ns)
+[loop(ns->Declarations->intf:typeof(Interface))]
+^
+    [GenerateInterfacePart(intf)]
+[end loop]
+end template
+
+template GenerateClientPart(Namespace ns)
+[loop(ns->Declarations->endp:typeof(Endpoint))]
+^
+    [GenerateClientPart(endp)]
+[end loop]
+end template
+
+/*
+* Print Operation header
+*/
+template GenerateOperationHead(Operation op)
+[PrintType(op.ReturnType)] [op.Name](\
+[loop(pa:op.Parameters; string comma=""; comma=", ")]
+[comma][PrintType(pa.Type)] [pa.Name]\
+[end loop]
+)
+end template
+
+/*
+* Print call operation code
+*/
+template GenerateOperationCall(Operation op)
+[op.Name](\
+[loop(pa:op.Parameters; string comma=""; comma=", ")]
+[comma][pa.Name]\
+[end loop]
+)
+end template
+
+/*
+* Print Operation header
+*/
+template GenerateOperationRefHead(OperationImplementation oi)
+[PrintType(oi.Operation.ReturnType)] [oi.Operation.Name](\
+[loop(oi.References->re:typeof(Reference) where re.Object is OperationParameter; string comma = ""; comma = ", ")]
+[comma][PrintType(((OperationParameter)re.Object).Type)] [re.Name]\
+[end loop]
+)
+end template
+
+/*
+* Print operation call for authorization and contract
+*/
+template GenerateOperationRefCall(OperationImplementation oi)
+[oi.Operation.Name](\
+[loop(oi.References->re:typeof(Reference) where re.Object is OperationParameter; string comma = ""; comma = ", ")]
+[comma][re.Name]\
+[end loop]
+)
+end template
+
+/*
+* Generate C# code for interface
+*/
+template GenerateInterface(Interface intf)
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.ServiceModel;
+using System.Text;
+^
+namespace [intf.Namespace.FullName]
+{
+[GenerateInterfacePart(intf)]
+}
+end template
+
+/*
+* Generate C# code for interface
+*/
+template GenerateInterfacePart(Interface intf)
+    ["["]System.ServiceModel.ServiceContractAttribute(Namespace = "[GetUri(intf.Namespace)]")["]"]
+    public interface [intf.Name]
+    {
+[loop(intf.Operations->op:typeof(Operation))]
+^
+        ["["]System.ServiceModel.OperationContractAttribute(Action="[GetUriWithSlash(op.Interface.Namespace) + op.Interface.Name + "/" + op.Name]", ReplyAction="[GetUriWithSlash(op.Interface.Namespace) + op.Interface.Name + "/" + op.Name + "Response"]")["]"]
+    [loop(op.Exceptions->ex:typeof(ExceptionType))]
+        ["["]System.ServiceModel.FaultContractAttribute(typeof([PrintType(ex)]), Action = "[GetUriWithSlash(op.Interface.Namespace) + op.Interface.Name + "/" + op.Name + "Fault/" + ex.Name]", Name = "[ex.Name]")["]"]
+    [end loop]
+        [GenerateOperationHead(op)];
+[end loop]
+    }
+end template
+
+/*
+* Generate code for interface implementation for endpoint
+*/
+template GenerateInterfaceImpl(Endpoint endp)
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ServiceModel;
+^
+namespace [endp.Namespace.FullName]
+{
+    ["["]ServiceBehavior(Namespace = "[GetUri(endp.Namespace)]")["]"]
+[if(!Properties.NoImplementationDelegates)]
+    public class [endp.Name]Implementation : [endp.Interface.Name]
+[else]
+[if(Properties.GenerateImplementationBase)]
+    public class [endp.Name] : [endp.Interface.Name.Substring(1)]Base, [endp.Interface.Name]
+[else]
+    public class [endp.Name] : [endp.Interface.Name]
+[end if]
+[end if]
+    {
+[loop(endp.Interface.Operations->op:typeof(Operation))]
+^
+        public [GenerateOperationHead(op)]
+        {
+            [if(Properties.GenerateImplementationBase)]
+                [if(op.ReturnType != PseudoType.Void && op.ReturnType != PseudoType.Async)]
+            return base.[GenerateOperationCall(op)];
+                [else]
+            base.[GenerateOperationCall(op)];
+                [end if]
+            [else]
+                [if (Properties.ThrowNotImplementedException)]
+            throw new NotImplementedException();
+                [end if]
+            [end if]
+        }
+[end loop]
+    }
+}
+end template
+
+/*
+* Generate code for interface implementation for endpoint
+*/
+template GenerateInterfaceImplBase(Interface intf)
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using System.ServiceModel;
+^
+namespace [intf.Namespace.FullName]
+{
+    public class [intf.Name.Substring(1)]Base : [intf.Name]
+    {
+[loop(intf.Operations->op:typeof(Operation))]
+^
+        public [GenerateOperationHead(op)]
+        {
+        }
+[end loop]
+    }
+}
+end template
+
+/*
+* Geneterate Contract implementation for endpoint
+*/
+template GenerateContract(Contract con)
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+^
+namespace [con.Namespace.FullName]
+{
+    public class [con.Name] : [con.Interface.Name]
+    {
+        private [con.Interface.Name] inner;
+^
+        public [con.Name]([con.Interface.Name] inner)
+        {
+            this.inner = inner;
+        }
+[loop(con.OperationContracts->op:typeof(OperationContract))]
+^
+        public [GenerateOperationRefHead(op)]
+        {
+    [loop(op.OperationContractStatements->ocs:typeof(Requires))]
+^
+            // Requires: [ocs.Text]
+            if (!([GenerateExpression(ocs.Rule)]))
+            {
+        [if(ocs.Otherwise == null)]
+                throw new Exception("Contract requirement error");
+        [else]
+                throw [GenerateExpression(ocs.Otherwise)];
+        [end if]
+            }
+    [end loop]
+    [if(op.Operation.ReturnType != PseudoType.Void && op.Operation.ReturnType != PseudoType.Async)]
+            [PrintType(op.Operation.ReturnType)] result = this.inner.[GenerateOperationRefCall(op)];
+    [else]
+            this.inner.[GenerateOperationRefCall(op)];
+    [end if]
+    [loop(op.OperationContractStatements->ocs:typeof(Ensures))]
+^
+            // Ensures: [ocs.Text]
+            if (!([GenerateExpression(ocs.Rule)]))
+            {
+                throw new Exception("Contract ensurement error");
+            }
+    [end loop]
+    [if(op.Operation.ReturnType != PseudoType.Void && op.Operation.ReturnType != PseudoType.Async)]
+            return result;
+    [end if]
+        }
+[end loop]
+    }
+}
+end template
+
+/*
+* Generate Authoriztaion implementation for endpoint
+*/
+template GenerateAuthorization(Authorization auth)
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Web;
+using Microsoft.IdentityModel.Claims;
+using System.Threading;
+^
+namespace [auth.Namespace.FullName]
+{
+    public class [auth.Name] : [auth.Interface.Name]
+    {
+        private [auth.Interface.Name] inner;
+^
+        public [auth.Name]([auth.Interface.Name] inner)
+        {
+            this.inner = inner;
+        }
+[loop(auth.OperationAuthorizations->op:typeof(OperationAuthorization))]
+^
+        public [GenerateOperationRefHead(op)]
+        {
+            IClaimsPrincipal principal = (IClaimsPrincipal)Thread.CurrentPrincipal;
+            IClaimsIdentity identity = (IClaimsIdentity)principal.Identity;
+            // Check claims here...
+    [if(op.Operation.ReturnType != PseudoType.Void && op.Operation.ReturnType != PseudoType.Async)]
+            return this.inner.[GenerateOperationRefCall(op)];
+    [else]
+            this.inner.[GenerateOperationRefCall(op)]
+    [end if]
+        }
+[end loop]
+    }
+}
+end template
+
+template GenerateEndpoint(Endpoint endp)
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.ServiceModel;
+using System.Text;
+^
+namespace [endp.Namespace.FullName]
+{
+    public class [endp.Name] : [endp.Interface.Name]
+    {
+        private [endp.Interface.Name] inner;
+^
+        public [endp.Name]()
+        {
+[if(endp.Contract == null && endp.Authorization == null)]
+            this.inner = new [endp.Name]Implementation();
+[else if(endp.Contract != null && endp.Authorization == null)]
+            this.inner = new [endp.Name]Contract(new [endp.Name]Implementation());
+[else if(endp.Contract == null && endp.Authorization != null)]
+            this.inner = new [endp.Name]Authorization(new [endp.Name]Implementation());
+[else]
+            this.inner = new [endp.Name]Authorization(new [endp.Name]Contract(new [endp.Name]Implementation()));
+[end if]
+        }
+[loop(endp.Interface.Operations->op:typeof(Operation))]
+^
+        public [GenerateOperationHead(op)]
+        {
+    [if(op.ReturnType != PseudoType.Void && op.ReturnType != PseudoType.Async)]
+            return this.inner.[GenerateOperationCall(op)];
+    [else]
+            this.inner.[GenerateOperationCall(op)];
+    [end if]
+        }
+[end loop]
+    }
+}
+end template
+
+/*
+* Generate Proxy for endpoint
+*/
+template GenerateClient(Endpoint endp)
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Runtime.Serialization;
+using System.ServiceModel;
+using System.Text;
+^
+namespace [endp.Namespace.FullName]
+{
+[GenerateClientPart(endp)]
+}
+end template
+
+
+/*
+* Generate Proxy for endpoint
+*/
+template GenerateClientPart(Endpoint endp)
+    public partial class [endp.Name]Client : System.ServiceModel.ClientBase<[endp.Namespace.FullName].[endp.Interface.Name]>, [endp.Namespace.FullName].[endp.Interface.Name]
+    {
+        public [endp.Name]Client()
+        {
+        }
+^
+        public [endp.Name]Client(string endpointConfigurationName) : 
+                base(endpointConfigurationName)
+        {
+        }
+^
+        public [endp.Name]Client(string endpointConfigurationName, string remoteAddress) : 
+                base(endpointConfigurationName, remoteAddress)
+        {
+        }
+^
+        public [endp.Name]Client(string endpointConfigurationName, System.ServiceModel.EndpointAddress remoteAddress) : 
+                base(endpointConfigurationName, remoteAddress)
+        {
+        }
+^
+        public [endp.Name]Client(System.ServiceModel.Channels.Binding binding, System.ServiceModel.EndpointAddress remoteAddress) : 
+                base(binding, remoteAddress)
+        {
+        }
+[loop(endp.Interface.Operations->op:typeof(Operation))]
+^
+        public [GenerateOperationHead(op)]
+        {
+        [if(op.ReturnType != PseudoType.Void && op.ReturnType != PseudoType.Async)]
+            return base.Channel.[GenerateOperationCall(op)];
+        [else]
+            base.Channel.[GenerateOperationCall(op)];
+        [end if]
+        }
+[end loop]
+    }
+end template
+
+template GenerateSolution()
+
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual Studio 2010
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "[Properties.ProjectName]Client", "[Properties.ProjectName]Client\[Properties.ProjectName]Client.csproj", "{25817C9A-811D-4D02-B475-927904A404FD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|x86 = Debug|x86
+		Release|x86 = Release|x86
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{25817C9A-811D-4D02-B475-927904A404FD}.Debug|x86.ActiveCfg = Debug|x86
+		{25817C9A-811D-4D02-B475-927904A404FD}.Debug|x86.Build.0 = Debug|x86
+		{25817C9A-811D-4D02-B475-927904A404FD}.Release|x86.ActiveCfg = Release|x86
+		{25817C9A-811D-4D02-B475-927904A404FD}.Release|x86.Build.0 = Release|x86
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+EndGlobal
+end template
+
+template GenerateClientProject()
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">x86</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{25817C9A-811D-4D02-B475-927904A404FD}</ProjectGuid>
+    <OutputType>Exe</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>[Properties.ProjectName]Client</RootNamespace>
+    <AssemblyName>[Properties.ProjectName]Client</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <TargetFrameworkProfile>Client</TargetFrameworkProfile>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|x86' ">
+    <PlatformTarget>x86</PlatformTarget>
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Runtime.Serialization" />
+    <Reference Include="System.ServiceModel" />
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+[loop(Instances->ns:typeof(Namespace))]
+[if (ns.HasDeclarations())]
+    <Compile Include="[ns.FullName].cs" />
+[end if]
+[end loop]
+    <Compile Include="Program.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="App.config">
+      <SubType>Designer</SubType>
+    </None>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
+end template
+
+template GenerateAssemblyInfo()
+using System.Reflection;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
+
+// General Information about an assembly is controlled through the following 
+// set of attributes. Change these attribute values to modify the information
+// associated with an assembly.
+["["]assembly: AssemblyTitle("[Properties.ProjectName]Client")["]"]
+["["]assembly: AssemblyDescription("")["]"]
+["["]assembly: AssemblyConfiguration("")["]"]
+["["]assembly: AssemblyCompany("")["]"]
+["["]assembly: AssemblyProduct("[Properties.ProjectName]Client")["]"]
+["["]assembly: AssemblyCopyright("Copyright ©  2014")["]"]
+["["]assembly: AssemblyTrademark("")["]"]
+["["]assembly: AssemblyCulture("")["]"]
+
+// Setting ComVisible to false makes the types in this assembly not visible 
+// to COM components.  If you need to access a type in this assembly from 
+// COM, set the ComVisible attribute to true on that type.
+["["]assembly: ComVisible(false)["]"]
+
+// The following GUID is for the ID of the typelib if this project is exposed to COM
+["["]assembly: Guid("ef038eee-e47d-4905-84cc-5e147df1ffec")["]"]
+
+// Version information for an assembly consists of the following four values:
+//
+//      Major Version
+//      Minor Version 
+//      Build Number
+//      Revision
+//
+// You can specify all the values or you can default the Build and Revision Numbers 
+// by using the '*' as shown below:
+// ["["]assembly: AssemblyVersion("1.0.*")["]"]
+["["]assembly: AssemblyVersion("1.0.0.0")["]"]
+["["]assembly: AssemblyFileVersion("1.0.0.0")["]"]
+end template
+
+template GenerateProgramCs()
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.ServiceModel;
+[loop(Instances->ns:typeof(Namespace))]
+[if (ns.HasDeclarations())]
+using [ns.FullName];
+[end if]
+[end loop]
+^
+namespace [Properties.ProjectName]Client
+{
+    enum TargetFramework
+    {
+        Wcf,
+        Metro,
+        TomcatCxf,
+        Oracle,
+        Ibm
+    }
+^
+    public class Program
+    {
+        private const bool PrintExceptions = false;
+        private static readonly Dictionary<TargetFramework, string> Urls = new Dictionary<TargetFramework, string>();
+^
+        private const TargetFramework Target = TargetFramework.Wcf;
+^
+        static void Main(string["[]"] args)
+        {
+            using (ConsoleCopy cc = new ConsoleCopy(@"..\..\Wcf.txt"))
+            {
+                Urls.Add(TargetFramework.Wcf, "http://localhost/WsInteropTest/Services/{0}.svc");
+                Urls.Add(TargetFramework.Metro, "http://localhost:8080/WsInteropTest/services/{0}");
+                Urls.Add(TargetFramework.TomcatCxf, "http://localhost:9080/WsInteropTest/services/{0}");
+                Urls.Add(TargetFramework.Oracle, "http://192.168.136.128:7101/WsInteropTest/services/{0}");
+                Urls.Add(TargetFramework.Ibm, "http://192.168.136.128:9080/WsInteropTest/{0}");
+                string url = Urls["[Target]"];
+                try
+                {
+					[loop(Instances->endp:typeof(Endpoint))]                
+					Test[endp.Interface.Name]("[endp.Name]", url);
+					[end loop]
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
+            }
+        }
+^
+		[loop(Instances->intf:typeof(Interface))]                
+		private static void Test[intf.Name](string endpoint, string url, bool close = true)
+		{
+			Console.WriteLine(endpoint);
+			try
+			{
+				var factory = new ChannelFactory<[intf.Name]>("[intf.Namespace.FullName]."+endpoint);
+				var address = new EndpointAddress(new Uri(string.Format(url, endpoint)), EndpointIdentity.CreateDnsIdentity("WspService"));
+				[intf.Name] service = factory.CreateChannel(address);
+				try
+				{
+					// call service
+					try
+					{
+						if (close)
+                        {
+                            ((IDisposable)service).Dispose();
+                        }
+					}
+					catch (Exception ex)
+					{
+						Console.WriteLine("Close failed.");
+						if (PrintExceptions) Console.WriteLine(ex);
+					}
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine("Call failed.");
+					if (PrintExceptions) Console.WriteLine(ex);
+				}
+			}
+			catch (Exception ex)
+			{
+	            Console.WriteLine("Init failed.");
+	            if (PrintExceptions) Console.WriteLine(ex);
+			}
+			Console.WriteLine("----");
+		}
+		[end loop]
+    }
+}
+end template
+
+template GenerateInstallCertificates()
+^
+end template

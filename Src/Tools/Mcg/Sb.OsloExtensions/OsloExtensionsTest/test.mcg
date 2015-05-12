@@ -1,0 +1,41 @@
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+configuration
+    properties Properties
+        string Name = "xyz";
+        string OtherName = "abc";
+    end properties
+end configuration
+
+function void Main()
+    int a = 4;
+    loop(Instances->typeof(string)->Distinct())
+      a = 3;
+    else
+      a = 1;
+    end loop
+    loop(Instances.OfType<string>().Distinct())
+      a = 3;
+    else
+      a = 1;
+    end loop
+end function
+
+template SayHello2(string name)
+Hello, [name]!
+Hello, [Properties.Name]!
+Hello, [Properties.OtherName]!
+end template
+
+template LoopTemplateTest()
+aaa
+[loop(Instances->typeof(string)->Distinct())]
+bbb
+[else]
+ccc
+[end loop]
+ddd
+end template

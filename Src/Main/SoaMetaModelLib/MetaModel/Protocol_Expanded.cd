@@ -1,0 +1,102 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="SoaMetaModel.AtomicTransactionProtocolBindingElement">
+    <Position X="4" Y="4.5" Width="3.25" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>AtomicTransactionProtocolBindingElement.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.AddressingProtocolBindingElement">
+    <Position X="0.5" Y="4.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>AddressingProtocolBindingElement.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.BootstrapProtocolBindingElement">
+    <Position X="15.25" Y="4.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAQAAAAAAAAAAAEAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>BootstrapProtocolBindingElement.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.ReliableMessagingProtocolBindingElement">
+    <Position X="8" Y="4.5" Width="3" />
+    <TypeIdentifier>
+      <HashCode>IAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAg=</HashCode>
+      <FileName>ReliableMessagingProtocolBindingElement.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.ProtocolBindingElement">
+    <Position X="8" Y="2" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAACA=</HashCode>
+      <FileName>ProtocolBindingElement.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.SecurityProtocolBindingElement">
+    <Position X="11.75" Y="4.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAIAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAIA=</HashCode>
+      <FileName>SecurityProtocolBindingElement.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SoaMetaModel.Binding">
+    <Position X="11.75" Y="0.75" Width="2" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAABAAAAAAAAAAAARAgAAAAAAAAAAAEAABAAA=</HashCode>
+      <FileName>Binding.cs</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Enum Name="SoaMetaModel.AtomicTransactionVersion">
+    <Position X="4.5" Y="6.75" Width="2.25" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAQAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>AtomicTransactionVersion.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="SoaMetaModel.AddressingVersion">
+    <Position X="1" Y="6.75" Width="1.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>AddressingVersion.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="SoaMetaModel.ReliableMessagingDelivery">
+    <Position X="8.25" Y="8.5" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAACAEAAAAAAAAAAAAAAAAAAQAAAAA=</HashCode>
+      <FileName>ReliableMessagingDelivery.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="SoaMetaModel.ReliableMessagingVersion">
+    <Position X="8.25" Y="6.75" Width="2.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ReliableMessagingVersion.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="SoaMetaModel.SecurityAlgorithmSuite">
+    <Position X="15.25" Y="6.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>ACgIACAAAAAAAAAAAAAAAAEAARAAAAEgJQKQAAAQAAA=</HashCode>
+      <FileName>SecurityAlgorithmSuite.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="SoaMetaModel.SecurityProtectionOrder">
+    <Position X="11.75" Y="6.75" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAEAAAAAAAAAAAEABAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SecurityProtectionOrder.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Enum Name="SoaMetaModel.SecurityHeaderLayout">
+    <Position X="11.75" Y="8.5" Width="2.75" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAAAAIAAAAgBAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SecurityHeaderLayout.cs</FileName>
+    </TypeIdentifier>
+  </Enum>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

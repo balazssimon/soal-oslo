@@ -1,0 +1,94 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{45456458-A7BC-46A4-96FC-25DE0669B8E5}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SoaMetaModel</RootNamespace>
+    <AssemblyName>SoaParserLib</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+    <OsloInstallPath>$(Registry:HKEY_LOCAL_MACHINE\Software\Microsoft\Oslo\1.0\Installer\@InstallPath)</OsloInstallPath>
+    <OsloInstallPath Condition="'$(OsloInstallPath)' == ''">$(Registry:HKEY_LOCAL_MACHINE\Software\Wow6432Node\Microsoft\Oslo\1.0\Installer\@InstallPath)</OsloInstallPath>
+    <SdkBinPath>$(OsloInstallPath)1.0\Bin</SdkBinPath>
+    <MDLL>$(SdkBinPath)\Microsoft.M.dll</MDLL>
+    <MTargetsPath Condition="$(MTargetsPath) == ''">$(MSBuildExtensionsPath32)\Microsoft\M\v1.0</MTargetsPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Microsoft.M, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="Sb.OsloExtensions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=61d7564ac0cf7b10, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Dataflow, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="BindingValidator.cs" />
+    <Compile Include="ExpressionValidator.cs" />
+    <Compile Include="ExpressionParser.cs" />
+    <Compile Include="MemberParser.cs" />
+    <Compile Include="DeclarationParser.cs" />
+    <Compile Include="NameValidator.cs" />
+    <Compile Include="SoaLanguageException.cs" />
+    <Compile Include="SoaLanguageInfo.cs" />
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="SoaLanguage.cs" />
+    <Compile Include="SoaLanguageParser.cs" />
+    <Compile Include="SoaLanguageValidator.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Sb.Meta\Sb.Meta.csproj">
+      <Project>{264D2AF3-9F8E-4C34-B733-AE51923ED976}</Project>
+      <Name>Sb.Meta</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SoaMetaModelLib\SoaMetaModelLib.csproj">
+      <Project>{29F8B50B-F187-45E0-A299-B9AE94294B1D}</Project>
+      <Name>SoaMetaModelLib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <MCompile Include="SoaGrammar.mg" />
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="TDK_Validator.cd" />
+    <None Include="TDK_Parser.cd" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <Import Condition="Exists('$(MTargetsPath)\Microsoft.M.Embedded.targets')" Project="$(MTargetsPath)\Microsoft.M.Embedded.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>

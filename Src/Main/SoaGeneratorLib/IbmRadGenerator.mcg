@@ -1,0 +1,622 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+using System.IO;
+using Ionic.Zip;
+include "GeneratorLib.mcg";
+import JavaGenerator;
+import XsdWsdlGenerator;
+
+configuration
+    string NamespaceName = "SoaMetaModel";
+	string ClassName = "IbmRadGenerator";
+    Type InstancesType = typeof(IEnumerable<SoaObject>);
+    properties Properties
+        string ProjectName = "RadProject";
+        string ResourcesDir = "../Resources";
+        string OutputDir = "../../Output";
+        bool NoImplementationDelegates = true;
+        bool ThrowNotImplementedException = true;
+        bool GenerateProxyFeatureConstructors = false;
+        bool GenerateImplementationBase = false;
+    end properties
+end configuration
+
+/*
+* Main function for creating folders and calling file templates.
+*/
+function void Main()
+	JavaGenerator.Properties.NoImplementationDelegates = Properties.NoImplementationDelegates;
+	JavaGenerator.Properties.ThrowNotImplementedException = Properties.ThrowNotImplementedException;
+	JavaGenerator.Properties.GenerateProxyFeatureConstructors = Properties.GenerateProxyFeatureConstructors;
+	JavaGenerator.Properties.GenerateImplementationBase = Properties.GenerateImplementationBase;
+
+	XsdWsdlGenerator.Properties.GeneratePolicies = false;
+	XsdWsdlGenerator.Properties.Ibm = true;
+	XsdWsdlGenerator.Properties.XPathSignEncrypt = true;
+	XsdWsdlGenerator.Properties.WsPolicyNamespace = "http://schemas.xmlsoap.org/ws/2004/09/policy";
+	XsdWsdlGenerator.Properties.WsSecurityPolicyNamespace = "http://docs.oasis-open.org/ws-sx/ws-securitypolicy/200512";
+
+	Context.SetOutputFolder(Properties.OutputDir);
+	Context.CreateFolder("IbmRad");
+
+	GeneratePolicies("IbmRad/Policies");
+	GenerateBindings("IbmRad/Bindings");
+
+	Context.SetOutput("IbmRad/" + GetProjectName() + "_websphere_script.py");
+	Context.Output(Generate_websphere_script());
+	Context.CreateFolder("IbmRad/" + GetProjectName());
+	Context.SetOutput("IbmRad/" + GetProjectName() + "/.project");
+	Context.Output(Generate_project());
+	Context.SetOutput("IbmRad/" + GetProjectName() + "/.classpath");
+	Context.Output(Generate_classpath());
+	Context.SetOutput("IbmRad/" + GetProjectName() + "/.factorypath");
+	Context.Output(Generate_factorypath());
+	Context.CreateFolder("IbmRad/" + GetProjectName() + "/.apt_generated");
+	Context.CreateFolder("IbmRad/" + GetProjectName() + "/.settings");
+	Context.SetOutput("IbmRad/" + GetProjectName() + "/.settings/.jsdtscope");
+	Context.Output(Generate_jsdtscope());
+	Context.SetOutput("IbmRad/" + GetProjectName() + "/.settings/org.eclipse.wst.common.component");
+	Context.Output(Generate_common_component());
+	Context.SetOutput("IbmRad/" + GetProjectName() + "/.settings/org.eclipse.wst.jsdt.ui.superType.container");
+	Context.Output(Generate_superType_container());
+	Context.SetOutput("IbmRad/" + GetProjectName() + "/.settings/org.eclipse.wst.jsdt.ui.superType.name");
+	Context.Output(Generate_superType_name());
+	Context.SetOutput("IbmRad/" + GetProjectName() + "/.settings/com.ibm.etools.references.prefs");
+	Context.Output(Generate_etools_references_prefs());
+	Context.SetOutput("IbmRad/" + GetProjectName() + "/.settings/org.eclipse.jdt.apt.core.prefs");
+	Context.Output(Generate_apt_core_prefs());
+	Context.SetOutput("IbmRad/" + GetProjectName() + "/.settings/org.eclipse.jdt.core.prefs");
+	Context.Output(Generate_core_prefs());
+	Context.SetOutput("IbmRad/" + GetProjectName() + "/.settings/org.eclipse.wst.ws.service.policy.prefs");
+	Context.Output(Generate_service_policy_prefs());
+	Context.SetOutput("IbmRad/" + GetProjectName() + "/.settings/org.eclipse.wst.common.project.facet.core.xml");
+	Context.Output(Generate_facet_core());
+
+	Context.CreateFolder("IbmRad/" + GetProjectName() + "/build");
+	Context.CreateFolder("IbmRad/" + GetProjectName() + "/WebContent");
+	Context.CreateFolder("IbmRad/" + GetProjectName() + "/WebContent/META-INF");
+	Context.SetOutput("IbmRad/" + GetProjectName() + "/WebContent/META-INF/MANIFEST.MF");
+	Context.Output(Generate_MetaInf_Manifest());
+
+	Context.CreateFolder("IbmRad/" + GetProjectName() + "/WebContent/WEB-INF");
+	Context.CreateFolder("IbmRad/" + GetProjectName() + "/WebContent/WEB-INF/lib");
+	Context.SetOutput("IbmRad/" + GetProjectName() + "/WebContent/WEB-INF/web.xml");
+	Context.Output(Generate_web_xml());
+	Context.SetOutput("IbmRad/" + GetProjectName() + "/WebContent/WEB-INF/ibm-web-bnd.xml");
+	Context.Output(Generate_ibm_web_bnd());
+	Context.SetOutput("IbmRad/" + GetProjectName() + "/WebContent/WEB-INF/ibm-web-ext.xml");
+	Context.Output(Generate_ibm_web_ext());
+	
+	JavaGenerator.Properties.GenerateServerStubs = true;
+	JavaGenerator.Properties.GenerateClientProxies = false;
+	JavaGenerator.GenerateJavaCode("IbmRad/" + GetProjectName() + "/src");
+
+	Context.CreateFolder("IbmRad/" + GetProjectName() + "/WebContent/WEB-INF");
+	Context.SetOutputFolder(Properties.OutputDir+"/IbmRad/" + GetProjectName() + "/WebContent/WEB-INF");
+	XsdWsdlGenerator.Properties.OutputDir = Properties.OutputDir+"/IbmRad/" + GetProjectName() + "/WebContent/WEB-INF";
+	loop(Instances->ns:typeof(Namespace))
+		XsdWsdlGenerator.GenerateXsdWsdl(ns);
+	end loop
+	Context.SetOutputFolder(Properties.OutputDir);
+
+	Context.CreateFolder("IbmRad/" + GetEarProjectName());
+	Context.SetOutput("IbmRad/" + GetEarProjectName() + "/.project");
+	Context.Output(Generate_project_ear());
+	Context.CreateFolder("IbmRad/" + GetEarProjectName() + "/.settings");
+	Context.SetOutput("IbmRad/" + GetEarProjectName() + "/.settings/org.eclipse.wst.common.component");
+	Context.Output(Generate_common_component_ear());
+	Context.SetOutput("IbmRad/" + GetEarProjectName() + "/.settings/org.eclipse.wst.ws.service.policy.prefs");
+	Context.Output(Generate_service_policy_prefs_ear());
+	Context.SetOutput("IbmRad/" + GetEarProjectName() + "/.settings/org.eclipse.wst.common.project.facet.core.xml");
+	Context.Output(Generate_facet_core_ear());
+	Context.CreateFolder("IbmRad/" + GetEarProjectName() + "/META-INF");
+	Context.SetOutput("IbmRad/" + GetEarProjectName() + "/META-INF/policyAttachments.xml");
+	Context.Output(Generate_policy_attachments());
+	Context.SetOutput("IbmRad/" + GetEarProjectName() + "/META-INF/wsPolicyServiceControl.xml");
+	Context.Output(Generate_ws_policy_service_control());
+end function
+
+/*
+* Get project name
+*/
+function string GetProjectName()
+    return Properties.ProjectName;
+end function
+
+/*
+* Get project name
+*/
+function string GetEarProjectName()
+    return Properties.ProjectName+"EAR";
+end function
+
+template Generate_web_services_jsp()
+<%-- 
+    Document   : services
+    Created on : Aug 19, 2011, 3:44:15 PM
+    Author     : sb
+--%>
+
+<%@page contentType="text/html" pageEncoding="UTF-8"%>
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN"
+   "http://www.w3.org/TR/html4/loose.dtd">
+
+<html>
+    <head>
+        <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+        <title>JSP Page</title>
+    </head>
+    <body>
+        <h1>List of Services</h1>
+[loop(Instances->endpoint:typeof(Endpoint))]
+        <a href="[endpoint.Name]?wsdl">[endpoint.Name]</a><br/>
+[end loop]
+    </body>
+</html>
+end template
+
+
+function void GeneratePolicies(string dir)
+	Context.CreateFolder(dir);
+	loop(Instances->binding:typeof(Binding))
+		if (binding.HasPolicy())
+			GeneratePolicy(dir+"/"+binding.Name+"_policy/PolicySets/"+binding.Name+"_policy", binding);
+			Context.SetOutput(null);
+			File.Delete(dir+"/"+binding.Name+"_policy.zip");
+			ZipFile zip = new ZipFile(dir+"/"+binding.Name+"_policy.zip");
+			zip.AddDirectory(dir+"/"+binding.Name+"_policy/PolicySets", "PolicySets");
+			zip.Save();
+			zip.Dispose();
+			Directory.Delete(dir+"/"+binding.Name+"_policy", true);
+		end if
+	end loop
+end function
+
+function void GeneratePolicy(string dir, Binding binding)
+	Context.CreateFolder(dir);
+	Context.SetOutput(dir+"/policySet.xml");
+	Context.Output(GeneratePolicySet(binding));
+	Context.CreateFolder(dir+"/PolicyTypes");
+	loop(binding.Protocols->addr:typeof(AddressingProtocolBindingElement))
+		Context.CreateFolder(dir+"/PolicyTypes/WSAddressing");
+		Context.SetOutput(dir+"/PolicyTypes/WSAddressing/policy.xml");
+		Context.Output(GenerateWSAddressingPolicy(binding));
+	end loop
+	loop(binding.Protocols->rm:typeof(ReliableMessagingProtocolBindingElement))
+		Context.CreateFolder(dir+"/PolicyTypes/WSReliableMessaging");
+		Context.SetOutput(dir+"/PolicyTypes/WSReliableMessaging/policy.xml");
+		Context.Output(GenerateWSReliableMessagingPolicy(binding));
+	end loop
+	loop(binding.Protocols->sec:typeof(SecurityProtocolBindingElement))
+		Context.CreateFolder(dir+"/PolicyTypes/WSSecurity");
+		Context.SetOutput(dir+"/PolicyTypes/WSSecurity/policy.xml");
+		Context.Output(GenerateWSSecurityPolicy(binding));
+	end loop
+end function
+
+template GeneratePolicySet(Binding binding)
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<ps:PolicySet xmlns:ps="http://www.ibm.com/xmlns/prod/websphere/200605/policyset" xmlns:psa="http://www.ibm.com/xmlns/prod/websphere/200605/policysetattachment" name="[binding.Name]_policy" type="application" description="[binding.Name]_policy" default="true" version="7.0.0.0">
+[loop(binding.Protocols->addr:typeof(AddressingProtocolBindingElement))]
+    <ps:PolicyType type="WSAddressing"  provides="" enabled="true">
+    </ps:PolicyType>
+[end loop]
+[loop(binding.Protocols->rm:typeof(ReliableMessagingProtocolBindingElement))]
+    <ps:PolicyType type="WSReliableMessaging" provides="" enabled="true">
+    </ps:PolicyType>
+[end loop]
+[loop(binding.Protocols->sec:typeof(SecurityProtocolBindingElement))]
+    <ps:PolicyType type="WSSecurity" provides="" enabled="true">
+    </ps:PolicyType>
+[end loop]
+</ps:PolicySet>           
+end template
+
+template GenerateWSAddressingPolicy(Binding binding)
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wsp:Policy wsu:Id="[binding.Name]_Policy"
+	[XsdWsdlGenerator.GeneratePolicyNamespaces()]
+>
+	[XsdWsdlGenerator.GenerateAddressingPolicy(binding)]
+</wsp:Policy>
+end template
+
+template GenerateWSReliableMessagingPolicy(Binding binding)
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wsp:Policy wsu:Id="[binding.Name]_Policy"
+	[XsdWsdlGenerator.GeneratePolicyNamespaces()]
+>
+	[XsdWsdlGenerator.GenerateReliableMessagingPolicy(binding)]
+</wsp:Policy>
+end template
+
+template GenerateWSSecurityPolicy(Binding binding)
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wsp:Policy wsu:Id="[binding.Name]_Policy"
+	[XsdWsdlGenerator.GeneratePolicyNamespaces()]
+>
+	[XsdWsdlGenerator.GenerateSecurityPolicy(binding, false)]
+	[GenerateWSSecurityExtPolicy()]
+</wsp:Policy>
+end template
+
+
+template GenerateWSSecurityExtPolicy()
+  <wsp:Policy wsu:Id="request:app_signparts">
+    <sp:SignedParts>
+      <sp:Body/>
+      <sp:Header Namespace="http://schemas.xmlsoap.org/ws/2004/08/addressing"/>
+      <sp:Header Namespace="http://www.w3.org/2005/08/addressing"/>
+    </sp:SignedParts>
+    <sp:SignedElements>
+      ["<sp:XPath>/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Envelope']/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd' and local-name()='Timestamp']</sp:XPath>"]
+      ["<sp:XPath>/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Envelope']/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='UsernameToken']</sp:XPath>"]
+      ["<sp:XPath>/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Envelope']/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd' and local-name()='Timestamp']</sp:XPath>"]
+      ["<sp:XPath>/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Envelope']/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='UsernameToken']</sp:XPath>"]
+    </sp:SignedElements>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="request:app_encparts">
+    <sp:EncryptedParts>
+      <sp:Body/>
+    </sp:EncryptedParts>
+    <sp:EncryptedElements>
+      ["<sp:XPath>/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Envelope']/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://www.w3.org/2000/09/xmldsig#' and local-name()='Signature']</sp:XPath>"]
+      ["<sp:XPath>/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Envelope']/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='UsernameToken']</sp:XPath>"]
+      ["<sp:XPath>/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Envelope']/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://www.w3.org/2000/09/xmldsig#' and local-name()='Signature']</sp:XPath>"]
+      ["<sp:XPath>/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Envelope']/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='UsernameToken']</sp:XPath>"]
+    </sp:EncryptedElements>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="response:app_signparts">
+    <sp:SignedParts>
+      <sp:Body/>
+      <sp:Header Namespace="http://schemas.xmlsoap.org/ws/2004/08/addressing"/>
+      <sp:Header Namespace="http://www.w3.org/2005/08/addressing"/>
+    </sp:SignedParts>
+    <sp:SignedElements>
+      ["<sp:XPath>/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Envelope']/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd' and local-name()='Timestamp']</sp:XPath>"]
+      ["<sp:XPath>/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Envelope']/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd' and local-name()='Timestamp']</sp:XPath>"]
+    </sp:SignedElements>
+  </wsp:Policy>
+  <wsp:Policy wsu:Id="response:app_encparts">
+    <sp:EncryptedParts>
+      <sp:Body/>
+    </sp:EncryptedParts>
+    <sp:EncryptedElements>
+      ["<sp:XPath>/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Envelope']/*[namespace-uri()='http://schemas.xmlsoap.org/soap/envelope/' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://www.w3.org/2000/09/xmldsig#' and local-name()='Signature']</sp:XPath>"]
+      ["<sp:XPath>/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Envelope']/*[namespace-uri()='http://www.w3.org/2003/05/soap-envelope' and local-name()='Header']/*[namespace-uri()='http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd' and local-name()='Security']/*[namespace-uri()='http://www.w3.org/2000/09/xmldsig#' and local-name()='Signature']</sp:XPath>"]
+    </sp:EncryptedElements>
+  </wsp:Policy>
+end template
+
+
+function void GenerateBindings(string dir)
+	Context.CreateFolder(dir);
+	GenerateBinding(dir+"/"+GetProjectName()+"_binding/bindings/"+GetProjectName()+"_binding");
+	Context.SetOutput(null);
+	File.Delete(dir+"/"+GetProjectName()+"_binding.zip");
+	ZipFile zip = new ZipFile(dir+"/"+GetProjectName()+"_binding.zip");
+	zip.AddDirectory(dir+"/"+GetProjectName()+"_binding/bindings", "bindings");
+	zip.Save();
+	zip.Dispose();
+	Directory.Delete(dir+"/"+GetProjectName()+"_binding", true);
+end function
+
+function void GenerateBinding(string dir)
+	Context.CreateFolder(dir);
+	Context.SetOutput(dir+"/bindingDefinition.xml");
+	Context.Output(GenerateBindingDefinition());
+	Context.CreateFolder(dir+"/PolicyTypes");
+	Context.CreateFolder(dir+"/PolicyTypes/HTTPTransport");
+	Context.SetOutput(dir+"/PolicyTypes/HTTPTransport/bindings.xml");
+	Context.Output(GenerateHttpTransportBinding());
+	Context.CreateFolder(dir+"/PolicyTypes/JMSTransport");
+	Context.SetOutput(dir+"/PolicyTypes/JMSTransport/bindings.xml");
+	Context.Output(GenerateJmsTransportBinding());
+	Context.CreateFolder(dir+"/PolicyTypes/SSLTransport");
+	Context.SetOutput(dir+"/PolicyTypes/SSLTransport/bindings.xml");
+	Context.Output(GenerateSslTransportBinding());
+	Context.CreateFolder(dir+"/PolicyTypes/WSAddressing");
+	Context.SetOutput(dir+"/PolicyTypes/WSAddressing/bindings.xml");
+	Context.Output(GenerateWSAddressingBinding());
+	Context.CreateFolder(dir+"/PolicyTypes/WSReliableMessaging");
+	Context.SetOutput(dir+"/PolicyTypes/WSReliableMessaging/bindings.xml");
+	Context.Output(GenerateWSReliableMessagingBinding());
+	Context.CreateFolder(dir+"/PolicyTypes/WSSecurity");
+	Context.SetOutput(dir+"/PolicyTypes/WSSecurity/bindings.xml");
+	Context.Output(GenerateWSSecurityBinding());
+end function
+
+template GenerateBindingDefinition()
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<BindingDefinition xmlns="http://www.ibm.com/xmlns/prod/websphere/200711/bindingdefinition" description="[GetProjectName()]_binding" type="provider" version="7.0.0.0">
+    <Domain name="global"></Domain>
+</BindingDefinition>
+end template
+
+template GenerateHttpTransportBinding()
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wsp:Policy
+	xmlns:wshttp="http://www.ibm.com/xmlns/prod/websphere/200609/ws-httpTransport"
+	xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+	<!-- Do not edit this file. -->
+	<wsp:ExactlyOne>
+		<wsp:All>
+			<wshttp:outRequestBasicAuth>
+                                <wshttp:basicAuth userid="" password=""></wshttp:basicAuth>
+			</wshttp:outRequestBasicAuth>
+			<wshttp:outAsyncResponseBasicAuth> 
+                                <wshttp:basicAuth userid="" password=""></wshttp:basicAuth>
+            </wshttp:outAsyncResponseBasicAuth>
+			<wshttp:outRequestProxy>
+                                <wshttp:connectInfo host="" port=""></wshttp:connectInfo>
+                                <wshttp:basicAuth userid="" password=""></wshttp:basicAuth>
+			</wshttp:outRequestProxy>
+			<wshttp:outAsyncResponseProxy>
+								<wshttp:connectInfo host="" port=""></wshttp:connectInfo>
+                                <wshttp:basicAuth userid="" password=""></wshttp:basicAuth>
+			</wshttp:outAsyncResponseProxy>
+		</wsp:All>
+	</wsp:ExactlyOne>
+</wsp:Policy>
+end template
+
+template GenerateJmsTransportBinding()
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wsp:Policy
+    xmlns:wsjms="http://www.ibm.com/xmlns/prod/websphere/200801/ws-jmsTransport"
+    xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+    <!-- Do not edit this file. -->
+    <wsp:ExactlyOne>
+        <wsp:All>
+            <wsjms:outRequestBasicAuth>
+                <wsjms:basicAuth userid="" password=""></wsjms:basicAuth>
+            </wsjms:outRequestBasicAuth>
+            <wsjms:outAsyncResponseBasicAuth> 
+                <wsjms:basicAuth userid="" password=""></wsjms:basicAuth>
+            </wsjms:outAsyncResponseBasicAuth>
+        </wsp:All>
+    </wsp:ExactlyOne>
+</wsp:Policy>
+end template
+
+template GenerateSslTransportBinding()
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wsp:Policy
+	xmlns:wshttp="http://www.ibm.com/xmlns/prod/websphere/200609/ws-httpTransport"
+	xmlns:wsp="http://schemas.xmlsoap.org/ws/2004/09/policy">
+	<!-- Do not edit this file. -->
+	<!-- This is binding for Https -->
+	<wsp:ExactlyOne>
+		<wsp:All>
+			<wshttp:outRequestwithSSL>
+				<wshttp:configAlias name="NodeDefaultSSLSettings"></wshttp:configAlias>
+				<wshttp:configFile path="${WAS_PROPS_DIR}/ssl.client.props"></wshttp:configFile>
+			</wshttp:outRequestwithSSL>
+			<wshttp:outAsyncResponsewithSSL>
+				<wshttp:configAlias name="NodeDefaultSSLSettings"></wshttp:configAlias>
+				<wshttp:configFile path="${WAS_PROPS_DIR}/ssl.client.props"></wshttp:configFile>
+			</wshttp:outAsyncResponsewithSSL>
+			<wshttp:inResponsewithSSL>
+				<wshttp:configAlias name="NodeDefaultSSLSettings"></wshttp:configAlias>
+				<wshttp:configFile path="${WAS_PROPS_DIR}/ssl.client.props"></wshttp:configFile>
+			</wshttp:inResponsewithSSL>			
+		</wsp:All>
+	</wsp:ExactlyOne>
+</wsp:Policy>
+end template
+
+template GenerateWSAddressingBinding()
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<wsp:Policy xmlns:wsp="http://www.w3.org/ns/ws-policy"
+	xmlns:wlm="http://www.ibm.com/ws/wsaddressing/jaxws/policyset/wlmset_200608">
+	<!-- Do not edit this file. -->
+	<wsp:ExactlyOne>
+		<wsp:All></wsp:All>
+	</wsp:ExactlyOne>
+</wsp:Policy>
+end template
+
+template GenerateWSReliableMessagingBinding()
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<rmBinding:busConfiguration xmlns:rmBinding="http://www.ibm.com/websphere/webservices/wsrmPolicyBinding" xmlns:rmPolicy="http://www.ibm.com/websphere/webservices/wsrmPolicySet">
+    <rmBinding:busName></rmBinding:busName>
+    <rmBinding:messagingEngineName></rmBinding:messagingEngineName>
+</rmBinding:busConfiguration>
+end template
+
+template GenerateWSSecurityBinding()
+<?xml version="1.0" encoding="UTF-8"?>
+<securityBindings xmlns="http://www.ibm.com/xmlns/prod/websphere/200710/ws-securitybinding">
+<securityBinding name="application">
+
+  <securityOutboundBindingConfig>
+    
+    <signingInfo order="1" name="asymmetric-signingInfoResponse">
+      <signingPartReference>
+        <transform  algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+      </signingPartReference>
+      <signingKeyInfo reference="gen_signkeyinfo" />
+    </signingInfo>
+    <keyInfo type="STRREF" name="gen_signkeyinfo" classname="com.ibm.ws.wssecurity.wssapi.CommonContentGenerator">
+      <tokenReference reference="gen_signx509token" />
+    </keyInfo>
+    <!-- Default Binding for X509Token -->
+    <tokenGenerator name="gen_signx509token" classname="com.ibm.ws.wssecurity.wssapi.token.impl.CommonTokenGenerator">
+      <valueType localName="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3" uri="" />
+      <callbackHandler classname="com.ibm.websphere.wssecurity.callbackhandler.X509GenerateCallbackHandler">
+          <key alias="wspservicepriv" keypass="changeit" name="CN=WspService, OU=IIT, O=BME, L=Budapest, S=Hungary, C=HU"/>
+          <keyStore storepass="changeit" path="${USER_INSTALL_ROOT}\etc\ws-security\[GetProjectName()]\server_keystore.jks" type="JKS"/>
+      </callbackHandler>
+      <jAASConfig configName="system.wss.generate.x509"/>
+    </tokenGenerator>
+    
+    <signingInfo order="2" name="symmetric-signingInfoResponse">
+      <signingPartReference>
+        <transform  algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+      </signingPartReference>
+      <signingKeyInfo reference="gen_signsctkeyinfo" />
+    </signingInfo>
+    <keyInfo type="STRREF" name="gen_signsctkeyinfo" classname="com.ibm.ws.wssecurity.wssapi.CommonContentGenerator">
+      <tokenReference reference="gen_scttoken" />
+      <derivedKeyInfo>
+          <requireDerivedKeys/>
+          <requireExplicitDerivedKeys/>
+      </derivedKeyInfo>
+    </keyInfo>
+    <tokenGenerator name="gen_scttoken" classname="com.ibm.ws.wssecurity.wssapi.token.impl.CommonTokenGenerator">
+      <valueType localName="http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512/sct" uri="" />
+      <callbackHandler classname="com.ibm.ws.wssecurity.impl.auth.callback.WSTrustCallbackHandler"/>
+      <jAASConfig configName="system.wss.generate.sct"/>
+    </tokenGenerator>
+
+
+    <encryptionInfo order="3" name="asymmetric-encryptionInfoResponse">
+      <keyEncryptionKeyInfo reference="gen_enckeyinfo" />
+      <encryptionPartReference/>
+    </encryptionInfo>
+    <keyInfo type="KEYID" name="gen_enckeyinfo" classname="com.ibm.ws.wssecurity.wssapi.CommonContentGenerator">
+      <tokenReference reference="gen_encx509token" />
+    </keyInfo>
+    <tokenGenerator name="gen_encx509token" classname="com.ibm.ws.wssecurity.wssapi.token.impl.CommonTokenGenerator">
+       <valueType localName="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3" uri="" />
+       <callbackHandler classname="com.ibm.websphere.wssecurity.callbackhandler.X509GenerateCallbackHandler">
+          <key alias="wspclientpub" name="CN=WspClient, OU=IIT, O=BME, L=Budapest, S=Hungary, C=HU"/>
+          <keyStore storepass="changeit" path="${USER_INSTALL_ROOT}\etc\ws-security\[GetProjectName()]\server_truststore.jks" type="JKS"/>
+      </callbackHandler>
+      <jAASConfig configName="system.wss.generate.x509"/>
+    </tokenGenerator>
+
+    <encryptionInfo order="4" name="symmetric-encryptionInfoResponse">
+    <encryptionPartReference>
+      <dataEncryptionKeyInfo reference="gen_encsctkeyinfo" />
+    </encryptionPartReference>     
+    </encryptionInfo>
+    <keyInfo type="STRREF" name="gen_encsctkeyinfo" classname="com.ibm.ws.wssecurity.wssapi.CommonContentGenerator">
+      <tokenReference reference="gen_scttoken" />
+      <derivedKeyInfo>
+          <requireDerivedKeys/>
+          <requireExplicitDerivedKeys/>
+      </derivedKeyInfo>
+    </keyInfo>
+
+
+  </securityOutboundBindingConfig>
+
+  <securityInboundBindingConfig> 
+    
+    <encryptionInfo name="asymmetric-encryptionInfoRequest">
+      <keyEncryptionKeyInfo reference="dec_keyinfo" />
+      <encryptionPartReference/>
+    </encryptionInfo>
+    <keyInfo name="dec_keyinfo" classname="com.ibm.ws.wssecurity.wssapi.CommonContentConsumer">
+      <tokenReference reference="con_encx509token" />
+    </keyInfo>
+    <tokenConsumer classname="com.ibm.ws.wssecurity.wssapi.token.impl.CommonTokenConsumer" name="con_encx509token">
+      <valueType localName="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3" uri="" />
+      <callbackHandler classname="com.ibm.websphere.wssecurity.callbackhandler.X509ConsumeCallbackHandler">
+        <key alias="wspservicepriv" keypass="changeit" name="CN=WspService, OU=IIT, O=BME, L=Budapest, S=Hungary, C=HU"/>
+        <keyStore storepass="changeit" path="${USER_INSTALL_ROOT}\etc\ws-security\[GetProjectName()]\server_keystore.jks" type="JKS"/>
+        <certPathSettings>
+          <trustAnyCertificate/>
+        </certPathSettings>
+      </callbackHandler>
+      <jAASConfig configName="system.wss.consume.x509"/>
+    </tokenConsumer>
+    
+    <encryptionInfo name="symmetric-encryptionInfoRequest">
+    <encryptionPartReference>
+      <dataEncryptionKeyInfo reference="dec_sctkeyinfo" />
+    </encryptionPartReference>     
+    </encryptionInfo>
+    <keyInfo name="dec_sctkeyinfo" classname="com.ibm.ws.wssecurity.wssapi.CommonContentConsumer">
+      <tokenReference reference="con_scttoken" /> 
+      <derivedKeyInfo>
+          <requireDerivedKeys/>
+          <requireExplicitDerivedKeys/>
+      </derivedKeyInfo>
+    </keyInfo>
+    <tokenConsumer classname="com.ibm.ws.wssecurity.wssapi.token.impl.CommonTokenConsumer" name="con_scttoken">
+      <valueType localName="http://docs.oasis-open.org/ws-sx/ws-secureconversation/200512/sct" uri="" />
+      <callbackHandler classname="com.ibm.ws.wssecurity.impl.auth.callback.SCTConsumeCallbackHandler">
+      </callbackHandler>
+     <jAASConfig configName="system.wss.consume.sct"/>
+    </tokenConsumer>
+    
+    
+    <signingInfo name="asymmetric-signingInfoRequest">
+      <signingPartReference>
+        <transform  algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+      </signingPartReference>
+      <signingKeyInfo reference="con_signkeyinfo" />
+    </signingInfo>
+    <keyInfo name="con_signkeyinfo" classname="com.ibm.ws.wssecurity.wssapi.CommonContentConsumer">
+      <tokenReference reference="con_signx509token" />
+    </keyInfo>
+    <tokenConsumer classname="com.ibm.ws.wssecurity.wssapi.token.impl.CommonTokenConsumer" name="con_signx509token">
+       <valueType localName="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-x509-token-profile-1.0#X509v3" uri="" />
+        <callbackHandler classname="com.ibm.websphere.wssecurity.callbackhandler.X509ConsumeCallbackHandler">
+          <certPathSettings>
+            <trustAnchorRef reference="DigSigTrustAnchor"/>
+            <certStoreRef reference="DigSigCertStore"/>
+          </certPathSettings>
+        </callbackHandler>
+        <jAASConfig configName="system.wss.consume.x509"/>
+    </tokenConsumer>
+    <trustAnchor name="DigSigTrustAnchor">
+       <keyStore storepass="changeit" path="${USER_INSTALL_ROOT}\etc\ws-security\[GetProjectName()]\server_truststore.jks" type="JKS"/>
+    </trustAnchor>
+    <certStoreList>
+        <collectionCertStores provider="IBMCertPath" name="DigSigCertStore">
+          <x509Certificates path="${USER_INSTALL_ROOT}\etc\ws-security\[GetProjectName()]\WspService.crt"/>
+          <x509Certificates path="${USER_INSTALL_ROOT}\etc\ws-security\[GetProjectName()]\WspClient.crt"/>
+        </collectionCertStores>
+    </certStoreList>
+
+    <signingInfo name="symmetric-signingInfoRequest">
+      <signingPartReference>
+        <transform  algorithm="http://www.w3.org/2001/10/xml-exc-c14n#" />
+      </signingPartReference>
+      <signingKeyInfo reference="con_sctsignkeyinfo" />
+    </signingInfo>
+    <keyInfo name="con_sctsignkeyinfo" classname="com.ibm.ws.wssecurity.wssapi.CommonContentConsumer">
+      <tokenReference reference="con_scttoken" />
+      <derivedKeyInfo>
+          <requireDerivedKeys/>
+          <requireExplicitDerivedKeys/>
+      </derivedKeyInfo>
+    </keyInfo>
+    <!-- Default Binding for UsernameToken -->
+    <tokenConsumer name="con_unametoken" classname="com.ibm.ws.wssecurity.wssapi.token.impl.CommonTokenConsumer">
+      <valueType localName="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-username-token-profile-1.0#UsernameToken" uri="" />
+      <callbackHandler classname="com.ibm.websphere.wssecurity.callbackhandler.UNTConsumeCallbackHandler">
+      <properties name="com.ibm.wsspi.wssecurity.token.username.verifyTimestamp" value="true"/>
+      <properties name="com.ibm.wsspi.wssecurity.token.username.verifyNonce" value="true"/>
+      </callbackHandler>
+      <jAASConfig configName="system.wss.consume.unt"/>
+    </tokenConsumer>
+
+   <!-- Default Binding for LTPAToken -->
+    <tokenConsumer name="con_ltpatoken" classname="com.ibm.ws.wssecurity.wssapi.token.impl.CommonTokenConsumer">
+      <valueType localName="LTPAv2" uri="http://www.ibm.com/websphere/appserver/tokentype" />
+      <callbackHandler classname="com.ibm.websphere.wssecurity.callbackhandler.LTPAConsumeCallbackHandler"/>
+      <jAASConfig configName="system.wss.consume.ltpa"/>
+    </tokenConsumer>
+
+   <!-- Default Binding for LTPA_PropagationToken -->
+    <tokenConsumer name="con_ltpaproptoken" classname="com.ibm.ws.wssecurity.wssapi.token.impl.CommonTokenConsumer">
+      <valueType localName="LTPA_PROPAGATION" uri="http://www.ibm.com/websphere/appserver/tokentype" />
+      <callbackHandler classname="com.ibm.websphere.wssecurity.callbackhandler.LTPAConsumeCallbackHandler"/>
+      <jAASConfig configName="system.wss.consume.ltpaProp"/>
+    </tokenConsumer>
+    
+  </securityInboundBindingConfig>
+
+ </securityBinding>
+</securityBindings>
+end template
+
+template Generate_websphere_script()
+^
+end template

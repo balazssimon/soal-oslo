@@ -1,0 +1,37 @@
+﻿[Uri("http://www.iit.bme.hu/TestWs")]
+namespace TestWs 
+{
+	interface IPing
+	{
+		void Ping();
+	}
+
+	binding ReliableBinding
+	{
+		transport HTTPS 
+		{
+			ClientAuthentication = HttpsAuthentication.None
+		};
+		encoding SOAP 
+		{ 
+			Version = SoapVersion.Soap11 
+		};
+		protocol Addressing
+		{
+			Version = AddressingVersion.Addressing10
+		};
+		protocol ReliableMessaging
+		{
+		    Version = ReliableMessagingVersion.ReliableMessaging11,
+			Delivery = ReliableMessagingDelivery.ExactlyOnce,
+			InOrder = true
+		};
+	}
+
+	endpoint Ping : IPing
+	{
+		binding ReliableBinding;
+		location "http://localhost/PingService";
+	}
+}
+

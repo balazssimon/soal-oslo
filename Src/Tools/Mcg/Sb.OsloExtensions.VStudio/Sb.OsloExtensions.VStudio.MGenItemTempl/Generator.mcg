@@ -1,0 +1,17 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+
+configuration
+	string ClassName = "$safeitemname$";
+end configuration
+
+function void Main()
+	Context.Output(SayHello("World"));
+end function
+
+template SayHello(string name)
+Hello, [name]!
+end template
+

@@ -1,0 +1,1345 @@
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text;
+include "GeneratorLib.mcg";
+
+configuration
+	string NamespaceName = "SoaMetaModel";
+	string ClassName = "JavaGenerator";
+    Type InstancesType = typeof(IEnumerable<SoaObject>);
+    properties Properties
+		string WsdlDirectory = "WEB-INF/wsdl/";
+		string WsdlSuffix = "Endpoint";
+		bool SeparateWsdlsForEndpoints = false;
+        bool NoImplementationDelegates = true;
+        bool ThrowNotImplementedException = true;
+        bool GenerateProxyFeatureConstructors = false;
+        bool GenerateImplementationBase = false;
+        bool GenerateOracleAnnotations = false;
+        bool GenerateServerStubs = true;
+        bool GenerateClientProxies = true;
+    end properties
+end configuration
+
+/*
+* Main function for creating folders and calling file templates.
+*/
+function void Main()
+end function
+
+/*
+* To create folder structure from namespace
+*/
+function string NamespaceToPath(Namespace ns)
+    return GetPackage(ns).Replace('.','/').ToLower();
+end function
+
+
+/*
+* Generate Java files
+*/
+function void GenerateJavaCode(string rootDirectory)
+	rootDirectory = rootDirectory + "/";
+    loop(Instances->ns:typeof(Namespace))
+        // Count namespaces in namespace
+        int i = 0;
+        loop(ns.Declarations->d:typeof(Namespace))
+            i = i + 1;
+        end loop
+        // Only create files if not only containing namespaces
+        if(ns.Declarations.Count > i)
+            Context.CreateFolder(rootDirectory + NamespaceToPath(ns));
+        end if
+    end loop
+    loop(Instances->ns:typeof(Namespace))
+
+        // Count namespaces in namespace
+        int i = 0;
+        loop(ns.Declarations->d:typeof(Namespace))
+            i = i + 1;
+        end loop
+        // Only create files if not only containing namespaces
+        if(ns.Declarations.Count > i)
+
+            Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/package-info.java");
+            Context.Output(GeneratePackageInfo(ns));
+            Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/ObjectFactory.java");
+            Context.Output(GenerateObjectFactory(ns));
+            // Interface for NewExpression
+            if (!Properties.NoImplementationDelegates)
+				Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/ExpressionHelper.java");
+				Context.Output(GenerateExpressionHelper(ns));
+            end if
+            loop(ns.Declarations->en:typeof(EnumType))
+                Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/" + en.Name + ".java");
+                Context.Output(GenerateEnum(en));
+            end loop
+            loop(ns.Declarations->st:typeof(StructType))
+                Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/" + st.Name + ".java");
+                Context.Output(GenerateStruct(st));
+            end loop
+            loop(ns.Declarations->cs:typeof(ClaimsetType))
+                Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/" + cs.Name + ".java");
+                Context.Output(GenerateClaimset(cs));
+            end loop
+            // Generate SoaMMException and fault
+            if (!Properties.NoImplementationDelegates)
+                Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/SoaMMFault.java");
+                Context.Output(GenerateSoaMMFault(ns));
+                Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/SoaMMException.java");
+                Context.Output(GenerateSoaMMException(ns));
+            end if
+            loop(ns.Declarations->ex:typeof(ExceptionType))
+                Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/" + ex.Name + "Fault.java");
+                Context.Output(GenerateException(ex));
+                Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/" + ex.Name + ".java");
+                Context.Output(GenerateOperationException(ex));
+            end loop
+            loop(Instances->ar:typeof(ArrayType))
+                if(ar.ItemType is NullableType)
+                Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/ArrayOfNullable" + FirstLetterUp(ar.ItemType.Name) + ".java");
+                Context.Output(GenerateNullableArray(ar, ns));
+                else
+                Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/ArrayOf" + FirstLetterUp(ar.ItemType.Name) + ".java");
+                Context.Output(GenerateArray(ar, ns));
+                end if
+            end loop
+            loop(ns.Declarations->intf:typeof(Interface))
+                loop(intf.Operations->op:typeof(Operation))
+                    Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/" + FirstLetterUp(op.Name) + ".java");
+                    Context.Output(GenerateOperationType(op));
+                    if(op.ReturnType != PseudoType.Async)
+                        Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/" + FirstLetterUp(op.Name) + "Response.java");
+                        Context.Output(GenerateOperationResponseType(op));
+                    end if
+                    
+                    //loop(op.Exceptions->ex:typeof(ExceptionType))
+                    //    Context.SetOutput("Netbeans/" + GetProjectName() + "/src/java/" + NamespaceToPath(ns) + "/" + intf.Name + op.Name + ex.Name + ".java");
+                    //    Context.Output(GenerateOperationException(intf, op, ex));
+                    //end loop
+                    
+                end loop
+                Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/" + intf.Name + ".java");
+                Context.Output(GenerateInterface(intf));
+                if (Properties.GenerateImplementationBase)
+                    Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/" + intf.Name.Substring(1) + "Base.java");
+                    Context.Output(GenerateImplementationBase(intf));
+                end if
+            end loop
+            loop(ns.Declarations->endp:typeof(Endpoint))
+				if (Properties.GenerateServerStubs)
+					if (!Properties.NoImplementationDelegates)
+						Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/"+ endp.Name + ".java");
+						Context.Output(GenerateService(endp));
+						Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/"+ endp.Name + "Impl.java");
+						Context.Output(GenerateImpl(endp));
+					else
+						Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/"+ endp.Name + ".java");
+						Context.Output(GenerateImpl(endp));
+					end if
+				end if
+				if (Properties.GenerateClientProxies)
+					Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/"+ endp.Name + "Service.java");
+					Context.Output(GenerateProxy(endp));
+				end if
+            end loop
+            if (!Properties.NoImplementationDelegates)
+                loop(ns.Declarations->auth:typeof(Authorization))
+                    Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/"+ auth.Name + ".java");
+                    Context.Output(GenerateAuth(auth));
+                end loop
+                loop(ns.Declarations->con:typeof(Contract))
+                    Context.SetOutput(rootDirectory + NamespaceToPath(ns) + "/"+ con.Name + ".java");
+                    Context.Output(GenerateContract(con));
+                end loop
+            end if
+        end if
+    end loop
+end function
+
+/*
+* Print type, Namespace name before type if it is not built in
+*/
+function String PrintType(Type type)
+if(type == PseudoType.Void || type == PseudoType.Async)
+    return "void";
+else if(type is BuiltInType)
+    if(type == BuiltInType.Bool)
+        return "boolean";
+    else if(type == BuiltInType.String || type == BuiltInType.Guid)
+        return "String";
+    else if(type == BuiltInType.Date || type == BuiltInType.DateTime || type == BuiltInType.DateTime)
+        return "javax.xml.datatype.XMLGregorianCalendar";
+    else if(type == BuiltInType.TimeSpan)
+        return "javax.xml.datatype.Duration";
+    else if(type == BuiltInType.Byte || type == BuiltInType.Int || type == BuiltInType.Long || type == BuiltInType.Float || type == BuiltInType.Double)
+        return type.Name;
+    end if
+else if(type is StructType || type is EnumType || type is ExceptionType)
+    return GetPackage(type.Namespace).ToLower() + "." + FirstLetterUp(type.Name);
+else if(type is ArrayType)
+    if(((ArrayType)type).ItemType is NullableType)
+        return "ArrayOfNullable"+ FirstLetterUp(((ArrayType)type).ItemType.Name);
+    else if (((ArrayType)type).ItemType == BuiltInType.Byte)
+        return "byte[]";
+    else
+        return "ArrayOf" + FirstLetterUp(((ArrayType)type).ItemType.Name);
+    end if
+else if(type is NullableType)
+    return PrintClassType(((NullableType)type).InnerType);
+end if
+return "";
+end function
+
+/*
+* Template to print class type
+*/
+function String PrintClassType(Type type)
+if(type is BuiltInType)
+    if(type == BuiltInType.Bool)
+        return "Boolean";
+    else if(type == BuiltInType.String || type == BuiltInType.Guid)
+        return "String";
+    else if(type == BuiltInType.Date || type == BuiltInType.DateTime || type == BuiltInType.DateTime)
+        return "javax.xml.datatype.XMLGregorianCalendar";
+    else if(type == BuiltInType.TimeSpan)
+        return "javax.xml.datatype.Duration";
+    else if(type == BuiltInType.Int)
+        return "Integer";
+    else if(type == BuiltInType.Byte || type == BuiltInType.Long || type == BuiltInType.Float || type == BuiltInType.Double)
+        return FirstLetterUp(type.Name);
+    end if
+else
+    return PrintType(type);
+end if
+return "";
+end function
+
+/*
+* package-info.java
+*/
+template GeneratePackageInfo(Namespace ns)
+@javax.xml.bind.annotation.XmlSchema(namespace = "[GetUri(ns)]", elementFormDefault = javax.xml.bind.annotation.XmlNsForm.QUALIFIED)
+package [GetPackage(ns).ToLower()];
+end template
+
+/*
+* ObjectFactory.java
+*/
+template GenerateObjectFactory(Namespace ns)
+package [GetPackage(ns).ToLower()];
+^
+import javax.xml.bind.JAXBElement;
+import javax.xml.bind.annotation.XmlElementDecl;
+import javax.xml.bind.annotation.XmlRegistry;
+import javax.xml.namespace.QName;
+^
+@XmlRegistry
+public class ObjectFactory {
+    public ObjectFactory() {
+    }
+[loop(ns.Declarations->type:typeof(StructType))]
+^
+    private final static QName _[FirstLetterUp(type.Name)]_QNAME = new QName("[GetUri(ns)]","[type.Name]");
+^
+    public [GetPackage(ns).ToLower()].[FirstLetterUp(type.Name)] create[FirstLetterUp(type.Name)]() {
+        return new [GetPackage(ns).ToLower()].[type.Name]();
+    }
+^
+    @XmlElementDecl(namespace = "[GetUri(ns)]", name = "[type.Name]")
+    public JAXBElement<[GetPackage(ns).ToLower()].[type.Name]> create[FirstLetterUp(type.Name)]([GetPackage(ns).ToLower()].[type.Name] value) {
+        return new JAXBElement<[GetPackage(ns).ToLower()].[type.Name]>(_[FirstLetterUp(type.Name)]_QNAME, [GetPackage(ns).ToLower()].[type.Name].class, null, value);
+    }
+[end loop]
+[loop(ns.Declarations->type:typeof(EnumType))]
+^
+    private final static QName _[FirstLetterUp(type.Name)]_QNAME = new QName("[GetUri(ns)]","[type.Name]");
+^
+    @XmlElementDecl(namespace = "[GetUri(ns)]", name = "[type.Name]")
+    public JAXBElement<[GetPackage(ns).ToLower()].[type.Name]> create[FirstLetterUp(type.Name)]([GetPackage(ns).ToLower()].[type.Name] value) {
+        return new JAXBElement<[GetPackage(ns).ToLower()].[type.Name]>(_[FirstLetterUp(type.Name)]_QNAME, [GetPackage(ns).ToLower()].[type.Name].class, null, value);
+    }
+[end loop]
+[loop(Instances->type:typeof(ArrayType))]
+    [if(type.ItemType is NullableType)]
+^
+    private final static QName _ArrayOfNullable[FirstLetterUp(type.Name)]_QNAME = new QName("[GetUri(ns)]","ArrayOfNullable[FirstLetterUp(type.Name)]");
+^
+    public [GetPackage(ns).ToLower()].ArrayOfNullable[FirstLetterUp(type.ItemType.Name)] create_ArrayOfNullable[FirstLetterUp(type.ItemType.Name)]() {
+        return new [GetPackage(ns).ToLower()].ArrayOfNullable[FirstLetterUp(type.ItemType.Name)]();
+    }
+^
+    @XmlElementDecl(namespace = "[GetUri(ns)]", name = "_ArrayOfNullable[FirstLetterUp(type.ItemType.Name)]")
+    public JAXBElement<[GetPackage(ns).ToLower()].ArrayOfNullable[FirstLetterUp(type.ItemType.Name)]> create_ArrayOfNullable[FirstLetterUp(type.ItemType.Name)]([GetPackage(ns).ToLower()].ArrayOfNullable[FirstLetterUp(type.ItemType.Name)] value) {
+        return new JAXBElement<[GetPackage(ns).ToLower()].ArrayOfNullable[FirstLetterUp(type.ItemType.Name)]>(_ArrayOfNullable[FirstLetterUp(type.ItemType.Name)]_QNAME, [GetPackage(ns).ToLower()].ArrayOfNullable[FirstLetterUp(type.ItemType.Name)].class, null, value);
+    }
+    [else if(type.ItemType != BuiltInType.Byte)]
+^
+    private final static QName _ArrayOf[FirstLetterUp(type.ItemType.Name)]_QNAME = new QName("[GetUri(ns)]","ArrayOf[FirstLetterUp(type.ItemType.Name)]");
+^
+    public [GetPackage(ns).ToLower()].ArrayOf[FirstLetterUp(type.ItemType.Name)] createArrayOf[FirstLetterUp(type.ItemType.Name)]() {
+        return new [GetPackage(ns).ToLower()].ArrayOf[FirstLetterUp(type.ItemType.Name)]();
+    }
+^
+    @XmlElementDecl(namespace = "[GetUri(ns)]", name = "ArrayOf[FirstLetterUp(type.ItemType.Name)]")
+    public JAXBElement<[GetPackage(ns).ToLower()].ArrayOf[FirstLetterUp(type.ItemType.Name)]> createArrayOf[FirstLetterUp(type.ItemType.Name)]([GetPackage(ns).ToLower()].ArrayOf[FirstLetterUp(type.ItemType.Name)] value) {
+        return new JAXBElement<[GetPackage(ns).ToLower()].ArrayOf[FirstLetterUp(type.ItemType.Name)]>(_ArrayOf[FirstLetterUp(type.ItemType.Name)]_QNAME, [GetPackage(ns).ToLower()].ArrayOf[FirstLetterUp(type.ItemType.Name)].class, null, value);
+    }
+    [end if]
+[end loop]
+[if (!Properties.NoImplementationDelegates)]
+^
+    private final static QName _SoaMMFault_QNAME = new QName("[GetUri(ns)]","SoaMMException");
+^
+    public [GetPackage(ns).ToLower()].SoaMMFault createSoaMMFault() {
+        return new [GetPackage(ns).ToLower()].SoaMMFault();
+    }
+^
+    @XmlElementDecl(namespace = "[GetUri(ns)]", name = "SoaMMException")
+    public JAXBElement<[GetPackage(ns).ToLower()].SoaMMFault> createSoaMMFault([GetPackage(ns).ToLower()].SoaMMFault value) {
+        return new JAXBElement<[GetPackage(ns).ToLower()].SoaMMFault>(_SoaMMFault_QNAME, [GetPackage(ns).ToLower()].SoaMMFault.class, null, value);
+    }
+[end if]
+[loop(ns.Declarations->type:typeof(ExceptionType))]
+^
+    private final static QName _[FirstLetterUp(type.Name)]Fault_QNAME = new QName("[GetUri(ns)]","[type.Name]");
+^
+    public [GetPackage(ns).ToLower()].[type.Name]Fault create[FirstLetterUp(type.Name)]Fault() {
+        return new [GetPackage(ns).ToLower()].[type.Name]Fault();
+    }
+^
+    @XmlElementDecl(namespace = "[GetUri(ns)]", name = "[type.Name]")
+    public JAXBElement<[GetPackage(ns).ToLower()].[type.Name]Fault> create[FirstLetterUp(type.Name)]Fault([GetPackage(ns).ToLower()].[type.Name]Fault value) {
+        return new JAXBElement<[GetPackage(ns).ToLower()].[type.Name]Fault>(_[FirstLetterUp(type.Name)]Fault_QNAME, [GetPackage(ns).ToLower()].[type.Name]Fault.class, null, value);
+    }
+[end loop]
+[loop(ns.Declarations->intf:typeof(Interface))]
+[loop(intf.Operations->type:typeof(Operation))]
+^
+    private final static QName _[FirstLetterUp(type.Name)]_QNAME = new QName("[GetUri(ns)]","[type.Name]");
+^
+    public [GetPackage(ns).ToLower()].[FirstLetterUp(type.Name)] create[FirstLetterUp(type.Name)]() {
+        return new [GetPackage(ns).ToLower()].[FirstLetterUp(type.Name)]();
+    }
+^
+    @XmlElementDecl(namespace = "[GetUri(ns)]", name = "[type.Name]")
+    public JAXBElement<[GetPackage(ns).ToLower()].[FirstLetterUp(type.Name)]> create[FirstLetterUp(type.Name)]([GetPackage(ns).ToLower()].[FirstLetterUp(type.Name)] value) {
+        return new JAXBElement<[GetPackage(ns).ToLower()].[FirstLetterUp(type.Name)]>(_[FirstLetterUp(type.Name)]_QNAME, [GetPackage(ns).ToLower()].[FirstLetterUp(type.Name)].class, null, value);
+    }
+    [if(type.ReturnType != PseudoType.Async)]
+^
+    private final static QName _[FirstLetterUp(type.Name)]Response_QNAME = new QName("[GetUri(ns)]","[type.Name]Response");
+^
+    public [GetPackage(ns).ToLower()].[FirstLetterUp(type.Name)]Response create[FirstLetterUp(type.Name)]Response() {
+        return new [GetPackage(ns).ToLower()].[FirstLetterUp(type.Name)]Response();
+    }
+^
+    @XmlElementDecl(namespace = "[GetUri(ns)]", name = "[type.Name]Response")
+    public JAXBElement<[GetPackage(ns).ToLower()].[FirstLetterUp(type.Name)]Response> create[FirstLetterUp(type.Name)]Response([GetPackage(ns).ToLower()].[FirstLetterUp(type.Name)]Response value) {
+        return new JAXBElement<[GetPackage(ns).ToLower()].[FirstLetterUp(type.Name)]Response>(_[FirstLetterUp(type.Name)]Response_QNAME, [GetPackage(ns).ToLower()].[FirstLetterUp(type.Name)]Response.class, null, value);
+    }
+    [end if]
+[end loop]
+[end loop]
+}
+end template
+
+/*
+* Generate java class for enum types
+*/
+template GenerateEnum(EnumType en)
+package [GetPackage(en.Namespace).ToLower()];
+^
+import javax.xml.bind.annotation.XmlEnum;
+import javax.xml.bind.annotation.XmlEnumValue;
+import javax.xml.bind.annotation.XmlType;
+^
+@XmlType(name = "[en.Name]")
+@XmlEnum
+public enum [en.Name] {
+^
+[loop(en->value:Values;string comma= "";comma= ",")]
+[comma]
+    @XmlEnumValue("[value.Name]")
+    [value.Name.ToUpper()]("[value.Name]")\
+[end loop]
+;
+^
+    private final String value;
+^
+    [en.Name](String v) {
+        value = v;
+    }
+^
+    public String value() {
+        return value;
+    }
+^
+    public static [en.Name] fromValue(String v) {
+        for ([en.Name] c: [en.Name].values()) {
+            if (c.value.equals(v)) {
+                return c;
+            }
+        }
+        throw new IllegalArgumentException(v);
+    }
+}
+end template
+
+function string GenSeeAlso(StructType str)
+	string result = "@javax.xml.bind.annotation.XmlSeeAlso({";
+	loop(strde:str.GetAllDescendants(); string delim = ""; delim = ", ")
+		result = result + delim + GetPackage(strde.Namespace).ToLower() + "." + strde.Name + ".class";
+	else
+		result = "";
+	end loop
+	if (result != "")
+		result = result+"})";
+	end if
+	return result;
+end function
+
+function string GenSeeAlso(ExceptionType ex)
+	string result = "@javax.xml.bind.annotation.XmlSeeAlso({";
+	loop(exde:ex.GetAllDescendants(); string delim = ""; delim = ", ")
+		result = result + delim + GetPackage(exde.Namespace).ToLower() + "." + exde.Name + ".class";
+	else
+		result = "";
+	end loop
+	if (result != "")
+		result = result+"})";
+	end if
+	return result;
+end function
+
+
+
+/*
+* Generate java file for struct types
+*/
+template GenerateStruct(StructType st)
+package [GetPackage(st.Namespace).ToLower()];
+^
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlType;
+^
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "[st.Name]", propOrder = {
+[loop(st.Fields->fi:typeof(StructField);string comma="";comma=",")]
+[comma]
+    "[FirstLetterLow(fi.Name)]"\
+[end loop]
+^
+})
+[GenSeeAlso(st)]
+public class [st.Name] \
+[if(st.SuperType != null)]
+extends [GetPackage(st.SuperType.Namespace).ToLower()].[st.SuperType.Name] {
+[else]
+{
+[end if]
+[loop(st.Fields->fi:typeof(StructField))]
+[if ((fi.Type is ArrayType) && !(((ArrayType)fi.Type).ItemType == BuiltInType.Byte))]
+    @javax.xml.bind.annotation.XmlElementWrapper(name = "[fi.Name]", required = true, nillable = true)
+    @javax.xml.bind.annotation.XmlElement(name = "[((ArrayType)fi.Type).ItemType.Name]", type = [PrintType(((ArrayType)fi.Type).ItemType)].class, nillable = [IsNillableType(((ArrayType)fi.Type).ItemType)])
+    protected java.util.List<[PrintType(((ArrayType)fi.Type).ItemType)]> [FirstLetterLow(fi.Name)];
+[else]
+    @javax.xml.bind.annotation.XmlElement(name = "[fi.Name]", required = true, nillable = [IsNillableType(fi.Type)])
+    protected [PrintType(fi.Type)] [FirstLetterLow(fi.Name)];
+[end if]
+^
+[end loop]
+    public [st.Name]() {
+    }
+[if (st.HasNonArrayFields())]
+^
+    public [st.Name](\
+[loop(st.Fields->fi:typeof(StructField) where !(fi.Type is ArrayType); string delim = ""; delim = ", ")]
+[delim][PrintType(fi.Type)] [FirstLetterLow(fi.Name)]\
+[end loop]
+) {
+[loop(st.Fields->fi:typeof(StructField) where !(fi.Type is ArrayType))]
+        this.[FirstLetterLow(fi.Name)] = [FirstLetterLow(fi.Name)];
+[end loop]
+    }
+[end if]
+[loop(st.Fields->fi:typeof(StructField))]
+^
+[if ((fi.Type is ArrayType) && !(((ArrayType)fi.Type).ItemType == BuiltInType.Byte))]
+    public java.util.List<[PrintType(((ArrayType)fi.Type).ItemType)]> get[FirstLetterUp(fi.Name)]() {
+        if (this.[FirstLetterLow(fi.Name)] == null) {
+            this.[FirstLetterLow(fi.Name)] = new java.util.ArrayList<[PrintType(((ArrayType)fi.Type).ItemType)]>();
+        }
+        return this.[FirstLetterLow(fi.Name)];
+    }
+[else]
+    public [PrintType(fi.Type)] get[FirstLetterUp(fi.Name)]() {
+        return this.[FirstLetterLow(fi.Name)];
+    }
+^
+    public void set[FirstLetterUp(fi.Name)]([PrintType(fi.Type)] value) {
+        this.[FirstLetterLow(fi.Name)] = value;
+    }
+[end if]
+[end loop]
+}
+end template
+
+/*
+* Generate java type for claimset
+*/
+template GenerateClaimset(ClaimsetType cs)
+package [GetPackage(cs.Namespace).ToLower()];
+^
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlType;
+^
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "[cs.Name]", propOrder = {
+[loop(cs.Fields->fi:typeof(ClaimField);string comma="";comma=",")]
+[comma]
+    "[FirstLetterLow(fi.Name)]"\
+[end loop]
+^
+})
+public class [cs.Name] {
+^
+[loop(cs.Fields->fi:typeof(ClaimField))]
+[if ((fi.Type is ArrayType) && !(((ArrayType)fi.Type).ItemType == BuiltInType.Byte))]
+    @javax.xml.bind.annotation.XmlElementWrapper(name = "[fi.Name]", required = true, nillable = true)
+    @javax.xml.bind.annotation.XmlElement(name = "[((ArrayType)fi.Type).ItemType.Name]", type = [PrintType(((ArrayType)fi.Type).ItemType)].class, nillable = [IsNillableType(((ArrayType)fi.Type).ItemType)])
+    protected java.util.List<[PrintType(((ArrayType)fi.Type).ItemType)]> [FirstLetterLow(fi.Name)];
+[else]
+    @javax.xml.bind.annotation.XmlElement(name = "[fi.Name]", required = true, nillable = [IsNillableType(fi.Type)])
+    protected [PrintType(fi.Type)] [FirstLetterLow(fi.Name)];
+[end if]
+[end loop]
+^
+    public [cs.Name]() {
+    }
+[if (cs.HasNonArrayFields())]
+^
+    public [cs.Name](\
+[loop(cs.Fields->fi:typeof(ClaimField) where !(fi.Type is ArrayType); string delim = ""; delim = ", ")]
+[delim][PrintType(fi.Type)] [FirstLetterLow(fi.Name)]\
+[end loop]
+) {
+[loop(cs.Fields->fi:typeof(ClaimField) where !(fi.Type is ArrayType))]
+        this.[FirstLetterLow(fi.Name)] = [FirstLetterLow(fi.Name)];
+[end loop]
+    }
+[end if]
+[loop(cs.Fields->fi:typeof(ClaimField))]
+^
+[if ((fi.Type is ArrayType) && !(((ArrayType)fi.Type).ItemType == BuiltInType.Byte))]
+    public java.util.List<[PrintType(((ArrayType)fi.Type).ItemType)]> get[FirstLetterUp(fi.Name)]() {
+        if (this.[FirstLetterLow(fi.Name)] == null) {
+            this.[FirstLetterLow(fi.Name)] = new java.util.ArrayList<[PrintType(((ArrayType)fi.Type).ItemType)]>();
+        }
+        return this.[FirstLetterLow(fi.Name)];
+    }
+[else]
+    public [PrintType(fi.Type)] get[FirstLetterUp(fi.Name)]() {
+        return this.[FirstLetterLow(fi.Name)];
+    }
+^
+    public void set[FirstLetterUp(fi.Name)]([PrintType(fi.Type)] value) {
+        this.[FirstLetterLow(fi.Name)] = value;
+    }
+[end if]
+[end loop]
+}
+end template
+
+/*
+* Generate java type for exception
+*/
+template GenerateException(ExceptionType ex)
+package [GetPackage(ex.Namespace).ToLower()];
+^
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlType;
+^
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "[ex.Name]", propOrder = {
+[loop(ex.Fields->fi:typeof(ExceptionField);string comma="";comma=",")]
+[comma]
+    "[FirstLetterLow(fi.Name)]"\
+[end loop]
+^
+})
+[GenSeeAlso(ex)]
+public class [ex.Name]Fault \
+[if(ex.SuperType != null)]
+extends [GetPackage(ex.SuperType.Namespace).ToLower()].[ex.SuperType.Name] {
+[else]
+{
+[end if]
+^
+[loop(ex.Fields->fi:typeof(ExceptionField))]
+[if ((fi.Type is ArrayType) && !(((ArrayType)fi.Type).ItemType == BuiltInType.Byte))]
+    @javax.xml.bind.annotation.XmlElementWrapper(name = "[fi.Name]", required = true, nillable = true)
+    @javax.xml.bind.annotation.XmlElement(name = "[((ArrayType)fi.Type).ItemType.Name]", type = [PrintType(((ArrayType)fi.Type).ItemType)].class, nillable = [IsNillableType(((ArrayType)fi.Type).ItemType)])
+    protected java.util.List<[PrintType(((ArrayType)fi.Type).ItemType)]> [FirstLetterLow(fi.Name)];
+[else]
+    @javax.xml.bind.annotation.XmlElement(name = "[fi.Name]", required = true, nillable = [IsNillableType(fi.Type)])
+    protected [PrintType(fi.Type)] [FirstLetterLow(fi.Name)];
+[end if]
+^
+[end loop]
+    public [ex.Name]Fault() {
+    }
+[if (ex.HasNonArrayFields())]
+^
+    public [ex.Name]Fault(\
+[loop(ex.Fields->fi:typeof(ExceptionField) where !(fi.Type is ArrayType); string delim = ""; delim = ", ")]
+[delim][PrintType(fi.Type)] [FirstLetterLow(fi.Name)]\
+[end loop]
+) {
+[loop(ex.Fields->fi:typeof(ExceptionField) where !(fi.Type is ArrayType))]
+        this.[FirstLetterLow(fi.Name)] = [FirstLetterLow(fi.Name)];
+[end loop]
+    }
+[end if]
+[loop(ex.Fields->fi:typeof(ExceptionField))]
+^
+[if ((fi.Type is ArrayType) && !(((ArrayType)fi.Type).ItemType == BuiltInType.Byte))]
+    public java.util.List<[PrintType(((ArrayType)fi.Type).ItemType)]> get[FirstLetterUp(fi.Name)]() {
+        if (this.[FirstLetterLow(fi.Name)] == null) {
+            this.[FirstLetterLow(fi.Name)] = new java.util.ArrayList<[PrintType(((ArrayType)fi.Type).ItemType)]>();
+        }
+        return this.[FirstLetterLow(fi.Name)];
+    }
+[else]
+    public [PrintType(fi.Type)] get[FirstLetterUp(fi.Name)]() {
+        return this.[FirstLetterLow(fi.Name)];
+    }
+^
+    public void set[FirstLetterUp(fi.Name)]([PrintType(fi.Type)] value) {
+        this.[FirstLetterLow(fi.Name)] = value;
+    }
+[end if]
+[end loop]
+}
+end template
+
+/*
+* Generate java type for NullableArray
+*/
+template GenerateNullableArray(ArrayType ar, Namespace ns)
+package [GetPackage(ns).ToLower()];
+^
+import java.util.ArrayList;
+import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
+^
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "ArrayOfNullable[FirstLetterUp(ar.ItemType.Name)]", propOrder = {
+    "_[ar.ItemType.Name]"
+})
+public class ArrayOfNullable[FirstLetterUp(ar.ItemType.Name)] {
+^
+    @XmlElement(name = "[ar.ItemType.Name]", type = [PrintClassType(ar.ItemType)].class, nillable = true)
+    protected List<[PrintClassType(ar.ItemType)]> _[ar.ItemType.Name];
+^
+    public List<[PrintClassType(ar.ItemType)]> get[FirstLetterUp(ar.ItemType.Name)]() {
+        if (_[ar.ItemType.Name] == null) {
+            _[ar.ItemType.Name] = new ArrayList<[PrintClassType(ar.ItemType)]>();
+        }
+        return this._[ar.ItemType.Name];
+    }
+}
+end template
+
+/*
+* Generate java type for Array
+*/
+template GenerateArray(ArrayType ar, Namespace ns)
+package [GetPackage(ns).ToLower()];
+^
+import java.util.ArrayList;
+import java.util.List;
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
+^
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "ArrayOf[FirstLetterUp(ar.ItemType.Name)]", propOrder = {
+    "_[ar.ItemType.Name]"
+})
+public class ArrayOf[FirstLetterUp(ar.ItemType.Name)] {
+^
+    @XmlElement(name = "[ar.ItemType.Name]", type = [PrintClassType(ar.ItemType)].class, nillable = true)
+    protected List<[PrintClassType(ar.ItemType)]> _[ar.ItemType.Name];
+^
+    public List<[PrintClassType(ar.ItemType)]> get[FirstLetterUp(ar.ItemType.Name)]() {
+        if (_[ar.ItemType.Name] == null) {
+            _[ar.ItemType.Name] = new ArrayList<[PrintClassType(ar.ItemType)]>();
+        }
+        return this._[ar.ItemType.Name];
+    }
+}
+end template
+
+/*
+* Generate java type for operation
+*/
+template GenerateOperationType(Operation op)
+package [GetPackage(op.Interface.Namespace).ToLower()];
+^
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
+^
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "[op.Name]", propOrder = {
+[loop(op.Parameters->fi:typeof(OperationParameter);string comma="";comma=",")]
+[comma]
+    "[FirstLetterLow(fi.Name)]"\
+[end loop]
+^
+})
+public class [FirstLetterUp(op.Name)] {
+^
+[loop(op.Parameters->pa:typeof(OperationParameter))]
+    @XmlElement(name = "[pa.Name]", required = true, nillable = [IsNillableType(pa.Type)])
+    protected [PrintType(pa.Type)] [pa.Name];
+[end loop]
+[loop(op.Parameters->pa:typeof(OperationParameter))]
+^
+    public [PrintType(pa.Type)] get[FirstLetterUp(pa.Name)]() {
+        return [FirstLetterLow(pa.Name)];
+    }
+^
+    public void set[FirstLetterUp(pa.Name)]([PrintType(pa.Type)] value) {
+        this.[FirstLetterLow(pa.Name)] = value;
+    }
+[end loop]
+}
+end template
+
+
+/*
+* Generate java type for operation response
+*/
+template GenerateOperationResponseType(Operation op)
+package [GetPackage(op.Interface.Namespace).ToLower()];
+^
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
+^
+@XmlAccessorType(XmlAccessType.FIELD)
+[if(op.ReturnType == PseudoType.Void)]
+@XmlType(name = "[op.Name]Response")
+public class [FirstLetterUp(op.Name)]Response {
+}
+[else]
+@XmlType(name = "[op.Name]Response", propOrder = {
+    "[FirstLetterLow(op.Name)]Result"
+})
+public class [FirstLetterUp(op.Name)]Response {
+^
+    @XmlElement(name = "[op.Name]Result", required = true, nillable = [IsNillableType(op.ReturnType)])
+    protected [PrintType(op.ReturnType)] [FirstLetterLow(op.Name)]Result;
+^
+    public [PrintType(op.ReturnType)] get[FirstLetterUp(op.Name)]Result() {
+        return [FirstLetterLow(op.Name)]Result;
+    }
+^
+    public void set[FirstLetterUp(op.Name)]Result([PrintType(op.ReturnType)] value) {
+        this.[FirstLetterLow(op.Name)]Result = value;
+    }
+}
+[end if]
+end template
+
+/*
+* Generate java exception for exception
+*/
+template GenerateOperationException(ExceptionType ex)
+package [GetPackage(ex.Namespace).ToLower()];
+^
+import javax.xml.ws.WebFault;
+^
+@WebFault(name = "[ex.Name]", targetNamespace = "[GetUri(ex.Namespace)]")
+public class [ex.Name] extends Exception {
+^
+    private [PrintType(ex)]Fault faultInfo;
+^
+    public [ex.Name](String message, [PrintType(ex)]Fault faultInfo) {
+        super(message);
+        this.faultInfo = faultInfo;
+    }
+^
+    public [ex.Name](String message, [PrintType(ex)]Fault faultInfo, Throwable cause) {
+        super(message, cause);
+        this.faultInfo = faultInfo;
+    }
+^
+    public [PrintType(ex)]Fault getFaultInfo() {
+        return faultInfo;
+    }
+}
+end template
+
+/*
+* Generate operation head
+*/
+template GenerateOperationHead(Operation op, bool webparam)
+[if(webparam)]
+public [PrintType(op.ReturnType)] [FirstLetterLow(op.Name)](
+[loop(op.Parameters->pa:typeof(OperationParameter); string comma = ""; comma = ",")]
+[comma]
+    @WebParam(name = "[pa.Name]", targetNamespace = "[GetUri(op.Interface.Namespace)]")
+    [PrintType(pa.Type)] [pa.Name]\
+[end loop]
+)
+[loop(op.Exceptions->ex:typeof(ExceptionType); string del = ThrowsSoaMMException(); del = ", ")][del][ex.Name][end loop]
+[else]
+[GenerateOperationHead(op)]
+[end if]
+end template
+
+template GenerateOperationHead(Operation op)
+public [PrintType(op.ReturnType)] [FirstLetterLow(op.Name)](\
+[loop(op.Parameters->pa:typeof(OperationParameter); string comma = ""; comma = ", ")]
+[comma][PrintType(pa.Type)] [pa.Name]\
+[end loop]
+)[loop(op.Exceptions->ex:typeof(ExceptionType); string del = ThrowsSoaMMException(); del = ", ")][del][ex.Name][end loop]
+end template
+
+/*
+* Generate Operation call
+*/
+template GenerateOperationCall(Operation op)
+[FirstLetterLow(op.Name)](\
+[loop(op.Parameters->pa:typeof(OperationParameter); string comma = ""; comma = ", ")]
+[comma][pa.Name]\
+[end loop]
+)
+end template
+
+/*
+* Generate operation head for authorization and contract
+*/
+template GenerateOperationRefHead(OperationImplementation oi)
+public [PrintType(oi.Operation.ReturnType)] [FirstLetterLow(oi.Operation.Name)] [GenerateOperationRefHeadParams(oi)][ThrowsSoaMMException()][loop(oi.Operation.Exceptions->ex:typeof(ExceptionType);string  del = ", ")][del][ex.Name][end loop]
+end template
+
+function string ThrowsSoaMMException()
+    if (!Properties.NoImplementationDelegates)
+        return " throws SoaMMException";
+    else 
+        return " throws ";
+    end if
+end function
+
+/*
+* Generate operation head parameters for authorization and contract
+*/
+template GenerateOperationRefHeadParams(OperationImplementation oi)
+(\
+[loop(oi.References->re:typeof(Reference) where re.Object is OperationParameter; string comma = ""; comma = ", ")]
+[comma][PrintType(((OperationParameter)re.Object).Type)] [re.Name]\
+[end loop]
+)
+end template
+
+/*
+* Generate operation call for authorization and contract
+*/
+template GenerateOperationRefCall(OperationImplementation oi)
+[FirstLetterLow(oi.Operation.Name)][GenerateOperationRefCallParams(oi)]
+end template
+
+/*
+* Generate operation call parameters for authorization and contract
+*/
+template GenerateOperationRefCallParams(OperationImplementation oi)
+(\
+[loop(oi.References->re:typeof(Reference) where re.Object is OperationParameter; string comma = ""; comma = ", ")]
+[comma][re.Name]\
+[end loop]
+)
+end template
+
+/*
+* Generate java interface for interface
+*/
+template GenerateInterface(Interface intf)
+package [GetPackage(intf.Namespace).ToLower()];
+^
+import javax.jws.*;
+import javax.xml.bind.annotation.XmlSeeAlso;
+import javax.xml.ws.*;
+^
+@WebService(targetNamespace = "[GetUri(intf.Namespace)]")
+@XmlSeeAlso({
+    ObjectFactory.class
+})
+public interface [intf.Name] \
+[if(intf.SuperInterfaces.Count != 0)]
+extends \
+[loop(intf.SuperInterfaces->sup:typeof(Interface);string comma="";comma=", ")]
+[comma][GetPackage(sup.Namespace).ToLower()].[sup.Name]\
+[end loop]
+ {
+[else]
+{
+[end if]
+[loop(intf.Operations->op:typeof(Operation))]
+^
+    @WebMethod(operationName = "[op.Name]", action = "[GetUriWithSlash(op.Interface.Namespace) + op.Interface.Name + "/" + op.Name]")
+    [if(op.ReturnType == PseudoType.Async)]
+    @Oneway
+    @RequestWrapper(localName = "[op.Name]", targetNamespace = "[GetUri(op.Interface.Namespace)]", className = "[GetPackage(op.Interface.Namespace).ToLower()].[op.Name]")
+    @Action(
+        input="[GetUriWithSlash(op.Interface.Namespace) + op.Interface.Name + "/" + op.Name]"
+        [if (op.Exceptions.Count > 0)]
+        , fault = {
+        [loop(op.Exceptions->ex:typeof(ExceptionType); string delim = ""; delim = ",")]
+            [delim]
+            @FaultAction(className = [ex.Name].class, value="[GetUriWithSlash(op.Interface.Namespace) + op.Interface.Name + "/" + op.Name + "Fault/" + ex.Name]")
+        [end loop]
+        }
+        [end if]
+        )
+    [else]
+    @WebResult(name = "[op.Name]Result", targetNamespace = "[GetUri(op.Interface.Namespace)]")
+    @RequestWrapper(localName = "[op.Name]", targetNamespace = "[GetUri(op.Interface.Namespace)]", className = "[GetPackage(op.Interface.Namespace).ToLower()].[op.Name]")
+    @ResponseWrapper(localName = "[op.Name]Response", targetNamespace = "[GetUri(op.Interface.Namespace)]", className = "[GetPackage(op.Interface.Namespace).ToLower()].[op.Name]Response")
+    @Action(
+        input="[GetUriWithSlash(op.Interface.Namespace) + op.Interface.Name + "/" + op.Name]",
+        output="[GetUriWithSlash(op.Interface.Namespace) + op.Interface.Name + "/" + op.Name + "Response"]"
+        [if (op.Exceptions.Count > 0)]
+        , fault = {
+        [loop(op.Exceptions->ex:typeof(ExceptionType); string delim = ""; delim = ",")]
+            [delim]
+            @FaultAction(className = [ex.Name].class, value="[GetUriWithSlash(op.Interface.Namespace) + op.Interface.Name + "/" + op.Name + "Fault/" + ex.Name]")
+        [end loop]
+        }
+        [end if]
+        )
+    [end if]
+    [GenerateOperationHead(op, true)];
+[end loop]
+}
+end template
+
+/*
+* Generate implementation base for services
+*/
+template GenerateImplementationBase(Interface intf)
+package [GetPackage(intf.Namespace).ToLower()];
+^
+public class [intf.Name.Substring(1)]Base implements [intf.Name] {
+[loop(intf.Operations->op:typeof(Operation))]
+^
+    [GenerateOperationHead(op)] {
+    }
+[end loop]
+}
+end template
+
+/*
+* Generate java class for service
+*/
+template GenerateService(Endpoint endp)
+package [GetPackage(endp.Namespace).ToLower()];
+^
+import javax.jws.WebService;
+[if(endp.Authorization != null)]
+import javax.annotation.Resource;
+import javax.xml.ws.WebServiceContext;
+[end if]
+^
+[if(endp.Binding.Encoding is SoapEncodingBindingElement && ((SoapEncodingBindingElement)endp.Binding.Encoding).Version == SoapVersion.Soap12)]
+@javax.xml.ws.BindingType(value=javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)
+[end if]
+[if(endp.Binding.Encoding is SoapEncodingBindingElement && ((SoapEncodingBindingElement)endp.Binding.Encoding).MtomEnabled)]
+@javax.xml.ws.soap.MTOM
+[end if]
+[if(Properties.GenerateOracleAnnotations)]
+	[if(endp.HasAddressing())]
+@javax.xml.ws.soap.Addressing(required = true)
+	[end if]
+	[if(endp.Binding.HasPolicy())]
+@weblogic.jws.Policy(uri = "policy:[endp.Binding.Name]_Policy.xml")
+	[end if]
+	[if(endp.HasSecurity())]
+@weblogic.jws.security.WssConfiguration("[endp.Namespace.FullName]Security")
+	[end if]
+[end if]
+[if(Properties.SeparateWsdlsForEndpoints)]
+@WebService(serviceName = "[endp.Name]", portName = "[endp.Interface.Name]_[endp.Binding.Name]_Port", 
+endpointInterface = "[GetPackage(endp.Namespace).ToLower()].[endp.Interface.Name]", targetNamespace = "[GetUri(endp.Namespace)]", wsdlLocation = "[Properties.WsdlDirectory][endp.Name][Properties.WsdlSuffix].wsdl")
+[else]
+@WebService(serviceName = "[endp.Name]", portName = "[endp.Interface.Name]_[endp.Binding.Name]_Port", 
+endpointInterface = "[GetPackage(endp.Namespace).ToLower()].[endp.Interface.Name]", targetNamespace = "[GetUri(endp.Namespace)]", wsdlLocation = "[Properties.WsdlDirectory][endp.Namespace.FullName][Properties.WsdlSuffix].wsdl")
+[end if]
+public class [endp.Name] implements [endp.Interface.Name] {
+[if(endp.Authorization != null)]
+^
+    @Resource
+    private WebServiceContext context;
+[end if]
+^
+    private [endp.Interface.Name] inner;
+^
+    public [endp.Name]() {
+[if(endp.Authorization == null && endp.Contract == null)]
+        inner = new [endp.Name]Impl();
+[else if(endp.Authorization == null && endp.Contract != null)]
+        inner = new [endp.Contract.Name](new [endp.Name]Impl());
+[else if(endp.Authorization != null && endp.Contract == null)]
+        inner = new [endp.Authorization.Name](context, new [endp.Name]Impl());
+[else]
+        inner = new [endp.Authorization.Name](context, new [endp.Contract.Name](new [endp.Name]Impl()));
+[end if]
+    }
+[loop(endp.Interface.Operations->op:typeof(Operation))]
+^
+    [GenerateOperationHead(op, false)] {
+    [if(op.ReturnType != PseudoType.Void && op.ReturnType != PseudoType.Async)]
+        return this.inner.[GenerateOperationCall(op)];
+    [else]
+        this.inner.[GenerateOperationCall(op)];
+    [end if]
+    }
+[end loop]
+}
+
+end template
+
+/*
+* Generate java class for service implementation
+*/
+template GenerateImpl(Endpoint endp)
+package [GetPackage(endp.Namespace).ToLower()];
+^
+[if(Properties.NoImplementationDelegates)]
+import javax.jws.WebService;
+^
+[end if]
+[if(!Properties.NoImplementationDelegates)]
+[if(Properties.GenerateImplementationBase)]
+public class [endp.Name]Impl extends [endp.Interface.Name.Substring(1)]Base implements [endp.Interface.Name] {
+[else]
+public class [endp.Name]Impl implements [endp.Interface.Name] {
+[end if]
+[else]
+[if(endp.Binding.Encoding is SoapEncodingBindingElement && ((SoapEncodingBindingElement)endp.Binding.Encoding).Version == SoapVersion.Soap12)]
+@javax.xml.ws.BindingType(value=javax.xml.ws.soap.SOAPBinding.SOAP12HTTP_BINDING)
+[end if]
+[if(endp.Binding.Encoding is SoapEncodingBindingElement && ((SoapEncodingBindingElement)endp.Binding.Encoding).MtomEnabled)]
+@javax.xml.ws.soap.MTOM
+[end if]
+[if(Properties.GenerateOracleAnnotations)]
+	[if(endp.HasAddressing())]
+@javax.xml.ws.soap.Addressing(required = true)
+	[end if]
+	[if(endp.Binding.HasPolicy())]
+@weblogic.jws.Policy(uri = "policy:[endp.Binding.Name]_Policy.xml")
+	[end if]
+	[if(endp.HasSecurity())]
+@weblogic.jws.security.WssConfiguration("[endp.Namespace.FullName]Security")
+	[end if]
+[end if]
+[if(Properties.SeparateWsdlsForEndpoints)]
+@WebService(serviceName = "[endp.Name]", portName = "[endp.Interface.Name]_[endp.Binding.Name]_Port", 
+endpointInterface = "[GetPackage(endp.Namespace).ToLower()].[endp.Interface.Name]", targetNamespace = "[GetUri(endp.Namespace)]", wsdlLocation = "[Properties.WsdlDirectory][endp.Name][Properties.WsdlSuffix].wsdl")
+[else]
+@WebService(serviceName = "[endp.Name]", portName = "[endp.Interface.Name]_[endp.Binding.Name]_Port", 
+endpointInterface = "[GetPackage(endp.Namespace).ToLower()].[endp.Interface.Name]", targetNamespace = "[GetUri(endp.Namespace)]", wsdlLocation = "[Properties.WsdlDirectory][endp.Namespace.FullName][Properties.WsdlSuffix].wsdl")
+[end if]
+[if(Properties.GenerateImplementationBase)]
+public class [endp.Name] extends [endp.Interface.Name.Substring(1)]Base implements [endp.Interface.Name] {
+[else]
+public class [endp.Name] implements [endp.Interface.Name] {
+[end if]
+[end if]
+[loop(endp.Interface.Operations->op:typeof(Operation))]
+^
+    [GenerateOperationHead(op, false)] {
+        [if(Properties.GenerateImplementationBase)]
+            [if(op.ReturnType != PseudoType.Void && op.ReturnType != PseudoType.Async)]
+        return super.[GenerateOperationCall(op)];                
+            [else]
+        super.[GenerateOperationCall(op)];                
+            [end if]
+        [else]
+            [if (Properties.ThrowNotImplementedException)]
+        // TODO implement this method
+        throw new UnsupportedOperationException("Not implemented yet.");
+            [end if]
+        [end if]
+    }
+[end loop]
+}
+end template
+
+/*
+* Generate java class for service authorization
+*/
+template GenerateAuth(Authorization auth)
+package [GetPackage(auth.Namespace).ToLower()];
+^
+import javax.xml.ws.WebServiceContext;
+import saml.SAMLSubject;
+import saml.validator.BaseValidator;
+^
+public class [auth.Name] extends BaseValidator implements [auth.Interface.Name] {
+^
+    private [auth.Interface.Name] inner;
+^
+    public [auth.Name](WebServiceContext context, [auth.Interface.Name] inner) {
+        super(context);
+        this.inner = inner;
+    }
+[loop(auth.OperationAuthorizations->op:typeof(OperationAuthorization))]
+^
+    [GenerateOperationRefHead(op)] {
+        if(validate[FirstLetterUp(op.Operation.Name)][GenerateOperationRefCallParams(op)]) {
+    [if(op.Operation.ReturnType != PseudoType.Void && op.Operation.ReturnType != PseudoType.Async)]
+            return this.inner.[GenerateOperationRefCall(op)];
+    [else]
+            this.inner.[GenerateOperationRefCall(op)];
+    [end if]
+        } else {
+            SoaMMFault faultInfo = new SoaMMFault();
+            faultInfo.setMessage("Authorization Exception");
+            throw new SoaMMException("Authorization Exception", faultInfo);
+        }
+    }
+^
+    public boolean validate[FirstLetterUp(op.Operation.Name)][GenerateOperationRefHeadParams(op)] {
+        try {
+            SAMLSubject subject = getsAMLSubject();
+            
+    [loop(op.References->re:typeof(Reference))]
+        [if(re.Object is ClaimField)]
+^
+            [PrintType(((ClaimField)re.Object).Type)] [re.Name] =  ([PrintType(((ClaimField)re.Object).Type)])subject.getAttribute([PrintClassType(((ClaimField)re.Object).Type)].class,"[((ClaimField)re.Object).Name]");
+        [else if(re.Object is ClaimsetType)]
+^
+            [GetPackage(((ClaimsetType)re.Object).Namespace).ToLower()].[((ClaimsetType)re.Object).Name] [re.Name] = new [GetPackage(((ClaimsetType)re.Object).Namespace).ToLower()].[((ClaimsetType)re.Object).Name]();
+            [loop(((ClaimsetType)re.Object).Fields->f:typeof(ClaimField))]
+            [re.Name].set[FirstLetterUp(f.Name)](([PrintType(f.Type)])subject.getAttribute([PrintClassType(f.Type)].class, "[f.Name]"));
+            [end loop]
+        [end if]
+    [end loop]
+
+    [loop(op.OperationAuthorizationStatements->oas:typeof(OperationAuthorizationStatement))]
+            // Demand: [oas.Text]
+            if ([GenerateExpression(oas.Rule)]) {
+                return true;
+            }
+    [end loop]
+
+        } catch (Exception ex) {
+        }
+        return false;
+    }
+[end loop]
+}
+end template
+
+/*
+* Generate java class for service contract
+*/
+template GenerateContract(Contract con)
+package [GetPackage(con.Namespace).ToLower()];
+^
+public class [con.Name] implements [con.Interface.Name] {
+^
+    private [con.Interface.Name] inner;
+^
+    public [con.Name]([con.Interface.Name] inner) {
+        this.inner = inner;
+    }
+[loop(con.OperationContracts->op:typeof(OperationContract))]
+^
+    [GenerateOperationRefHead(op)] {
+
+    [loop(op.OperationContractStatements->ocs:typeof(Requires))]
+^
+        // Requires: [ocs.Text]
+        if (!([GenerateExpression(ocs.Rule)])) {
+            [if(ocs.Otherwise == null)]
+            SoaMMFault faultInfo = new SoaMMFault();
+            faultInfo.setMessage("Contract requirement error");
+            throw new SoaMMException("Contract requirement error", faultInfo);
+            [else]
+            throw [GenerateExpression(ocs.Otherwise)];
+            [end if]
+        }
+    [end loop]
+    [if(op.Operation.ReturnType != PseudoType.Void && op.Operation.ReturnType != PseudoType.Async)]
+        [PrintType(op.Operation.ReturnType)] result = this.inner.[GenerateOperationRefCall(op)];
+    [else]
+        this.inner.[GenerateOperationRefCall(op)];
+    [end if]
+    [loop(op.OperationContractStatements->ocs:typeof(Ensures))]
+^
+        // Ensures: [ocs.Text]
+        if (!([GenerateExpression(ocs.Rule)])) {
+            SoaMMFault faultInfo = new SoaMMFault();
+            faultInfo.setMessage("Contract ensurement error");
+            throw new SoaMMException("Contract ensurement error", faultInfo);
+        }
+    [end loop]
+    [if(op.Operation.ReturnType != PseudoType.Void && op.Operation.ReturnType != PseudoType.Async)]
+        return result;
+    [end if]
+    }
+[end loop]
+}
+end template
+
+/*
+* Generate java class for client proxy
+*/
+template GenerateProxy(Endpoint endp)
+package [GetPackage(endp.Namespace).ToLower()];
+^
+import java.net.MalformedURLException;
+import java.net.URL;
+import javax.xml.namespace.QName;
+import javax.xml.ws.Service;
+import javax.xml.ws.WebEndpoint;
+import javax.xml.ws.WebServiceClient;
+import javax.xml.ws.WebServiceException;
+import javax.xml.ws.WebServiceFeature;
+^
+@WebServiceClient(name = "[endp.Name]", targetNamespace = "[GetUri(endp.Namespace)]", wsdlLocation = "[Properties.WsdlDirectory][endp.Namespace.FullName][Properties.WsdlSuffix].wsdl")
+public class [endp.Name]Service extends Service {
+^
+    private final static URL [(endp.Name + "Service").ToUpper()]_WSDL_LOCATION;
+    private final static WebServiceException [(endp.Name + "Service").ToUpper()]_EXCEPTION;
+    private final static QName [(endp.Name + "Service").ToUpper()]_QNAME = new QName("[GetUri(endp.Namespace)]", "[endp.Name]");
+^
+    static {
+        URL url = null;
+        WebServiceException e = null;
+        try {
+            url = new URL("file:[Properties.WsdlDirectory][endp.Namespace.FullName][Properties.WsdlSuffix].wsdl");
+        } catch (MalformedURLException ex) {
+            e = new WebServiceException(ex);
+        }
+        [(endp.Name + "Service").ToUpper()]_WSDL_LOCATION = url;
+        [(endp.Name + "Service").ToUpper()]_EXCEPTION = e;
+    }
+^
+    public [endp.Name]Service() {
+        super(__getWsdlLocation(), [(endp.Name + "Service").ToUpper()]_QNAME);
+    }
+[if (Properties.GenerateProxyFeatureConstructors)]
+^
+    public [endp.Name]Service(WebServiceFeature... features) {
+        super(__getWsdlLocation(), [(endp.Name + "Service").ToUpper()]_QNAME, features);
+    }
+[end if]
+^
+    public [endp.Name]Service(URL wsdlLocation) {
+        super(wsdlLocation, [(endp.Name + "Service").ToUpper()]_QNAME);
+    }
+[if (Properties.GenerateProxyFeatureConstructors)]
+^
+    public [endp.Name]Service(URL wsdlLocation, WebServiceFeature... features) {
+        super(wsdlLocation, [(endp.Name + "Service").ToUpper()]_QNAME, features);
+    }
+[end if]
+^
+    public [endp.Name]Service(URL wsdlLocation, QName serviceName) {
+        super(wsdlLocation, serviceName);
+    }
+[if (Properties.GenerateProxyFeatureConstructors)]
+^
+    public [endp.Name]Service(URL wsdlLocation, QName serviceName, WebServiceFeature... features) {
+        super(wsdlLocation, serviceName, features);
+    }
+[end if]
+^
+    @WebEndpoint(name = "[endp.Interface.Name]_[endp.Binding.Name]_Port")
+    public [endp.Interface.Name] get[endp.Interface.Name + endp.Binding.Name + "Port"]() {
+        return super.getPort(new QName("[endp.Namespace.Uri]", "[endp.Interface.Name]_[endp.Binding.Name]_Port"), [endp.Interface.Name].class);
+    }
+^
+    @WebEndpoint(name = "[endp.Interface.Name]_[endp.Binding.Name]_Port")
+    public [endp.Interface.Name] get[endp.Interface.Name + endp.Binding.Name + "Port"](WebServiceFeature... features) {
+        return super.getPort(new QName("[endp.Namespace.Uri]", "[endp.Interface.Name]_[endp.Binding.Name]_Port"), [endp.Interface.Name].class, features);
+    }
+^
+    private static URL __getWsdlLocation() {
+        if ([(endp.Name + "Service").ToUpper()]_EXCEPTION!= null) {
+            throw [(endp.Name + "Service").ToUpper()]_EXCEPTION;
+        }
+        return [(endp.Name + "Service").ToUpper()]_WSDL_LOCATION;
+    }
+}
+end template
+
+template GenerateSoaMMFault(Namespace ns)
+package [GetPackage(ns).ToLower()];
+^
+import javax.xml.bind.annotation.XmlAccessType;
+import javax.xml.bind.annotation.XmlAccessorType;
+import javax.xml.bind.annotation.XmlElement;
+import javax.xml.bind.annotation.XmlType;
+^
+@XmlAccessorType(XmlAccessType.FIELD)
+@XmlType(name = "SoaMMException", propOrder = {
+    "message"
+})
+public class SoaMMFault {
+^
+    @XmlElement(name = "message")
+    protected String message;
+^
+    public String getMessage() {
+        return message;
+    }
+^
+    public void setMessage(String value) {
+        this.message = value;
+    }
+}
+
+end template
+
+template GenerateSoaMMException(Namespace ns)
+package [GetPackage(ns).ToLower()];
+^
+import javax.xml.ws.WebFault;
+^
+@WebFault(name = "SoaMMException", targetNamespace = "[GetUri(ns)]")
+public class SoaMMException extends Exception {
+^
+    private [GetPackage(ns).ToLower()].SoaMMFault faultInfo;
+^
+    public SoaMMException(String message, [GetPackage(ns).ToLower()].SoaMMFault faultInfo) {
+        super(message);
+        this.faultInfo = faultInfo;
+    }
+^
+    public SoaMMException(String message, [GetPackage(ns).ToLower()].SoaMMFault faultInfo, Throwable cause) {
+        super(message, cause);
+        this.faultInfo = faultInfo;
+    }
+^
+    public [GetPackage(ns).ToLower()].SoaMMFault getFaultInfo() {
+        return faultInfo;
+    }
+}
+end template

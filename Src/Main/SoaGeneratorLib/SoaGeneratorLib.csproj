@@ -1,0 +1,299 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProductVersion>8.0.30703</ProductVersion>
+    <SchemaVersion>2.0</SchemaVersion>
+    <ProjectGuid>{360B30A1-0A45-4977-8460-57DD36131F8A}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <AppDesignerFolder>Properties</AppDesignerFolder>
+    <RootNamespace>SoaMetaModel</RootNamespace>
+    <AssemblyName>SoaGeneratorLib</AssemblyName>
+    <TargetFrameworkVersion>v4.0</TargetFrameworkVersion>
+    <FileAlignment>512</FileAlignment>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <DebugType>pdbonly</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="Ionic.Zip">
+      <HintPath>..\..\..\Libraries\Ionic.Zip.dll</HintPath>
+    </Reference>
+    <Reference Include="Microsoft.M, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    </Reference>
+    <Reference Include="Sb.OsloExtensions, Version=1.0.0.0, Culture=neutral, PublicKeyToken=61d7564ac0cf7b10, processorArchitecture=MSIL" />
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="System.Dataflow, Version=1.0.0.0, Culture=neutral, PublicKeyToken=31bf3856ad364e35, processorArchitecture=MSIL">
+    </Reference>
+    <Reference Include="System.Xml.Linq" />
+    <Reference Include="System.Data.DataSetExtensions" />
+    <Reference Include="Microsoft.CSharp" />
+    <Reference Include="System.Data" />
+    <Reference Include="System.Xml" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="EclipseCxfGenerator.Generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>EclipseCxfGenerator.mcg</DependentUpon>
+    </Compile>
+    <Compile Include="GeneratorLib.Generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>GeneratorLib.mcg</DependentUpon>
+    </Compile>
+    <Compile Include="GeneratorLibExtensions.cs" />
+    <Compile Include="IbmRadGenerator.Generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>IbmRadGenerator.mcg</DependentUpon>
+    </Compile>
+    <Compile Include="IbmRadGeneratorLib.Generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>IbmRadGeneratorLib.mcg</DependentUpon>
+    </Compile>
+    <Compile Include="JavaGenerator.Generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>JavaGenerator.mcg</DependentUpon>
+    </Compile>
+    <Compile Include="JBossCxfGenerator.Generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>JBossCxfGenerator.mcg</DependentUpon>
+    </Compile>
+    <Compile Include="JavaGeneratorEx.Generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>JavaGeneratorEx.mcg</DependentUpon>
+    </Compile>
+    <Compile Include="NetbeansGenerator.Generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>NetbeansGenerator.mcg</DependentUpon>
+    </Compile>
+    <Compile Include="NetbeansGeneratorLib.Generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>NetbeansGeneratorLib.mcg</DependentUpon>
+    </Compile>
+    <Compile Include="OracleGenerator.Generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>OracleGenerator.mcg</DependentUpon>
+    </Compile>
+    <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="TomcatCxfGenerator.Generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>TomcatCxfGenerator.mcg</DependentUpon>
+    </Compile>
+    <Compile Include="VSGenerator.Generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>VSGenerator.mcg</DependentUpon>
+    </Compile>
+    <Compile Include="VSGeneratorEx.Generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>VSGeneratorEx.mcg</DependentUpon>
+    </Compile>
+    <Compile Include="VSGeneratorLib.Generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>VSGeneratorLib.mcg</DependentUpon>
+    </Compile>
+    <Compile Include="XsdWsdlGenerator.Generated.cs">
+      <AutoGen>True</AutoGen>
+      <DesignTime>True</DesignTime>
+      <DependentUpon>XsdWsdlGenerator.mcg</DependentUpon>
+    </Compile>
+    <Content Include="Resources\VisualStudio\About.aspx.cs">
+      <DependentUpon>About.aspx</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\VisualStudio\ChangePassword.aspx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\VisualStudio\ChangePasswordSuccess.aspx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\VisualStudio\Default.aspx.cs">
+      <DependentUpon>Default.aspx</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\VisualStudio\Login.aspx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\VisualStudio\Register.aspx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\VisualStudio\Site.css">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\VisualStudio\Site.master.cs">
+      <DependentUpon>Site.master</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\VisualStudio\ChangePassword.aspx.cs">
+      <DependentUpon>ChangePassword.aspx</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\VisualStudio\ChangePasswordSuccess.aspx.cs">
+      <DependentUpon>ChangePasswordSuccess.aspx</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\VisualStudio\Login.aspx.cs">
+      <DependentUpon>Login.aspx</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\VisualStudio\Register.aspx.cs">
+      <DependentUpon>Register.aspx</DependentUpon>
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\VisualStudio\SampleRequestValidator.cs">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="GeneratorLib.mcg">
+      <Generator>MCodeGenerator</Generator>
+      <LastGenOutput>GeneratorLib.Generated.cs</LastGenOutput>
+    </None>
+    <None Include="IbmRadGenerator.mcg">
+      <Generator>MCodeGenerator</Generator>
+      <LastGenOutput>IbmRadGenerator.Generated.cs</LastGenOutput>
+    </None>
+    <None Include="IbmRadGeneratorLib.mcg">
+      <Generator>MCodeGenerator</Generator>
+      <LastGenOutput>IbmRadGeneratorLib.Generated.cs</LastGenOutput>
+    </None>
+    <None Include="JavaGenerator.mcg">
+      <Generator>MCodeGenerator</Generator>
+      <LastGenOutput>JavaGenerator.Generated.cs</LastGenOutput>
+    </None>
+    <None Include="JBossCxfGenerator.mcg">
+      <Generator>MCodeGenerator</Generator>
+      <LastGenOutput>JBossCxfGenerator.Generated.cs</LastGenOutput>
+    </None>
+    <None Include="EclipseCxfGenerator.mcg">
+      <Generator>MCodeGenerator</Generator>
+      <LastGenOutput>EclipseCxfGenerator.Generated.cs</LastGenOutput>
+    </None>
+    <None Include="NetbeansGenerator.mcg">
+      <Generator>MCodeGenerator</Generator>
+      <LastGenOutput>NetbeansGenerator.Generated.cs</LastGenOutput>
+    </None>
+    <None Include="JavaGeneratorEx.mcg">
+      <Generator>MCodeGenerator</Generator>
+      <LastGenOutput>JavaGeneratorEx.Generated.cs</LastGenOutput>
+    </None>
+    <None Include="NetbeansGeneratorLib.mcg">
+      <Generator>MCodeGenerator</Generator>
+      <LastGenOutput>NetbeansGeneratorLib.Generated.cs</LastGenOutput>
+    </None>
+    <None Include="OracleGenerator.mcg">
+      <Generator>MCodeGenerator</Generator>
+      <LastGenOutput>OracleGenerator.Generated.cs</LastGenOutput>
+    </None>
+    <None Include="Resources\Netbeans\MANIFEST.MF">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\VisualStudio\AccountWeb.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\VisualStudio\Site.master">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="Resources\VisualStudio\web.config">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <None Include="TomcatCxfGenerator.mcg">
+      <Generator>MCodeGenerator</Generator>
+      <LastGenOutput>TomcatCxfGenerator.Generated.cs</LastGenOutput>
+    </None>
+    <None Include="VSGenerator.mcg">
+      <Generator>MCodeGenerator</Generator>
+      <LastGenOutput>VSGenerator.Generated.cs</LastGenOutput>
+    </None>
+    <None Include="VSGeneratorEx.mcg">
+      <Generator>MCodeGenerator</Generator>
+      <LastGenOutput>VSGeneratorEx.Generated.cs</LastGenOutput>
+    </None>
+    <None Include="VSGeneratorLib.mcg">
+      <Generator>MCodeGenerator</Generator>
+      <LastGenOutput>VSGeneratorLib.Generated.cs</LastGenOutput>
+    </None>
+    <None Include="XsdWsdlGenerator.mcg">
+      <Generator>MCodeGenerator</Generator>
+      <LastGenOutput>XsdWsdlGenerator.Generated.cs</LastGenOutput>
+    </None>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\Sb.Meta\Sb.Meta.csproj">
+      <Project>{264D2AF3-9F8E-4C34-B733-AE51923ED976}</Project>
+      <Name>Sb.Meta</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\SoaMetaModelLib\SoaMetaModelLib.csproj">
+      <Project>{29F8B50B-F187-45E0-A299-B9AE94294B1D}</Project>
+      <Name>SoaMetaModelLib</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Include="Resources\Netbeans\ant-deploy.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Netbeans\beans.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Netbeans\web.xml">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <None Include="Resources\VisualStudio\About.aspx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
+    <Content Include="Resources\VisualStudio\Default.aspx">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\VisualStudio\Global.asax">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\VisualStudio\jquery-1.4.1-vsdoc.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\VisualStudio\jquery-1.4.1.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\VisualStudio\jquery-1.4.1.min.js">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+    <Content Include="Resources\Netbeans\SAMLHelper.jar">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
+       Other similar extension points exist, see Microsoft.Common.targets.
+  <Target Name="BeforeBuild">
+  </Target>
+  <Target Name="AfterBuild">
+  </Target>
+  -->
+</Project>
